@@ -1,9 +1,89 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_2.xsd"
-             version="3.2">
-    <persistence-unit name="default">
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+             http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
 
+    <persistence-unit name="EventManagementPU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- Entity Classes -->
+        <class>com.projet.jee.model.Utilisateur</class>
+        <class>com.projet.jee.model.Participant</class>
+        <class>com.projet.jee.model.Organisateur</class>
+        <class>com.projet.jee.model.Administrateur</class>
+        <class>com.projet.jee.model.Commentaire</class>
+        <class>com.projet.jee.model.Evaluation</class>
+        <class>com.projet.jee.model.RoleUpgradeRequest</class>
+        <class>com.projet.jee.model.PasswordResetToken</class>
+
+        <properties>
+            <!-- MySQL Database Connection -->
+            <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/event_management?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true"/>
+            <property name="javax.persistence.jdbc.user" value="root"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+
+            <!-- HikariCP Connection Pool -->
+            <property name="hibernate.connection.provider_class"
+                      value="com.zaxxer.hikari.hibernate.HikariConnectionProvider"/>
+            <property name="hibernate.hikari.minimumIdle" value="5"/>
+            <property name="hibernate.hikari.maximumPoolSize" value="20"/>
+            <property name="hibernate.hikari.idleTimeout" value="300000"/>
+            <property name="hibernate.hikari.connectionTimeout" value="20000"/>
+
+            <!-- Hibernate Dialect for MySQL -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
+
+            <!-- Schema Management -->
+            <!-- Use 'validate' in production, 'update' for development, 'create' for initial setup -->
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+
+            <!-- Show SQL queries in console (disable in production) -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.use_sql_comments" value="true"/>
+
+            <!-- Additional Hibernate Settings -->
+            <property name="hibernate.enable_lazy_load_no_trans" value="false"/>
+            <property name="hibernate.jdbc.batch_size" value="20"/>
+            <property name="hibernate.order_inserts" value="true"/>
+            <property name="hibernate.order_updates" value="true"/>
+            <property name="hibernate.jdbc.batch_versioned_data" value="true"/>
+
+            <!-- Second-level Cache (optional) -->
+            <property name="hibernate.cache.use_second_level_cache" value="false"/>
+            <property name="hibernate.cache.use_query_cache" value="false"/>
+
+            <!-- Statistics (for monitoring, disable in production) -->
+            <property name="hibernate.generate_statistics" value="false"/>
+        </properties>
     </persistence-unit>
+
+    <!-- Test Persistence Unit (using H2 in-memory database) -->
+    <persistence-unit name="EventManagementTestPU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <class>com.projet.jee.model.Utilisateur</class>
+        <class>com.projet.jee.model.Participant</class>
+        <class>com.projet.jee.model.Organisateur</class>
+        <class>com.projet.jee.model.Administrateur</class>
+        <class>com.projet.jee.model.Commentaire</class>
+        <class>com.projet.jee.model.Evaluation</class>
+        <class>com.projet.jee.model.RoleUpgradeRequest</class>
+        <class>com.projet.jee.model.PasswordResetToken</class>
+
+        <properties>
+            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1"/>
+            <property name="javax.persistence.jdbc.user" value="sa"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+            <property name="hibernate.show_sql" value="true"/>
+        </properties>
+    </persistence-unit>
+
 </persistence>
