@@ -1,0 +1,14 @@
+connect http-remoting://localhost:8082
+batch
+data-source add --name=eventManagerDS \
+    --jndi-name=java:jboss/datasources/eventManagerDS \
+    --driver-name=postgresql \
+    --connection-url=jdbc:postgresql://localhost:5432/event_manager_db?characterEncoding=UTF-8 \
+    --user-name=postgres \
+    --password=1234 \
+    --enabled=true \
+    --use-java-context=true \
+    --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker \
+    --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter
+run-batch
+exit
