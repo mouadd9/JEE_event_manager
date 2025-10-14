@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+ 
 
 // this class will be a JPA entity representing the user table
 @Entity
@@ -25,4 +25,16 @@ public class User {
     private String lastName;
     private String email;
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role = UserRole.PARTICIPANT;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserAccountStatus accountStatus = UserAccountStatus.ACTIVE;
+
+    // Relevant only when role == ORGANIZER, but kept here for simplicity
+    @Column(nullable = false)
+    private boolean organizerValidated = false;
 }

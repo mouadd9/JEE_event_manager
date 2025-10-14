@@ -3,4 +3,22 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
+    <display-name>JEE Event Manager</display-name>
+
+    <!-- CDI activation -->
+    <context-param>
+        <param-name>jakarta.enterprise.inject.scan.implicit</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
+    <!-- Explicit servlet mapping in addition to annotation (helps older containers) -->
+    <servlet>
+        <servlet-name>AdminServlet</servlet-name>
+        <servlet-class>com.example.jee_event_manager.servlet.AdminServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminServlet</servlet-name>
+        <url-pattern>/api/admin/*</url-pattern>
+    </servlet-mapping>
 </web-app

@@ -21,4 +21,12 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY) // this configures Hibernate not to fetch the user related to the event.
     @JoinColumn(name="organizerId") // name of the foreign key
     private Organizer organizer;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EventPublicationStatus publicationStatus = EventPublicationStatus.DRAFT;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EventModerationStatus moderationStatus = EventModerationStatus.PENDING_REVIEW;
 }
