@@ -6,6 +6,7 @@ import com.example.jee_event_manager.model.Event;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +42,19 @@ public class EventRepositoryImpl implements EventRepository {
     @Override
     public Event update(Event event) {
         return em.merge(event);
+    }
+
+    @Override
+    public List<Event> findByOrganizerId(Long organizerId) {
+        // Create a query to select events where the organizer's ID matches the parameter.
+        TypedQuery<Event> query = em.createQuery(
+                "SELECT e FROM Event e WHERE e.organizer.id = :organizerId", Event.class);
+
+        // Set the value for the named parameter ":organizerId".
+        query.setParameter("organizerId", organizerId);
+
+        // Execute the query and return the list of results.
+        return query.getResultList();
     }
 
     @Override

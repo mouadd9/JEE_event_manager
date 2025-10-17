@@ -11,4 +11,5 @@ public interface EventRepository {
         public Event save(Event event);
         public void delete(Long id);
         public Event update(Event event);
+        public List<Event> findByOrganizerId(Long id);
 }
