@@ -1,37 +1,30 @@
 package com.example.jee_event_manager.model;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name = "inscriptions")
-public class Inscription {
+@Table(name = "comments")
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    // each event is associated to one or many comments
+    // a participant can submit one or many comments
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY) // a comment is submitted by one Participant.
     @JoinColumn(name = "participant_id")
     private Participant participant;
 
-    // an inscription is only done ton one event
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id")
+    @ManyToOne(fetch = FetchType.LAZY) // a comment
+    @JoinColumn(name = "comment_id")
     private Event event;
 
-    @Column(nullable = false)
-    private LocalDateTime dateInscription = LocalDateTime.now();
-
-    //@Column(nullable = false)
-    //private String statut = "EN_ATTENTE";
 }

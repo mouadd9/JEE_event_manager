@@ -1,21 +1,19 @@
 package com.example.jee_event_manager.model;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name = "inscriptions")
-public class Inscription {
+@Table(name = "reviews")
+public class Review {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,14 +22,7 @@ public class Inscription {
     @JoinColumn(name = "participant_id")
     private Participant participant;
 
-    // an inscription is only done ton one event
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
     private Event event;
-
-    @Column(nullable = false)
-    private LocalDateTime dateInscription = LocalDateTime.now();
-
-    //@Column(nullable = false)
-    //private String statut = "EN_ATTENTE";
 }

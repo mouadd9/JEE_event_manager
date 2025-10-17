@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,12 +15,21 @@ import lombok.Setter;
 @Setter
 @Table(name = "events")
 public class Event {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     // Creates foreign key column FK
     @ManyToOne(fetch = FetchType.LAZY) // this configures Hibernate not to fetch the user related to the event.
-    @JoinColumn(name="organizerId") // name of the foreign key
+    @JoinColumn(name="organizer_id") // name of the foreign key
     private Organizer organizer;
+
+    @OneToMany(mappedBy = "event")
+    private List<Review> reviews;
+
+    @OneToMany(mappedBy = "event")
+    private List<Comment> comments;
+
+
 }

@@ -23,4 +23,11 @@ public class Participant extends User {
     // The "participant" field in the Inscription class maps this.
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL)
     private List<Inscription> inscriptions;
+
+    // A Participant can submit many Comments
+    @OneToMany(mappedBy = "participant")
+    private List<Comment> comments;
+
+    @OneToMany(mappedBy = "participant")
+    private List<Review> reviews;
 }
