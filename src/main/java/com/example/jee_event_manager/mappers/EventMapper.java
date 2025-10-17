@@ -48,4 +48,30 @@ public class EventMapper {
 
         return event;
     }
+
+    public static void updateEntityFromDto(Event event, EventDto dto) {
+        if (dto == null || event == null) {
+            return;
+        }
+
+        // Only update fields if the new value from the DTO is not null
+        if (dto.getTitre() != null) {
+            event.setTitre(dto.getTitre());
+        }
+        if (dto.getDescription() != null) {
+            event.setDescription(dto.getDescription());
+        }
+        if (dto.getDateDebut() != null) {
+            event.setDateDebut(dto.getDateDebut());
+        }
+        if (dto.getDateFin() != null) {
+            event.setDateFin(dto.getDateFin());
+        }
+        if (dto.getLieu() != null) {
+            event.setLieu(dto.getLieu());
+        }
+        if (dto.getStatut() != null) {
+            event.setStatut(dto.getStatut());
+        }
+    }
 }
