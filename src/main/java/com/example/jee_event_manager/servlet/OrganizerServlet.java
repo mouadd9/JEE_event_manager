@@ -42,6 +42,9 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
                 case "/events/edit":
                     showEditEventForm(request, response);
                     break;
+                case "/events/detail": // <-- NEW CASE
+                    showEventDetail(request, response);
+                    break;
                 default:
                     response.sendError(HttpServletResponse.SC_NOT_FOUND, "Page not found");
             }
@@ -105,6 +108,15 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         EventDto event = eventService.getEventById(eventId); // here we extract the event
         request.setAttribute("event", event);
         request.getRequestDispatcher("/WEB-INF/views/organizer/eventForm.jsp").forward(request, response);
+    }
+
+    private void showEventDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Long eventId = Long.parseLong(request.getParameter("id"));
+        EventDto event = eventService.getEventById(eventId);
+
+        // Put the event data into the request
+        request.setAttribute("event", event);
+        request.getRequestDispatcher("/WEB-INF/views/organizer/detail.jsp").forward(request, response);
     }
 
     private void handleCreate(HttpServletRequest request, HttpServletResponse response) throws IOException {
