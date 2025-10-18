@@ -11,4 +11,5 @@ public interface EventService {
     void cancelEvent(Long eventId);
     List<EventDto> getEventsByOrganizer(Long organizerId);
     EventDto getEventById(Long eventId);
+    void deleteEvent(Long eventId);
 }

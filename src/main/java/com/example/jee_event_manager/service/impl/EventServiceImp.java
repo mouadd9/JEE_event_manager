@@ -76,5 +76,13 @@ public class EventServiceImp implements EventService {
                 .orElseThrow(() -> new EntityNotFoundException("Event with ID " + eventId + " not found."));
         return EventMapper.toDto(event);
     }
+
+    @Override
+    public void deleteEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Event with ID " + eventId + " not found."));
+
+        eventRepository.delete(event.getId());
+    }
 }
 
