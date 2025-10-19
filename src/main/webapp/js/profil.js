@@ -315,14 +315,23 @@ function loadStatistiques() {
         if (window.serverData && window.serverData.statistiques) {
             const stats = window.serverData.statistiques;
             
-            document.getElementById('statTotalInscriptions').textContent = 
-                stats.nombreInscriptionsActives || 0;
-            document.getElementById('statEvenementsParticipes').textContent = 
-                stats.nombreEvenementsParticipes || 0;
-            document.getElementById('statCommentaires').textContent = 
-                stats.nombreCommentaires || 0;
-            document.getElementById('statEvaluations').textContent = 
-                stats.nombreEvaluations || 0;
+            const statTotalInscriptions = document.getElementById('statTotalInscriptions');
+            const statEvenementsParticipes = document.getElementById('statEvenementsParticipes');
+            const statCommentaires = document.getElementById('statCommentaires');
+            const statEvaluations = document.getElementById('statEvaluations');
+            
+            if (statTotalInscriptions) {
+                statTotalInscriptions.textContent = stats.nombreInscriptionsActives || 0;
+            }
+            if (statEvenementsParticipes) {
+                statEvenementsParticipes.textContent = stats.nombreEvenementsParticipes || 0;
+            }
+            if (statCommentaires) {
+                statCommentaires.textContent = stats.nombreCommentaires || 0;
+            }
+            if (statEvaluations) {
+                statEvaluations.textContent = stats.nombreEvaluations || 0;
+            }
         }
     } catch (error) {
         console.error('Erreur loadStatistiques:', error);
