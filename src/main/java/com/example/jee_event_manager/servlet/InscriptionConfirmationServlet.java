@@ -9,6 +9,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 @WebServlet(name = "InscriptionConfirmationServlet", urlPatterns = {"/inscription-confirmation"})
@@ -37,8 +38,9 @@ public class InscriptionConfirmationServlet extends HttpServlet {
         }
         
         try {
-            Long inscriptionId = Long.parseLong(idStr);
-            Inscription inscription = inscriptionService.findById(inscriptionId);
+            Integer inscriptionId = Integer.parseInt(idStr);
+            Inscription inscription = inscriptionService.findById(inscriptionId)
+                .orElse(null);
             
             if (inscription == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Inscription introuvable");

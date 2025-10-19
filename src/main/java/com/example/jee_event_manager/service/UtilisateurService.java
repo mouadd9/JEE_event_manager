@@ -42,7 +42,18 @@ public class UtilisateurService {
         utilisateur.setMotDePasseHash(hashPassword(motDePasse));
         utilisateur.setUserType(userType);
 
-        em.persist(utilisateur);
+        // Gérer la transaction manuellement
+        em.getTransaction().begin();
+        try {
+            em.persist(utilisateur);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        }
+        
         return utilisateur;
     }
 
@@ -124,16 +135,35 @@ public class UtilisateurService {
      * Met à jour un utilisateur
      */
     public Utilisateur update(Utilisateur utilisateur) {
-        return em.merge(utilisateur);
+        em.getTransaction().begin();
+        try {
+            Utilisateur updated = em.merge(utilisateur);
+            em.getTransaction().commit();
+            return updated;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        }
     }
 
     /**
      * Supprime un utilisateur
      */
     public void delete(Long id) {
-        Utilisateur utilisateur = findById(id);
-        if (utilisateur != null) {
-            em.remove(utilisateur);
+        em.getTransaction().begin();
+        try {
+            Utilisateur utilisateur = findById(id);
+            if (utilisateur != null) {
+                em.remove(utilisateur);
+            }
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
         }
     }
 
@@ -152,8 +182,17 @@ public class UtilisateurService {
             throw new IllegalArgumentException("Ancien mot de passe incorrect");
         }
 
-        utilisateur.setMotDePasseHash(hashPassword(nouveauMotDePasse));
-        em.merge(utilisateur);
+        em.getTransaction().begin();
+        try {
+            utilisateur.setMotDePasseHash(hashPassword(nouveauMotDePasse));
+            em.merge(utilisateur);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        }
     }
 
     /**
@@ -180,5 +219,43 @@ public class UtilisateurService {
      */
     public boolean isEmailAvailable(String email) {
         return findByEmail(email) == null;
+    }
+    
+    /**
+     * Vérifie si un email existe déjà
+     */
+    public boolean emailExists(String email) {
+        return findByEmail(email) != null;
+    }
+    
+    /**
+     * Vérifie un mot de passe contre son hash
+     */
+    public boolean verifyPassword(String plainPassword, String hashedPassword) {
+        String hashedInput = hashPassword(plainPassword);
+        return hashedInput.equals(hashedPassword);
+    }
+    
+    /**
+     * Change le mot de passe d'un utilisateur (surcharge sans vérification ancien mot de passe)
+     */
+    public void changePassword(Long userId, String nouveauMotDePasse) {
+        Utilisateur utilisateur = findById(userId);
+        
+        if (utilisateur == null) {
+            throw new IllegalArgumentException("Utilisateur introuvable");
+        }
+        
+        em.getTransaction().begin();
+        try {
+            utilisateur.setMotDePasseHash(hashPassword(nouveauMotDePasse));
+            em.merge(utilisateur);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        }
     }
 }

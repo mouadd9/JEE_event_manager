@@ -1,6 +1,7 @@
 package com.example.jee_event_manager.config;
-
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Disposes;
 import jakarta.enterprise.inject.Produces;
 import jakarta.persistence.EntityManager;
@@ -15,19 +16,17 @@ public class EntityManagerProducer {
     public EntityManagerProducer() {
         this.emf = Persistence.createEntityManagerFactory("event-manager-pu");
     }
-
     @Produces
-    @ApplicationScoped
+    @RequestScoped
     public EntityManager createEntityManager() {
         return emf.createEntityManager();
     }
-
     public void closeEntityManager(@Disposes EntityManager em) {
-        if (em.isOpen()) {
+        if (em != null && em.isOpen()) {
             em.close();
         }
     }
-
+    @PreDestroy
     public void closeEntityManagerFactory() {
         if (emf != null && emf.isOpen()) {
             emf.close();

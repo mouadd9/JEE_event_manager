@@ -72,6 +72,18 @@ public abstract class Utilisateur extends BaseEntity {
         this.userType = userType;
     }
     
+    @PrePersist
+    @Override
+    protected void onCreate() {
+        super.onCreate();
+    }
+    
+    @PreUpdate
+    @Override
+    protected void onUpdate() {
+        super.onUpdate();
+    }
+    
     @Override
     public boolean validate() {
         return email != null && !email.trim().isEmpty() 

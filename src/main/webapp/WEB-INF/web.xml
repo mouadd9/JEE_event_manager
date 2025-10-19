@@ -17,4 +17,12 @@
         <res-auth>Container</res-auth>
     </resource-ref>
     
+    <!-- Configuration pour scanner les annotations -->
+    <metadata-complete>false</metadata-complete>
+    
+    <!-- Configuration CDI -->
+    <listener>
+        <listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>
+    </listener>
+    
 </web-app>

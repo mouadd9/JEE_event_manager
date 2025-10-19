@@ -13,15 +13,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Neue+Plak:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
     
     <style>
         :root {
-            --primary-color: #d1410c;
-            --secondary-color: #1e0a3c;
-            --accent-color: #f05537;
-            --text-dark: #39364f;
-            --text-light: #6f7287;
-            --bg-light: #f8f7fa;
+            --primary-color: #c471eb;      
+            --secondary-color: #b985ce;    
+            --accent-color: #693d84;
+            --text-dark: #212529;
+            --text-light: #6c757d;
+            --bg-light: #f8f9fa;
         }
         
         * {
@@ -32,7 +34,7 @@
         
         body {
             font-family: 'Neue Plak', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -50,7 +52,7 @@
         }
         
         .register-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #c28fe4 0%, #764ba2 100%);
             color: white;
             padding: 3rem 2rem;
             text-align: center;
@@ -110,7 +112,7 @@
         }
         
         .step.completed .step-number {
-            background: #00ab55;
+            background: #c481e3;
             color: white;
         }
         
@@ -139,7 +141,7 @@
         }
         
         .step.completed .step-line {
-            background: #00ab55;
+            background: #be97de;
         }
         
         .form-section {
@@ -172,7 +174,7 @@
         
         .form-control:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(209, 65, 12, 0.1);
+            box-shadow: 0 0 0 3px rgba(203, 133, 237, 0.1);
         }
         
         .role-card {
@@ -290,17 +292,17 @@
         
         .password-strength-bar.weak {
             width: 33%;
-            background: #ff4842;
+            background: #a35ec6;
         }
         
         .password-strength-bar.medium {
             width: 66%;
-            background: #ffa726;
+            background: #743c99;
         }
         
         .password-strength-bar.strong {
             width: 100%;
-            background: #00ab55;
+            background: #8c57b7;
         }
         
         .password-requirements {
@@ -314,11 +316,11 @@
         }
         
         .password-requirements li.valid {
-            color: #00ab55;
+            color: #9965bd;
         }
         
         .password-requirements li.valid i {
-            color: #00ab55;
+            color: #a65ee1;
         }
     </style>
 </head>

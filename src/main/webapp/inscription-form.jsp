@@ -12,16 +12,18 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
     
     <style>
         :root {
-            --eb-orange: #f05537;
-            --eb-orange-dark: #d1410c;
-            --eb-purple: #3659e3;
-            --eb-dark: #1e0a3c;
-            --eb-gray: #6f7287;
-            --eb-light-gray: #f8f7fa;
-            --eb-border: #d1d5db;
+            --eb-orange: #095401;        /* Vert foncé */
+            --eb-orange-dark: #063d01;
+            --eb-purple: #d4af37;        /* Jaune foncé (or) */
+            --eb-dark: #212529;
+            --eb-gray: #6c757d;          /* Gris */
+            --eb-light-gray: #f8f9fa;
+            --eb-border: #e9ecef;
         }
         
         body {

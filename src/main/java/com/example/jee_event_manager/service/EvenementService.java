@@ -1,11 +1,11 @@
 package com.example.jee_event_manager.service;
+
 import jakarta.persistence.TypedQuery;
 import com.example.jee_event_manager.DAO.EvenementDAO;
 import com.example.jee_event_manager.model.Evenement;
 import com.example.jee_event_manager.model.StatutEvenement;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.persistence.criteria.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +21,27 @@ public class EvenementService {
      * @param date Date de l'événement (optionnel)
      * @param lieu Lieu de l'événement (optionnel)
      * @param categorie Catégorie de l'événement (optionnel)
+     * @param search Recherche textuelle dans titre et description (optionnel)
      * @return Liste des événements correspondants aux critères
      */
-    public List<Evenement> getEvenementsPublies(LocalDate date, String lieu, String categorie) {
+    public List<Evenement> getEvenementsPublies(LocalDate date, String lieu, String categorie, String search) {
         try {
+            // Déterminer si on a besoin d'un filtre de catégorie
+            boolean hasCategorieFilter = categorie != null && !categorie.trim().isEmpty();
+            Long categorieId = null;
+            
+            if (hasCategorieFilter) {
+                try {
+                    categorieId = Long.parseLong(categorie.trim());
+                } catch (NumberFormatException ex) {
+                    System.err.println("ID de catégorie invalide: " + categorie);
+                    hasCategorieFilter = false;
+                }
+            }
+            
             // Créer une requête avec les jointures nécessaires
             String jpql = "SELECT DISTINCT e FROM Evenement e " +
-                         "LEFT JOIN FETCH e.categories c " +
+                         "LEFT JOIN FETCH e.categories " +
                          "LEFT JOIN FETCH e.organisateur " +
                          "WHERE e.statut = 'PUBLIE'";
             
@@ -44,16 +58,14 @@ public class EvenementService {
                 conditions.add("LOWER(e.lieu) LIKE LOWER(CONCAT('%', :lieu, '%'))");
             }
             
-            // Filtre par catégorie (par ID)
-            if (categorie != null && !categorie.trim().isEmpty()) {
-                try {
-                    // Essayer de parser comme un ID
-                    Integer catId = Integer.parseInt(categorie.trim());
-                    conditions.add("EXISTS (SELECT 1 FROM e.categories cat WHERE cat.id = :categorieId)");
-                } catch (NumberFormatException ex) {
-                    // Si ce n'est pas un ID, ignorer ce filtre
-                    System.err.println("ID de catégorie invalide: " + categorie);
-                }
+            // Filtre par catégorie (par ID) - utiliser une sous-requête avec jointure
+            if (hasCategorieFilter) {
+                conditions.add(":categorieId IN (SELECT c.id FROM e.categories c)");
+            }
+            
+            // Filtre par recherche textuelle (titre ou description)
+            if (search != null && !search.trim().isEmpty()) {
+                conditions.add("(LOWER(e.titre) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(e.description) LIKE LOWER(CONCAT('%', :search, '%')))");
             }
             
             // Ajouter les conditions à la requête
@@ -74,18 +86,17 @@ public class EvenementService {
             if (lieu != null && !lieu.trim().isEmpty()) {
                 query.setParameter("lieu", lieu.trim());
             }
-            if (categorie != null && !categorie.trim().isEmpty()) {
-                try {
-                    Integer catId = Integer.parseInt(categorie.trim());
-                    query.setParameter("categorieId", catId);
-                } catch (NumberFormatException ex) {
-                    // Ignorer si ce n'est pas un ID valide
-                }
+            if (hasCategorieFilter && categorieId != null) {
+                query.setParameter("categorieId", categorieId);
+            }
+            if (search != null && !search.trim().isEmpty()) {
+                query.setParameter("search", search.trim());
             }
             
             // Exécuter la requête et retourner les résultats
             List<Evenement> result = query.getResultList();
             System.out.println("=== DEBUG: Nombre d'événements trouvés: " + result.size());
+            System.out.println("=== DEBUG: Paramètres - search=" + search + ", categorie=" + categorie);
             return result;
         } catch (Exception e) {
             System.err.println("=== ERREUR lors de la récupération des événements:");

@@ -3,7 +3,6 @@ package com.example.jee_event_manager.servlet;
 import com.example.jee_event_manager.model.Evenement;
 import com.example.jee_event_manager.model.Inscription;
 import com.example.jee_event_manager.service.EvenementService;
-import com.example.jee_event_manager.service.InscriptionService;
 import com.example.jee_event_manager.service.facade.InscriptionFacade;
 
 import jakarta.inject.Inject;

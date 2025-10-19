@@ -20,14 +20,6 @@ public class RegisterServlet extends HttpServlet {
     private UtilisateurService utilisateurService;
 
     @Override
-    public void init() throws ServletException {
-        super.init();
-        if (utilisateurService == null) {
-            utilisateurService = new UtilisateurService();
-        }
-    }
-
-    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         

@@ -13,15 +13,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Neue+Plak:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
     
     <style>
         :root {
-            --primary-color: #d1410c;
-            --secondary-color: #1e0a3c;
-            --accent-color: #f05537;
-            --text-dark: #39364f;
-            --text-light: #6f7287;
-            --bg-light: #f8f7fa;
+            --primary-color: #8c65a7;      
+            --secondary-color: #c191e1;  
+            --accent-color: #8338b5;
+            --text-dark: #212529;
+            --text-light: #171818;
+            --bg-light: #f8f9fa;
         }
         
         * {
@@ -32,7 +34,7 @@
         
         body {
             font-family: 'Neue Plak', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -50,7 +52,7 @@
         }
         
         .login-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #7d24bd 0%, #8529c2 100%);
             color: white;
             padding: 3rem 2rem;
             text-align: center;

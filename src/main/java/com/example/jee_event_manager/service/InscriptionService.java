@@ -3,11 +3,17 @@ package com.example.jee_event_manager.service;
 import com.example.jee_event_manager.DAO.InscriptionDAO;
 import com.example.jee_event_manager.model.Evenement;
 import com.example.jee_event_manager.model.Inscription;
+import com.example.jee_event_manager.model.Participant;
+import com.example.jee_event_manager.model.StatutInscription;
 import com.example.jee_event_manager.model.observer.InscriptionNotifier;
 import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Stateless
 public class InscriptionService {
@@ -21,51 +27,229 @@ public class InscriptionService {
     @Inject
     private InscriptionNotifier notifier;
     
-    public Inscription findById(Long id) {
+    @Inject
+    private EntityManager em;
+    
+    /**
+     * Trouver une inscription par son ID
+     */
+    public Optional<Inscription> findById(Integer id) {
         return inscriptionDAO.findById(id);
     }
     
-    public List<Inscription> findByParticipantId(Long participantId) {
-        return inscriptionDAO.findByParticipantId(participantId);
+    /**
+     * Récupérer toutes les inscriptions d'un participant
+     */
+    public List<Inscription> getInscriptionsParticipant(Long participantId) {
+        return inscriptionDAO.findByParticipant(participantId);
     }
     
-    public Inscription register(Inscription inscription) {
-        // Vérification de la capacité de l'événement
-        if (!checkCapaciteEvenement(inscription.getEvenement())) {
-            throw new IllegalStateException("Capacité maximale atteinte pour cet événement");
-        }
+    /**
+     * Récupérer les inscriptions d'un participant filtrées par statut
+     */
+    public List<Inscription> getInscriptionsParticipantByStatut(Long participantId, StatutInscription statut) {
+        return inscriptionDAO.findByParticipantAndStatut(participantId, statut);
+    }
+    
+    /**
+     * Inscrire un participant à un événement
+     * Validations:
+     * - Vérifier que le participant n'est pas déjà inscrit
+     * - Vérifier la capacité disponible
+     * - Valider la quantité de places demandées
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public Inscription inscrireParticipant(Long participantId, Integer evenementId, String typeBillet, Integer quantite) {
+        // Démarrer une transaction manuelle pour RESOURCE_LOCAL
+        em.getTransaction().begin();
         
-        // Vérification des conflits d'horaire
-        if (hasConflitHoraire(inscription)) {
-            throw new IllegalStateException("Conflit d'horaire avec une autre inscription");
-        }
-        
-        // Validation et enregistrement
-        if (inscription.validate()) {
+        try {
+            // Validation des paramètres
+            if (participantId == null || evenementId == null) {
+                throw new IllegalArgumentException("Participant et événement sont obligatoires");
+            }
+            
+            if (quantite == null || quantite < 1 || quantite > 10) {
+                throw new IllegalArgumentException("La quantité doit être entre 1 et 10");
+            }
+            
+            // Récupérer les entités
+            Participant participant = em.find(Participant.class, participantId);
+            if (participant == null) {
+                throw new IllegalArgumentException("Participant introuvable");
+            }
+            
+            Evenement evenement = em.find(Evenement.class, evenementId);
+            if (evenement == null) {
+                throw new IllegalArgumentException("Événement introuvable");
+            }
+            
+            // Vérifier que le participant n'est pas déjà inscrit
+            if (inscriptionDAO.isParticipantInscrit(participantId, evenementId)) {
+                throw new IllegalStateException("Vous êtes déjà inscrit à cet événement");
+            }
+            
+            // Vérifier la capacité disponible
+            Long placesReservees = inscriptionDAO.countPlacesReservees(evenementId);
+            int capaciteDisponible = evenement.getCapacite() - placesReservees.intValue();
+            
+            if (capaciteDisponible < quantite) {
+                throw new IllegalStateException("Capacité insuffisante. Places disponibles: " + capaciteDisponible);
+            }
+            
+            // Créer l'inscription
+            Inscription inscription = new Inscription();
+            inscription.setParticipant(participant);
+            inscription.setEvenement(evenement);
+            inscription.setTypeBillet(typeBillet != null ? typeBillet : "STANDARD");
+            inscription.setQuantite(quantite);
             inscription.setDateInscription(LocalDateTime.now());
-            inscriptionDAO.save(inscription);
-            notifier.notifyInscription(inscription);
-            return inscription;
+            
+            // Définir le statut (acceptation automatique ou en attente)
+            // Pour simplifier, on accepte automatiquement si capacité OK
+            inscription.setStatut(StatutInscription.ACCEPTEE);
+            
+            // Sauvegarder l'inscription
+            Inscription saved = inscriptionDAO.save(inscription);
+            
+            // Committer la transaction
+            em.getTransaction().commit();
+            
+            // Forcer le chargement des relations pour éviter LazyInitializationException
+            saved.getEvenement().getTitre(); // Force le chargement de l'événement
+            saved.getParticipant().getNom(); // Force le chargement du participant
+            
+            // Notifier les observateurs
+            notifier.notifyInscription(saved);
+            
+            return saved;
+            
+        } catch (Exception e) {
+            // Rollback en cas d'erreur
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
         }
-        throw new IllegalArgumentException("Inscription invalide");
     }
     
-    public void delete(Long id) {
-        Inscription inscription = findById(id);
-        if (inscription != null) {
+    /**
+     * Annuler une inscription
+     * Validation: vérifier que l'inscription appartient au participant
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void annulerInscription(Integer inscriptionId, Long participantId) {
+        // Démarrer une transaction manuelle pour RESOURCE_LOCAL
+        em.getTransaction().begin();
+        
+        try {
+            // Vérifier que l'inscription existe
+            Inscription inscription = inscriptionDAO.findById(inscriptionId)
+                .orElseThrow(() -> new IllegalArgumentException("Inscription introuvable"));
+            
+            // Vérifier que l'inscription appartient bien au participant
+            if (!inscriptionDAO.isOwner(inscriptionId, participantId)) {
+                throw new IllegalStateException("Vous ne pouvez annuler que vos propres inscriptions");
+            }
+            
+            // Vérifier que l'inscription n'est pas déjà annulée
+            if (inscription.getStatut() == StatutInscription.ANNULEE) {
+                throw new IllegalStateException("Cette inscription est déjà annulée");
+            }
+            
+            // Annuler l'inscription
+            inscriptionDAO.cancelInscription(inscriptionId);
+            
+            // Committer la transaction
+            em.getTransaction().commit();
+            
+        } catch (Exception e) {
+            // Rollback en cas d'erreur
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        }
+    }
+    
+    /**
+     * Supprimer définitivement une inscription
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void delete(Integer id) {
+        // Démarrer une transaction manuelle pour RESOURCE_LOCAL
+        em.getTransaction().begin();
+        
+        try {
+            Inscription inscription = inscriptionDAO.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Inscription introuvable"));
             inscriptionDAO.delete(inscription);
+            
+            // Committer la transaction
+            em.getTransaction().commit();
+            
+        } catch (Exception e) {
+            // Rollback en cas d'erreur
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
         }
     }
     
-    private boolean checkCapaciteEvenement(Evenement evenement) {
-        // Implémentez la logique de vérification de capacité
-        // Par exemple, vérifier le nombre d'inscriptions actuelles vs capacité max
-        return true;
+    /**
+     * Obtenir le statut d'inscription d'un participant pour un événement
+     */
+    public Optional<StatutInscription> getStatutInscription(Long participantId, Integer evenementId) {
+        Optional<Inscription> inscription = inscriptionDAO.findByParticipantAndEvenement(participantId, evenementId);
+        return inscription.map(Inscription::getStatut);
     }
     
-    private boolean hasConflitHoraire(Inscription nouvelleInscription) {
-        // Implémentez la logique de détection de conflit
-        // Par exemple, vérifier si le participant a déjà une inscription dans la même plage horaire
-        return false;
+    /**
+     * Vérifier si un participant est inscrit à un événement
+     */
+    public boolean isParticipantInscrit(Long participantId, Integer evenementId) {
+        return inscriptionDAO.isParticipantInscrit(participantId, evenementId);
+    }
+    
+    /**
+     * Compter le nombre d'inscrits pour un événement
+     */
+    public Long countInscritsEvenement(Integer evenementId) {
+        return inscriptionDAO.countByEvenement(evenementId);
+    }
+    
+    /**
+     * Compter le nombre de places réservées pour un événement
+     */
+    public Long countPlacesReservees(Integer evenementId) {
+        return inscriptionDAO.countPlacesReservees(evenementId);
+    }
+    
+    /**
+     * Calculer la capacité disponible pour un événement
+     */
+    public Integer getCapaciteDisponible(Integer evenementId) {
+        Evenement evenement = em.find(Evenement.class, evenementId);
+        if (evenement == null) {
+            throw new IllegalArgumentException("Événement introuvable");
+        }
+        
+        Long placesReservees = inscriptionDAO.countPlacesReservees(evenementId);
+        return evenement.getCapacite() - placesReservees.intValue();
+    }
+    
+    /**
+     * Récupérer toutes les inscriptions d'un événement
+     */
+    public List<Inscription> getInscriptionsEvenement(Integer evenementId) {
+        return inscriptionDAO.findByEvenement(evenementId);
+    }
+    
+    /**
+     * Récupérer les inscriptions d'un événement par statut
+     */
+    public List<Inscription> getInscriptionsEvenementByStatut(Integer evenementId, StatutInscription statut) {
+        return inscriptionDAO.findByEvenementAndStatut(evenementId, statut);
     }
 }

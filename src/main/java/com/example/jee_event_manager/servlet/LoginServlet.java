@@ -75,9 +75,24 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("userName", utilisateur.getNom());
             session.setAttribute("userEmail", utilisateur.getEmail());
             session.setAttribute("userType", utilisateur.getUserType().toString());
+            
+            // Ajouter des attributs spécifiques selon le type d'utilisateur
+            if ("PARTICIPANT".equals(utilisateur.getUserType().toString())) {
+                session.setAttribute("participantId", utilisateur.getId());
+            } else if ("ORGANISATEUR".equals(utilisateur.getUserType().toString())) {
+                session.setAttribute("organisateurId", utilisateur.getId());
+            }
 
-            // Rediriger vers le catalogue
-            response.sendRedirect(request.getContextPath() + "/catalogue");
+            // Rediriger selon le type d'utilisateur
+            String redirectUrl;
+            if ("PARTICIPANT".equals(utilisateur.getUserType().toString())) {
+                redirectUrl = request.getContextPath() + "/participant/dashboard";
+            } else if ("ORGANISATEUR".equals(utilisateur.getUserType().toString())) {
+                redirectUrl = request.getContextPath() + "/organisateur/dashboard";
+            } else {
+                redirectUrl = request.getContextPath() + "/catalogue";
+            }
+            response.sendRedirect(redirectUrl);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -12,15 +12,10 @@ import com.example.jee_event_manager.service.InscriptionService;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Facade Pattern pour encapsuler toute la logique d'inscription
- * Inspiré d'Eventbrite avec gestion de types de billets et quantités
- */
 @Stateless
 public class InscriptionFacade {
     
@@ -36,7 +31,7 @@ public class InscriptionFacade {
     @Inject
     private EvenementDAO evenementDAO;
     
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     private EntityManager getEm() {
@@ -48,61 +43,61 @@ public class InscriptionFacade {
         }
         throw new IllegalStateException("EntityManager indisponible");
     }
-    
-    /**
-     * Méthode principale pour enregistrer un participant à un événement
-     * Encapsule toutes les validations et la persistance
-     * 
-     * @param userId ID de l'utilisateur
-     * @param evenementId ID de l'événement
-     * @param typeBillet Type de billet (STANDARD, VIP, etc.)
-     * @param quantite Nombre de places à réserver
-     * @return L'inscription créée
-     * @throws IllegalStateException Si l'inscription n'est pas possible
-     */
     @Transactional
     public Inscription registerParticipant(Long userId, Long evenementId, String typeBillet, int quantite) 
             throws IllegalStateException {
         
-        // 1. Validation des données d'entrée
-        validateInputData(userId, evenementId, typeBillet, quantite);
+        EntityManager entityManager = getEm();
+        // Démarrer une transaction manuelle pour RESOURCE_LOCAL
+        entityManager.getTransaction().begin();
         
-        // 2. Récupérer l'événement
-        Evenement evenement = evenementService.findById(evenementId);
-        if (evenement == null) {
-            throw new IllegalStateException("Événement introuvable");
+        try {
+            // 1. Validation des données d'entrée
+            validateInputData(userId, evenementId, typeBillet, quantite);
+            
+            // 2. Récupérer l'événement
+            Evenement evenement = evenementService.findById(evenementId);
+            if (evenement == null) {
+                throw new IllegalStateException("Événement introuvable");
+            }
+            
+            // 3. Récupérer le participant
+            Participant participant = entityManager.find(Participant.class, userId);
+            if (participant == null) {
+                throw new IllegalStateException("Participant introuvable");
+            }
+            
+            // 4. Vérifier la capacité disponible
+            validateCapacity(evenementId, quantite, evenement.getCapacite());
+            
+            // 5. Vérifier les conflits d'horaire
+            validateScheduleConflicts(userId, evenement);
+            
+            // 6. Vérifier si l'utilisateur n'est pas déjà inscrit
+            validateDuplicateRegistration(userId, evenementId);
+            
+            // 7. Déterminer le statut de l'inscription
+            StatutInscription statut = determineInscriptionStatus(evenementId, quantite, evenement.getCapacite());
+            
+            // 8. Créer l'inscription
+            Inscription inscription = createInscription(participant, evenement, typeBillet, quantite, statut);
+            
+            // 9. Persister l'inscription
+            inscriptionDAO.save(inscription);
+            
+            // Committer la transaction
+            entityManager.getTransaction().commit();
+            
+            return inscription;
+            
+        } catch (Exception e) {
+            // Rollback en cas d'erreur
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            throw e;
         }
-        
-        // 3. Récupérer le participant
-        Participant participant = getEm().find(Participant.class, userId);
-        if (participant == null) {
-            throw new IllegalStateException("Participant introuvable");
-        }
-        
-        // 4. Vérifier la capacité disponible
-        validateCapacity(evenementId, quantite, evenement.getCapacite());
-        
-        // 5. Vérifier les conflits d'horaire
-        validateScheduleConflicts(userId, evenement);
-        
-        // 6. Vérifier si l'utilisateur n'est pas déjà inscrit
-        validateDuplicateRegistration(userId, evenementId);
-        
-        // 7. Déterminer le statut de l'inscription
-        StatutInscription statut = determineInscriptionStatus(evenementId, quantite, evenement.getCapacite());
-        
-        // 8. Créer l'inscription
-        Inscription inscription = createInscription(participant, evenement, typeBillet, quantite, statut);
-        
-        // 9. Persister l'inscription
-        inscriptionDAO.save(inscription);
-        
-        return inscription;
     }
-    
-    /**
-     * Valide les données d'entrée
-     */
     private void validateInputData(Long userId, Long evenementId, String typeBillet, int quantite) {
         if (userId == null || userId <= 0) {
             throw new IllegalStateException("ID utilisateur invalide");
@@ -120,10 +115,6 @@ public class InscriptionFacade {
             throw new IllegalStateException("Type de billet requis");
         }
     }
-    
-    /**
-     * Vérifie la capacité disponible de l'événement
-     */
     private void validateCapacity(Long evenementId, int quantiteDemandee, int capaciteTotale) {
         // Compter le nombre d'inscriptions acceptées
         Long inscriptionsCount = getEm().createQuery(

@@ -18,6 +18,5 @@ public class InscriptionListener implements InscriptionObserver {
                            inscription.getEvenement().getTitre(), 
                            inscription.getParticipant().getNom()});
         
-        // Ici, vous pouvez ajouter la logique d'envoi d'email, notification, etc.
     }
 }

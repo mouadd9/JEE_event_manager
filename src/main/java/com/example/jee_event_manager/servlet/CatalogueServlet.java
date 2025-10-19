@@ -1,9 +1,16 @@
 package com.example.jee_event_manager.servlet;
 
+import com.example.jee_event_manager.dto.EvenementDetailDTO;
 import com.example.jee_event_manager.model.Categorie;
 import com.example.jee_event_manager.model.Evenement;
+import com.example.jee_event_manager.model.Evaluation;
+import com.example.jee_event_manager.model.StatutInscription;
 import com.example.jee_event_manager.service.CategorieService;
+import com.example.jee_event_manager.service.CommentaireService;
+import com.example.jee_event_manager.service.EvaluationService;
 import com.example.jee_event_manager.service.EvenementService;
+import com.example.jee_event_manager.service.InscriptionService;
+import com.example.jee_event_manager.util.DTOMapper;
 
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
@@ -25,6 +32,15 @@ public class CatalogueServlet extends HttpServlet {
     
     @Inject
     private CategorieService categorieService;
+    
+    @Inject
+    private InscriptionService inscriptionService;
+    
+    @Inject
+    private EvaluationService evaluationService;
+    
+    @Inject
+    private CommentaireService commentaireService;
 
     @Override
     public void init() throws ServletException {
@@ -53,6 +69,7 @@ public class CatalogueServlet extends HttpServlet {
         String dateStr = request.getParameter("date");
         String lieu = request.getParameter("lieu");
         String categorieId = request.getParameter("categorie");
+        String searchQuery = request.getParameter("search");
         
         // Conversion de la date si elle est fournie
         LocalDate date = null;
@@ -75,14 +92,36 @@ public class CatalogueServlet extends HttpServlet {
             request.setAttribute("selectedCategorie", categorieId.trim());
         }
         
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            request.setAttribute("selectedSearch", searchQuery.trim());
+        }
+        
         try {
+            // Récupérer l'ID du participant si connecté
+            Long participantId = getParticipantIdFromSession(request);
+            
             // Récupération des catégories pour le menu déroulant
             List<Categorie> categories = categorieService.findAll();
             request.setAttribute("categories", categories);
             
             // Récupération des événements avec les filtres
-            List<Evenement> evenements = evenementService.getEvenementsPublies(date, lieu, categorieId);
-            request.setAttribute("evenements", evenements);
+            List<Evenement> evenements = evenementService.getEvenementsPublies(date, lieu, categorieId, searchQuery);
+            System.out.println("=== DEBUG CatalogueServlet ===");
+            System.out.println("Nombre d'événements récupérés: " + (evenements != null ? evenements.size() : "null"));
+            System.out.println("Filtres: date=" + date + ", lieu=" + lieu + ", categorieId=" + categorieId + ", search=" + searchQuery);
+            
+            // Enrichir les événements avec statistiques et statut inscription
+            List<EvenementDetailDTO> evenementsDTO = evenements.stream()
+                .map(evt -> enrichirEvenementDTO(evt, participantId))
+                .collect(java.util.stream.Collectors.toList());
+            
+            System.out.println("Nombre de DTOs créés: " + evenementsDTO.size());
+            if (!evenementsDTO.isEmpty()) {
+                System.out.println("Premier événement: " + evenementsDTO.get(0).getTitre());
+            }
+            
+            request.setAttribute("evenements", evenementsDTO);
+            request.setAttribute("isParticipantConnecte", participantId != null);
             
             // Transférer à la JSP
             request.getRequestDispatcher("/catalogue.jsp").forward(request, response);
@@ -100,5 +139,53 @@ public class CatalogueServlet extends HttpServlet {
             throws ServletException, IOException {
         // Rediriger vers GET pour éviter les problèmes de rechargement de formulaire
         doGet(request, response);
+    }
+    
+    /**
+     * Enrichir un événement avec les statistiques et le statut d'inscription
+     */
+    private EvenementDetailDTO enrichirEvenementDTO(Evenement evenement, Long participantId) {
+        EvenementDetailDTO dto = DTOMapper.toEvenementDetailDTO(evenement);
+        
+        // Ajouter les statistiques
+        dto.setNoteMoyenne(evaluationService.getMoyenneEvenement(evenement.getId()));
+        dto.setNombreEvaluations(evaluationService.countEvaluationsEvenement(evenement.getId()));
+        dto.setNombreInscrits(inscriptionService.countInscritsEvenement(evenement.getId()));
+        dto.setCapaciteDisponible(inscriptionService.getCapaciteDisponible(evenement.getId()));
+        dto.setNombreCommentaires(commentaireService.countCommentairesEvenement(evenement.getId()));
+        
+        // Si un participant est connecté, ajouter son statut d'inscription
+        if (participantId != null) {
+            java.util.Optional<StatutInscription> statutInscription = 
+                inscriptionService.getStatutInscription(participantId, evenement.getId());
+            statutInscription.ifPresent(dto::setStatutInscription);
+            
+            // Ajouter l'évaluation du participant s'il a déjà évalué
+            java.util.Optional<Evaluation> evaluation = 
+                evaluationService.getEvaluationParticipant(participantId, evenement.getId());
+            evaluation.ifPresent(e -> dto.setEvaluationParticipant(e.getNote()));
+        }
+        
+        return dto;
+    }
+    
+    /**
+     * Récupérer l'ID du participant depuis la session
+     */
+    private Long getParticipantIdFromSession(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) return null;
+        
+        Object participantId = session.getAttribute("participantId");
+        if (participantId instanceof Long) {
+            return (Long) participantId;
+        }
+        
+        Object userId = session.getAttribute("userId");
+        if (userId instanceof Long) {
+            return (Long) userId;
+        }
+        
+        return null;
     }
 }

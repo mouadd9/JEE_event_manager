@@ -43,13 +43,17 @@ public class Evenement extends BaseEntity {
     @Column(name = "capacite")
     private int capacite = 100; // Capacité par défaut
     
+    @Size(max = 500, message = "L'URL de l'image ne peut pas dépasser 500 caractères")
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organisateur_id", nullable = false, columnDefinition = "BIGINT")
     private Organisateur organisateur;
     
     @ManyToMany
     @JoinTable(
-        name = "evenement_categories",
+        name = "evenement_categorie",
         joinColumns = @JoinColumn(name = "evenement_id"),
         inverseJoinColumns = @JoinColumn(name = "categorie_id")
     )
@@ -134,6 +138,14 @@ public class Evenement extends BaseEntity {
 
     public void setCapacite(int capacite) {
         this.capacite = capacite;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
     
     // Méthodes helper
