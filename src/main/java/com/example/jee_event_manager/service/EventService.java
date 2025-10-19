@@ -12,4 +12,5 @@ public interface EventService {
     List<EventDto> getEventsByOrganizer(Long organizerId);
     EventDto getEventById(Long eventId);
     void deleteEvent(Long eventId);
+    void unpublishEvent(Long eventId);
 }

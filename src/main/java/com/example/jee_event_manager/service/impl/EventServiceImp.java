@@ -1,6 +1,7 @@
 package com.example.jee_event_manager.service.impl;
 
 import com.example.jee_event_manager.DAO.EventRepository;
+import com.example.jee_event_manager.DAO.OrganizerRepository;
 import com.example.jee_event_manager.dto.EventDto;
 import com.example.jee_event_manager.enums.EventStatus;
 import com.example.jee_event_manager.mappers.EventMapper;
@@ -21,13 +22,16 @@ public class EventServiceImp implements EventService {
     @Inject
     private EventRepository eventRepository;
 
+    @Inject
+    private OrganizerRepository organizerRepository;
+
     @Override
     public EventDto createEvent(EventDto dto, Long organizerId) {
-        // we will check if the user exists first
-        // then we will create a new event and link it to the organizer
-        // we should fetch an organizer here
-        Organizer organizer = new Organizer(); // Organizer organizer = this.organizerService.getOrganizerById(organizerId);
-        Event event = EventMapper.toEntity(dto); // event.setOrganizer(organizer);
+
+        Organizer organizer = organizerRepository.findById(organizerId)
+                .orElseThrow(() -> new EntityNotFoundException("Org with ID " + organizerId + " not found."));
+
+        Event event = EventMapper.toEntity(dto);
         event.setOrganizer(organizer);
         Event saved = eventRepository.save(event);
         return EventMapper.toDto(saved);
@@ -51,6 +55,14 @@ public class EventServiceImp implements EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Event with ID " + eventId + " not found."));
         event.setStatut(EventStatus.PUBLIE);
+        eventRepository.update(event);
+    }
+
+    @Override
+    public void unpublishEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Event with ID " + eventId + " not found."));
+        event.setStatut(EventStatus.BROUILLON);
         eventRepository.update(event);
     }
 

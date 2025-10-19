@@ -1,6 +1,7 @@
 package com.example.jee_event_manager.servlet;
 
 import com.example.jee_event_manager.dto.EventDto;
+import com.example.jee_event_manager.enums.EventStatus;
 import com.example.jee_event_manager.model.Organizer;
 import com.example.jee_event_manager.service.EventService;
 import jakarta.inject.Inject;
@@ -16,7 +17,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@WebServlet("/organizer/events")
+@WebServlet("/organizer/*")
 public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract class defines how to intercept http requests and construct http responses.
     // in our case the EventServlet will be registered as a servlet class and it will intercept http requests with a specific path "/organizer/events"
     // this servlet will return names of jsp web pages and the tomcat container will return the correct JSP page in the http response.
@@ -42,7 +43,7 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
                 case "/events/edit":
                     showEditEventForm(request, response);
                     break;
-                case "/events/detail": // <-- NEW CASE
+                case "/events/detail":
                     showEventDetail(request, response);
                     break;
                 default:
@@ -64,25 +65,48 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         }
 
         try {
+
+            if (action.equals("create") || action.equals("update")) {
+                if (action.equals("create")) {
+                    handleCreate(request); // Pass request only
+                } else {
+                    handleUpdate(request); // Pass request only
+                }
+                response.sendRedirect(request.getContextPath() + "/organizer/dashboard");
+                return;
+            }
+
+            String eventIdParam = request.getParameter("eventId");
+            if (eventIdParam == null) {
+                eventIdParam = request.getParameter("id"); // Check 'id' as fallback
+                if (eventIdParam == null){
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No eventId specified for this action.");
+                    return;
+                }
+            }
+            Long eventId = Long.parseLong(eventIdParam);
+
             switch (action) {
-                case "create":
-                    handleCreate(request, response);
-                    break;
-                case "update":
-                    handleUpdate(request, response);
-                    break;
                 case "publish":
-                    handlePublish(request, response);
+                    eventService.publishEvent(eventId);
+                    break;
+                case "unpublish":
+                    eventService.unpublishEvent(eventId);
                     break;
                 case "cancel":
-                    handleCancel(request, response);
+                    eventService.cancelEvent(eventId);
                     break;
                 case "delete":
-                    handleDelete(request, response);
-                    break;
+                    eventService.deleteEvent(eventId);
+                    response.sendRedirect(request.getContextPath() + "/organizer/dashboard");
+                    return;
                 default:
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action.");
+                    return;
             }
+            // Redirect back to the detail page
+            response.sendRedirect(request.getContextPath() + "/organizer/events/detail?id=" + eventId);
+
         } catch (EntityNotFoundException e) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
         } catch (Exception e) {
@@ -92,15 +116,15 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
     }
 
     private void showDashboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession(); // extracts user session from the server using token in the request.
-        Organizer organizer = (Organizer) session.getAttribute("loggedInUser");
-        List<EventDto> eventList = eventService.getEventsByOrganizer(organizer.getId());
+        //HttpSession session = request.getSession(); // extracts user session from the server using token in the request.
+        //Organizer organizer = (Organizer) session.getAttribute("loggedInUser");
+        List<EventDto> eventList = eventService.getEventsByOrganizer(1L);
         request.setAttribute("events", eventList); // here we pass data to our request
         request.getRequestDispatcher("/WEB-INF/views/organizer/dashboard.jsp").forward(request, response); // and then we forward the request to the JSP page.
     }
 
     private void showCreateEventForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/WEB-INF/views/organizer/createEvent.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/organizer/eventForm.jsp").forward(request, response);
     }
 
     private void showEditEventForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -119,53 +143,27 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         request.getRequestDispatcher("/WEB-INF/views/organizer/detail.jsp").forward(request, response);
     }
 
-    private void handleCreate(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        HttpSession session = request.getSession(); // extracts user session from the server using token in the request.
-        Organizer organizer = (Organizer) session.getAttribute("loggedInUser");
-
-        // we should manually construct the event DTO
+    private void handleCreate(HttpServletRequest request) throws IOException {
+       // HttpSession session = request.getSession(); // extracts user session from the server using token in the request.
+       // Organizer organizer = (Organizer) session.getAttribute("loggedInUser");
         EventDto dto = new EventDto();
         dto.setTitre(request.getParameter("titre"));
         dto.setDescription(request.getParameter("description"));
         dto.setLieu(request.getParameter("lieu"));
         dto.setDateDebut(LocalDateTime.parse(request.getParameter("dateDebut")));
         dto.setDateFin(LocalDateTime.parse(request.getParameter("dateFin")));
-
-        eventService.createEvent(dto, organizer.getId()); // creates a new event
-
-        response.sendRedirect(request.getContextPath() + "/organizer/dashboard"); // we then redirect to the dashboard
+        dto.setStatut(EventStatus.BROUILLON);
+        eventService.createEvent(dto, 1L); // creates a new event
     }
 
-    private void handleUpdate(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void handleUpdate(HttpServletRequest request) throws IOException {
         Long eventId = Long.parseLong(request.getParameter("id"));
-
         EventDto dto = eventService.getEventById(eventId);
         dto.setTitre(request.getParameter("titre"));
         dto.setDescription(request.getParameter("description"));
         dto.setLieu(request.getParameter("lieu"));
         dto.setDateDebut(LocalDateTime.parse(request.getParameter("dateDebut")));
         dto.setDateFin(LocalDateTime.parse(request.getParameter("dateFin")));
-
         eventService.updateEvent(dto);
-        response.sendRedirect(request.getContextPath() + "/organizer/dashboard");
     }
-
-    private void handlePublish(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Long eventId = Long.parseLong(request.getParameter("eventId"));
-        eventService.publishEvent(eventId);
-        response.sendRedirect(request.getContextPath() + "/organizer/dashboard");
-    }
-
-    private void handleCancel(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Long eventId = Long.parseLong(request.getParameter("eventId"));
-        eventService.cancelEvent(eventId);
-        response.sendRedirect(request.getContextPath() + "/organizer/dashboard");
-    }
-
-    private void handleDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Long eventId = Long.parseLong(request.getParameter("eventId"));
-        eventService.deleteEvent(eventId);
-        response.sendRedirect(request.getContextPath() + "/organizer/dashboard");
-    }
-
 }
