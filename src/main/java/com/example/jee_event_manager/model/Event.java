@@ -40,6 +40,12 @@ public class Event {
 
     @Column
     private String lieu;
+
+    @Column
+    private Double latitude;
+
+    @Column
+    private Double longitude;
     // Creates foreign key column FK
     @ManyToOne(fetch = FetchType.LAZY) // this configures Hibernate not to fetch the user related to the event.
     @JoinColumn(name="organizer_id") // name of the foreign key

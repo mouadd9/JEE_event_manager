@@ -1,5 +1,6 @@
 package com.example.jee_event_manager.servlet;
 
+import com.example.jee_event_manager.DAO.OrganizerRepository;
 import com.example.jee_event_manager.dto.EventDto;
 import com.example.jee_event_manager.enums.EventStatus;
 import com.example.jee_event_manager.model.Organizer;
@@ -17,6 +18,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static java.lang.Double.parseDouble;
+
 @WebServlet("/organizer/*")
 public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract class defines how to intercept http requests and construct http responses.
     // in our case the EventServlet will be registered as a servlet class and it will intercept http requests with a specific path "/organizer/events"
@@ -25,12 +28,22 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
     @Inject
     private EventService eventService;
 
+    // !!!!!!! temporary we will use sessions in the future
+    @Inject
+    private OrganizerRepository organizerRepository;
+    private static final Long CURRENT_ORGANIZER_ID = 1L;
+    // !!!!!!! temporary we will use sessions in the future
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
         if (pathInfo == null || pathInfo.equals("/")) {
             pathInfo = "/dashboard";
         }
+
+        // !!!!!!! temporary we will use sessions in the future
+        addOrganizerToRequest(request);
+        // !!!!!!! temporary we will use sessions in the future
 
         try {
             switch (pathInfo) {
@@ -50,7 +63,6 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
                     response.sendError(HttpServletResponse.SC_NOT_FOUND, "Page not found");
             }
         } catch (EntityNotFoundException e) {
-            // Handle cases where an event ID doesn't exist
             response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
         }
     }
@@ -64,18 +76,23 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
             return;
         }
 
+        addOrganizerToRequest(request);
+        Long eventId = null;
+
         try {
 
             if (action.equals("create") || action.equals("update")) {
                 if (action.equals("create")) {
-                    handleCreate(request); // Pass request only
+                    EventDto newEvent = handleCreate(request); // Pass request only
+                    eventId = newEvent.getId();
                 } else {
-                    handleUpdate(request); // Pass request only
+                    EventDto updatedEvent = handleUpdate(request); // Pass request only
+                    eventId = updatedEvent.getId();
                 }
-                response.sendRedirect(request.getContextPath() + "/organizer/dashboard");
-                return;
+                response.sendRedirect(request.getContextPath() + "/organizer/events/detail?id=" + eventId);                return;
             }
 
+            // we extract event ID for operations that require event id
             String eventIdParam = request.getParameter("eventId");
             if (eventIdParam == null) {
                 eventIdParam = request.getParameter("id"); // Check 'id' as fallback
@@ -84,7 +101,7 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
                     return;
                 }
             }
-            Long eventId = Long.parseLong(eventIdParam);
+            eventId = Long.parseLong(eventIdParam);
 
             switch (action) {
                 case "publish":
@@ -106,19 +123,29 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
             }
             // Redirect back to the detail page
             response.sendRedirect(request.getContextPath() + "/organizer/events/detail?id=" + eventId);
-
         } catch (EntityNotFoundException e) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
         } catch (Exception e) {
-            // Handle other potential errors (e.g., bad date format)
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    // !!!!!!! temporary we will use sessions in the future
+    private void addOrganizerToRequest(HttpServletRequest request) {
+        try {
+            Organizer organizer = organizerRepository.findById(CURRENT_ORGANIZER_ID)
+                    .orElseThrow(() -> new EntityNotFoundException("Organizer not found"));
+            request.setAttribute("organizer", organizer);
+        } catch (Exception e) {
+            // Handle error, maybe set a default name
+            request.setAttribute("organizerName", "Erreur");
         }
     }
 
     private void showDashboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //HttpSession session = request.getSession(); // extracts user session from the server using token in the request.
         //Organizer organizer = (Organizer) session.getAttribute("loggedInUser");
-        List<EventDto> eventList = eventService.getEventsByOrganizer(1L);
+        List<EventDto> eventList = eventService.getEventsByOrganizer(CURRENT_ORGANIZER_ID);
         request.setAttribute("events", eventList); // here we pass data to our request
         request.getRequestDispatcher("/WEB-INF/views/organizer/dashboard.jsp").forward(request, response); // and then we forward the request to the JSP page.
     }
@@ -131,7 +158,7 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         Long eventId = Long.parseLong(request.getParameter("id")); // here we extract the id of the event
         EventDto event = eventService.getEventById(eventId); // here we extract the event
         request.setAttribute("event", event);
-        request.getRequestDispatcher("/WEB-INF/views/organizer/eventForm.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/organizer/editEventForm.jsp").forward(request, response);
     }
 
     private void showEventDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -143,7 +170,7 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         request.getRequestDispatcher("/WEB-INF/views/organizer/detail.jsp").forward(request, response);
     }
 
-    private void handleCreate(HttpServletRequest request) throws IOException {
+    private EventDto handleCreate(HttpServletRequest request) throws IOException {
        // HttpSession session = request.getSession(); // extracts user session from the server using token in the request.
        // Organizer organizer = (Organizer) session.getAttribute("loggedInUser");
         EventDto dto = new EventDto();
@@ -152,11 +179,13 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         dto.setLieu(request.getParameter("lieu"));
         dto.setDateDebut(LocalDateTime.parse(request.getParameter("dateDebut")));
         dto.setDateFin(LocalDateTime.parse(request.getParameter("dateFin")));
+        dto.setLatitude(parseDouble(request.getParameter("latitude")));
+        dto.setLongitude(parseDouble(request.getParameter("longitude")));
         dto.setStatut(EventStatus.BROUILLON);
-        eventService.createEvent(dto, 1L); // creates a new event
+       return eventService.createEvent(dto, CURRENT_ORGANIZER_ID); // creates a new event
     }
 
-    private void handleUpdate(HttpServletRequest request) throws IOException {
+    private EventDto handleUpdate(HttpServletRequest request) throws IOException {
         Long eventId = Long.parseLong(request.getParameter("id"));
         EventDto dto = eventService.getEventById(eventId);
         dto.setTitre(request.getParameter("titre"));
@@ -164,6 +193,8 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         dto.setLieu(request.getParameter("lieu"));
         dto.setDateDebut(LocalDateTime.parse(request.getParameter("dateDebut")));
         dto.setDateFin(LocalDateTime.parse(request.getParameter("dateFin")));
-        eventService.updateEvent(dto);
+        dto.setLatitude(parseDouble(request.getParameter("latitude")));
+        dto.setLongitude(parseDouble(request.getParameter("longitude")));
+        return eventService.updateEvent(dto);
     }
 }

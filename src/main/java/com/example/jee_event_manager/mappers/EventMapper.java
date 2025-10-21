@@ -17,7 +17,9 @@ public class EventMapper {
         dto.setDateDebut(event.getDateDebut());
         dto.setDateFin(event.getDateFin());
         dto.setLieu(event.getLieu());
-        dto.setStatut(event.getStatut()); // This now works with the enum
+        dto.setStatut(event.getStatut());
+        dto.setLatitude(event.getLatitude());
+        dto.setLongitude(event.getLongitude());
 
         if (event.getOrganizer() != null) {
             User organizerUser = event.getOrganizer();
@@ -44,6 +46,8 @@ public class EventMapper {
         event.setDateFin(dto.getDateFin());
         event.setLieu(dto.getLieu());
         event.setStatut(dto.getStatut());
+        event.setLatitude(dto.getLatitude());
+        event.setLongitude(dto.getLongitude());
         // the 'organizer' is set by the service layer.
 
         return event;
@@ -72,6 +76,12 @@ public class EventMapper {
         }
         if (dto.getStatut() != null) {
             event.setStatut(dto.getStatut());
+        }
+        if (dto.getLatitude() != null) {
+            event.setLatitude(dto.getLatitude());
+        }
+        if (dto.getLongitude() != null) {
+            event.setLongitude(dto.getLongitude());
         }
     }
 }
