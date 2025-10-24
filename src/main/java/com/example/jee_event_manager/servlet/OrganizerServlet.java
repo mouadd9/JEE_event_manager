@@ -1,18 +1,21 @@
 package com.example.jee_event_manager.servlet;
 
-import com.example.jee_event_manager.DAO.OrganizerRepository;
-import com.example.jee_event_manager.dto.EventDto;
-import com.example.jee_event_manager.enums.EventStatus;
-import com.example.jee_event_manager.model.Organizer;
-import com.example.jee_event_manager.service.EventService;
+import com.example.jee_event_manager.DAO.OrganisateurRepository;
+import com.example.jee_event_manager.dto.EvenementDTO;
+import com.example.jee_event_manager.enums.StatutEvenement;
+import com.example.jee_event_manager.model.Organisateur;
+import com.example.jee_event_manager.service.EvenementService;
+import com.example.jee_event_manager.service.FileUploadService;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -21,16 +24,23 @@ import java.util.List;
 import static java.lang.Double.parseDouble;
 
 @WebServlet("/organizer/*")
+@MultipartConfig(
+    maxFileSize = 5242880,      // 5MB
+    maxRequestSize = 10485760   // 10MB
+)
 public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract class defines how to intercept http requests and construct http responses.
     // in our case the EventServlet will be registered as a servlet class and it will intercept http requests with a specific path "/organizer/events"
     // this servlet will return names of jsp web pages and the tomcat container will return the correct JSP page in the http response.
 
     @Inject
-    private EventService eventService;
+    private EvenementService evenementService;
+    
+    @Inject
+    private FileUploadService fileUploadService;
 
     // !!!!!!! temporary we will use sessions in the future
     @Inject
-    private OrganizerRepository organizerRepository;
+    private OrganisateurRepository organisateurRepository;
     private static final Long CURRENT_ORGANIZER_ID = 1L;
     // !!!!!!! temporary we will use sessions in the future
 
@@ -83,13 +93,14 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
 
             if (action.equals("create") || action.equals("update")) {
                 if (action.equals("create")) {
-                    EventDto newEvent = handleCreate(request); // Pass request only
+                    EvenementDTO newEvent = handleCreate(request); // Pass request only
                     eventId = newEvent.getId();
                 } else {
-                    EventDto updatedEvent = handleUpdate(request); // Pass request only
+                    EvenementDTO updatedEvent = handleUpdate(request); // Pass request only
                     eventId = updatedEvent.getId();
                 }
-                response.sendRedirect(request.getContextPath() + "/organizer/events/detail?id=" + eventId);                return;
+                response.sendRedirect(request.getContextPath() + "/organizer/events/detail?id=" + eventId);
+                return;
             }
 
             // we extract event ID for operations that require event id
@@ -105,16 +116,16 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
 
             switch (action) {
                 case "publish":
-                    eventService.publishEvent(eventId);
+                    evenementService.publishEvent(eventId);
                     break;
                 case "unpublish":
-                    eventService.unpublishEvent(eventId);
+                    evenementService.unpublishEvent(eventId);
                     break;
                 case "cancel":
-                    eventService.cancelEvent(eventId);
+                    evenementService.cancelEvent(eventId);
                     break;
                 case "delete":
-                    eventService.deleteEvent(eventId);
+                    // evenementService.deleteEvent(eventId); // Commented out as per plan
                     response.sendRedirect(request.getContextPath() + "/organizer/dashboard");
                     return;
                 default:
@@ -133,9 +144,9 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
     // !!!!!!! temporary we will use sessions in the future
     private void addOrganizerToRequest(HttpServletRequest request) {
         try {
-            Organizer organizer = organizerRepository.findById(CURRENT_ORGANIZER_ID)
-                    .orElseThrow(() -> new EntityNotFoundException("Organizer not found"));
-            request.setAttribute("organizer", organizer);
+            Organisateur organisateur = organisateurRepository.findOrganisateurById(CURRENT_ORGANIZER_ID)
+                    .orElseThrow(() -> new EntityNotFoundException("Organisateur not found"));
+            request.setAttribute("organizer", organisateur);
         } catch (Exception e) {
             // Handle error, maybe set a default name
             request.setAttribute("organizerName", "Erreur");
@@ -144,8 +155,8 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
 
     private void showDashboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //HttpSession session = request.getSession(); // extracts user session from the server using token in the request.
-        //Organizer organizer = (Organizer) session.getAttribute("loggedInUser");
-        List<EventDto> eventList = eventService.getEventsByOrganizer(CURRENT_ORGANIZER_ID);
+        //Organisateur organisateur = (Organisateur) session.getAttribute("loggedInUser");
+        List<EvenementDTO> eventList = evenementService.getEventsByOrganizer(CURRENT_ORGANIZER_ID);
         request.setAttribute("events", eventList); // here we pass data to our request
         request.getRequestDispatcher("/WEB-INF/views/organizer/dashboard.jsp").forward(request, response); // and then we forward the request to the JSP page.
     }
@@ -156,24 +167,24 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
 
     private void showEditEventForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Long eventId = Long.parseLong(request.getParameter("id")); // here we extract the id of the event
-        EventDto event = eventService.getEventById(eventId); // here we extract the event
+        EvenementDTO event = evenementService.getEventById(eventId); // here we extract the event
         request.setAttribute("event", event);
         request.getRequestDispatcher("/WEB-INF/views/organizer/editEventForm.jsp").forward(request, response);
     }
 
     private void showEventDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Long eventId = Long.parseLong(request.getParameter("id"));
-        EventDto event = eventService.getEventById(eventId);
+        EvenementDTO event = evenementService.getEventById(eventId);
 
         // Put the event data into the request
         request.setAttribute("event", event);
         request.getRequestDispatcher("/WEB-INF/views/organizer/detail.jsp").forward(request, response);
     }
 
-    private EventDto handleCreate(HttpServletRequest request) throws IOException {
+    private EvenementDTO handleCreate(HttpServletRequest request) throws IOException {
        // HttpSession session = request.getSession(); // extracts user session from the server using token in the request.
-       // Organizer organizer = (Organizer) session.getAttribute("loggedInUser");
-        EventDto dto = new EventDto();
+       // Organisateur organisateur = (Organisateur) session.getAttribute("loggedInUser");
+        EvenementDTO dto = new EvenementDTO();
         dto.setTitre(request.getParameter("titre"));
         dto.setDescription(request.getParameter("description"));
         dto.setLieu(request.getParameter("lieu"));
@@ -181,13 +192,35 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         dto.setDateFin(LocalDateTime.parse(request.getParameter("dateFin")));
         dto.setLatitude(parseDouble(request.getParameter("latitude")));
         dto.setLongitude(parseDouble(request.getParameter("longitude")));
-        dto.setStatut(EventStatus.BROUILLON);
-       return eventService.createEvent(dto, CURRENT_ORGANIZER_ID); // creates a new event
+        
+        // Handle capacity
+        String capaciteStr = request.getParameter("capacite");
+        if (capaciteStr != null && !capaciteStr.trim().isEmpty()) {
+            dto.setCapacite(Integer.parseInt(capaciteStr));
+        } else {
+            dto.setCapacite(100); // Default capacity
+        }
+        
+        dto.setStatut(StatutEvenement.BROUILLON);
+        
+        // Handle image upload
+        try {
+            Part imagePart = request.getPart("eventImage");
+            if (imagePart != null && imagePart.getSize() > 0) {
+                String imageUrl = fileUploadService.saveEventImage(imagePart);
+                dto.setImageUrl(imageUrl);
+            }
+        } catch (Exception e) {
+            // Log error but don't fail the event creation
+            System.err.println("Error uploading image: " + e.getMessage());
+        }
+        
+       return evenementService.createEvent(dto, CURRENT_ORGANIZER_ID); // creates a new event
     }
 
-    private EventDto handleUpdate(HttpServletRequest request) throws IOException {
+    private EvenementDTO handleUpdate(HttpServletRequest request) throws IOException {
         Long eventId = Long.parseLong(request.getParameter("id"));
-        EventDto dto = eventService.getEventById(eventId);
+        EvenementDTO dto = evenementService.getEventById(eventId);
         dto.setTitre(request.getParameter("titre"));
         dto.setDescription(request.getParameter("description"));
         dto.setLieu(request.getParameter("lieu"));
@@ -195,6 +228,30 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         dto.setDateFin(LocalDateTime.parse(request.getParameter("dateFin")));
         dto.setLatitude(parseDouble(request.getParameter("latitude")));
         dto.setLongitude(parseDouble(request.getParameter("longitude")));
-        return eventService.updateEvent(dto);
+        
+        // Handle capacity
+        String capaciteStr = request.getParameter("capacite");
+        if (capaciteStr != null && !capaciteStr.trim().isEmpty()) {
+            dto.setCapacite(Integer.parseInt(capaciteStr));
+        }
+        
+        // Handle image upload
+        try {
+            Part imagePart = request.getPart("eventImage");
+            if (imagePart != null && imagePart.getSize() > 0) {
+                // Delete old image if exists
+                if (dto.getImageUrl() != null) {
+                    fileUploadService.deleteEventImage(dto.getImageUrl());
+                }
+                // Save new image
+                String imageUrl = fileUploadService.saveEventImage(imagePart);
+                dto.setImageUrl(imageUrl);
+            }
+        } catch (Exception e) {
+            // Log error but don't fail the event update
+            System.err.println("Error uploading image: " + e.getMessage());
+        }
+        
+        return evenementService.updateEvent(dto);
     }
 }

@@ -9,21 +9,21 @@ public interface EvaluationRepository {
     
     // Basic CRUD operations
     List<Evaluation> findAll();
-    Optional<Evaluation> findById(Integer id);
+    Optional<Evaluation> findById(Long id);
     Evaluation save(Evaluation evaluation);
-    void delete(Integer id);
+    void delete(Long id);
     Evaluation update(Evaluation evaluation);
     
     // Event-related queries
-    List<Evaluation> findByEvenement(Integer evenementId);
-    List<Evaluation> findByEvenementOrderByDate(Integer evenementId);
-    Optional<Evaluation> findByParticipantAndEvenement(Long participantId, Integer evenementId);
+    List<Evaluation> findByEvenement(Long evenementId);
+    List<Evaluation> findByEvenementOrderByDate(Long evenementId);
+    Optional<Evaluation> findByParticipantAndEvenement(Long participantId, Long evenementId);
     
     // Participant-related queries
     List<Evaluation> findByParticipant(Long participantId);
     
     // Statistics queries
-    Double getMoyenneNoteByEvenement(Integer evenementId);
-    Long countByEvenement(Integer evenementId);
-    Long countByNote(Integer evenementId, Integer note);
+    Double getMoyenneNoteByEvenement(Long evenementId);
+    Long countByEvenement(Long evenementId);
+    Long countByNote(Long evenementId, Long note);
 }

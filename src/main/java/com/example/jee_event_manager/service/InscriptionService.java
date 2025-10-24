@@ -139,84 +139,72 @@ public class InscriptionService {
         inscriptionRepository.cancelInscription(inscriptionId);
     }
     
+    // === ADMINISTRATION METHODS (COMMENTED OUT) ===
+    
+    /*
     /**
      * Supprimer définitivement une inscription
      */
+    /*
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void delete(Integer id) {
-        // Démarrer une transaction manuelle pour RESOURCE_LOCAL
-        em.getTransaction().begin();
-        
-        try {
-            Inscription inscription = inscriptionDAO.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Inscription introuvable"));
-            inscriptionDAO.delete(inscription);
-            
-            // Committer la transaction
-            em.getTransaction().commit();
-            
-        } catch (Exception e) {
-            // Rollback en cas d'erreur
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
-        }
+    public void delete(Long id) {
+        Inscription inscription = inscriptionRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Inscription introuvable"));
+        inscriptionRepository.delete(id);
     }
+    */
     
     /**
      * Obtenir le statut d'inscription d'un participant pour un événement
      */
-    public Optional<StatutInscription> getStatutInscription(Long participantId, Integer evenementId) {
-        Optional<Inscription> inscription = inscriptionDAO.findByParticipantAndEvenement(participantId, evenementId);
+    public Optional<StatutInscription> getStatutInscription(Long participantId, Long evenementId) {
+        Optional<Inscription> inscription = inscriptionRepository.findByParticipantAndEvenement(participantId, evenementId);
         return inscription.map(Inscription::getStatut);
     }
     
     /**
      * Vérifier si un participant est inscrit à un événement
      */
-    public boolean isParticipantInscrit(Long participantId, Integer evenementId) {
-        return inscriptionDAO.isParticipantInscrit(participantId, evenementId);
+    public boolean isParticipantInscrit(Long participantId, Long evenementId) {
+        return inscriptionRepository.isParticipantInscrit(participantId, evenementId);
     }
     
     /**
      * Compter le nombre d'inscrits pour un événement
      */
-    public Long countInscritsEvenement(Integer evenementId) {
-        return inscriptionDAO.countByEvenement(evenementId);
+    public Long countInscritsEvenement(Long evenementId) {
+        return inscriptionRepository.countByEvenement(evenementId);
     }
     
     /**
      * Compter le nombre de places réservées pour un événement
      */
-    public Long countPlacesReservees(Integer evenementId) {
-        return inscriptionDAO.countPlacesReservees(evenementId);
+    public Long countPlacesReservees(Long evenementId) {
+        return inscriptionRepository.countPlacesReservees(evenementId);
     }
     
     /**
      * Calculer la capacité disponible pour un événement
      */
-    public Integer getCapaciteDisponible(Integer evenementId) {
-        Evenement evenement = em.find(Evenement.class, evenementId);
-        if (evenement == null) {
-            throw new IllegalArgumentException("Événement introuvable");
-        }
+    public Integer getCapaciteDisponible(Long evenementId) {
+        Evenement evenement = evenementRepository.findById(evenementId)
+                .orElseThrow(() -> new IllegalArgumentException("Événement introuvable"));
         
-        Long placesReservees = inscriptionDAO.countPlacesReservees(evenementId);
+        Long placesReservees = inscriptionRepository.countPlacesReservees(evenementId);
         return evenement.getCapacite() - placesReservees.intValue();
     }
     
     /**
      * Récupérer toutes les inscriptions d'un événement
      */
-    public List<Inscription> getInscriptionsEvenement(Integer evenementId) {
-        return inscriptionDAO.findByEvenement(evenementId);
+    public List<Inscription> getInscriptionsEvenement(Long evenementId) {
+        return inscriptionRepository.findByEvenement(evenementId);
     }
     
     /**
      * Récupérer les inscriptions d'un événement par statut
      */
-    public List<Inscription> getInscriptionsEvenementByStatut(Integer evenementId, StatutInscription statut) {
-        return inscriptionDAO.findByEvenementAndStatut(evenementId, statut);
+    public List<Inscription> getInscriptionsEvenementByStatut(Long evenementId, StatutInscription statut) {
+        return inscriptionRepository.findByEvenementAndStatut(evenementId, statut);
     }
 }

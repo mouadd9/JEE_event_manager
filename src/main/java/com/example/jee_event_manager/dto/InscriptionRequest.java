@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 public class InscriptionRequest {
     
     @NotNull(message = "L'identifiant de l'événement est obligatoire")
-    private Integer evenementId;
+    private Long evenementId;
     
     @NotBlank(message = "Le type de billet est obligatoire")
     @Pattern(regexp = "STANDARD|VIP|PREMIUM", message = "Type de billet invalide (STANDARD, VIP ou PREMIUM)")
@@ -19,18 +19,18 @@ public class InscriptionRequest {
     // Constructeurs
     public InscriptionRequest() {}
     
-    public InscriptionRequest(Integer evenementId, String typeBillet, Integer quantite) {
+    public InscriptionRequest(Long evenementId, String typeBillet, Integer quantite) {
         this.evenementId = evenementId;
         this.typeBillet = typeBillet;
         this.quantite = quantite;
     }
     
     // Getters et Setters
-    public Integer getEvenementId() {
+    public Long getEvenementId() {
         return evenementId;
     }
     
-    public void setEvenementId(Integer evenementId) {
+    public void setEvenementId(Long evenementId) {
         this.evenementId = evenementId;
     }
     

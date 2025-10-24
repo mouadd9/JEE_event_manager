@@ -24,7 +24,7 @@ public class InscriptionRepositoryImpl implements InscriptionRepository {
     }
     
     @Override
-    public Optional<Inscription> findById(Integer id) {
+    public Optional<Inscription> findById(Long id) {
         Inscription inscription = em.find(Inscription.class, id);
         return Optional.ofNullable(inscription);
     }
@@ -40,7 +40,7 @@ public class InscriptionRepositoryImpl implements InscriptionRepository {
     }
     
     @Override
-    public void delete(Integer id) {
+    public void delete(Long id) {
         Inscription inscription = em.find(Inscription.class, id);
         if (inscription != null) {
             em.remove(inscription);
@@ -74,7 +74,7 @@ public class InscriptionRepositoryImpl implements InscriptionRepository {
     }
     
     @Override
-    public Optional<Inscription> findByParticipantAndEvenement(Long participantId, Integer evenementId) {
+    public Optional<Inscription> findByParticipantAndEvenement(Long participantId, Long evenementId) {
         TypedQuery<Inscription> query = em.createQuery(
             "SELECT i FROM Inscription i WHERE i.participant.id = :participantId AND i.evenement.id = :evenementId",
             Inscription.class
@@ -89,7 +89,7 @@ public class InscriptionRepositoryImpl implements InscriptionRepository {
     }
     
     @Override
-    public boolean isParticipantInscrit(Long participantId, Integer evenementId) {
+    public boolean isParticipantInscrit(Long participantId, Long evenementId) {
         TypedQuery<Long> query = em.createQuery(
             "SELECT COUNT(i) FROM Inscription i WHERE i.participant.id = :participantId AND i.evenement.id = :evenementId",
             Long.class
@@ -100,7 +100,7 @@ public class InscriptionRepositoryImpl implements InscriptionRepository {
     }
     
     @Override
-    public boolean isOwner(Integer inscriptionId, Long participantId) {
+    public boolean isOwner(Long inscriptionId, Long participantId) {
         TypedQuery<Long> query = em.createQuery(
             "SELECT COUNT(i) FROM Inscription i WHERE i.id = :inscriptionId AND i.participant.id = :participantId",
             Long.class
@@ -111,7 +111,7 @@ public class InscriptionRepositoryImpl implements InscriptionRepository {
     }
     
     @Override
-    public List<Inscription> findByEvenement(Integer evenementId) {
+    public List<Inscription> findByEvenement(Long evenementId) {
         TypedQuery<Inscription> query = em.createQuery(
             "SELECT i FROM Inscription i WHERE i.evenement.id = :evenementId ORDER BY i.dateInscription DESC",
             Inscription.class
@@ -121,7 +121,7 @@ public class InscriptionRepositoryImpl implements InscriptionRepository {
     }
     
     @Override
-    public List<Inscription> findByEvenementAndStatut(Integer evenementId, StatutInscription statut) {
+    public List<Inscription> findByEvenementAndStatut(Long evenementId, StatutInscription statut) {
         TypedQuery<Inscription> query = em.createQuery(
             "SELECT i FROM Inscription i WHERE i.evenement.id = :evenementId AND i.statut = :statut ORDER BY i.dateInscription DESC",
             Inscription.class
@@ -132,7 +132,7 @@ public class InscriptionRepositoryImpl implements InscriptionRepository {
     }
     
     @Override
-    public Long countByEvenement(Integer evenementId) {
+    public Long countByEvenement(Long evenementId) {
         TypedQuery<Long> query = em.createQuery(
             "SELECT COUNT(i) FROM Inscription i WHERE i.evenement.id = :evenementId",
             Long.class
@@ -142,7 +142,7 @@ public class InscriptionRepositoryImpl implements InscriptionRepository {
     }
     
     @Override
-    public Long countPlacesReservees(Integer evenementId) {
+    public Long countPlacesReservees(Long evenementId) {
         TypedQuery<Long> query = em.createQuery(
             "SELECT COALESCE(SUM(i.quantite), 0) FROM Inscription i WHERE i.evenement.id = :evenementId AND i.statut IN ('EN_ATTENTE', 'ACCEPTEE')",
             Long.class
@@ -152,7 +152,7 @@ public class InscriptionRepositoryImpl implements InscriptionRepository {
     }
     
     @Override
-    public void cancelInscription(Integer inscriptionId) {
+    public void cancelInscription(Long inscriptionId) {
         TypedQuery<Inscription> query = em.createQuery(
             "SELECT i FROM Inscription i WHERE i.id = :inscriptionId",
             Inscription.class
@@ -164,7 +164,7 @@ public class InscriptionRepositoryImpl implements InscriptionRepository {
     }
     
     @Override
-    public Optional<StatutInscription> getStatutInscription(Long participantId, Integer evenementId) {
+    public Optional<StatutInscription> getStatutInscription(Long participantId, Long evenementId) {
         Optional<Inscription> inscription = findByParticipantAndEvenement(participantId, evenementId);
         return inscription.map(Inscription::getStatut);
     }

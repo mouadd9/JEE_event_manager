@@ -1,0 +1,254 @@
+/**
+ * Organizer Theme - Matches Participant Theme
+ * Purple theme with Bootstrap 5 styling
+ */
+
+/* Import participant theme variables */
+:root {
+    --primary-color: #a855f7;
+    --primary-hover: #9333ea;
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+    --bg-light: #f9fafb;
+    --border-color: #e5e7eb;
+}
+
+/* Organizer-specific overrides */
+.organizer-navbar {
+    background: #fff !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 1rem 0;
+}
+
+.organizer-navbar .navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color) !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.organizer-navbar .navbar-brand i {
+    font-size: 1.8rem;
+}
+
+.organizer-navbar .nav-link {
+    color: var(--text-dark) !important;
+    font-weight: 500;
+    margin: 0 0.8rem;
+    transition: color 0.3s;
+}
+
+.organizer-navbar .nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+.organizer-navbar .nav-link.active {
+    color: var(--primary-color) !important;
+    font-weight: 600;
+}
+
+/* Organizer welcome banner */
+.organizer-welcome-banner {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    color: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Organizer stat cards */
+.organizer-stat-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+}
+
+.organizer-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.organizer-stat-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-right: 1rem;
+}
+
+.organizer-stat-icon.primary {
+    background-color: rgba(168, 85, 247, 0.1);
+    color: var(--primary-color);
+}
+
+.organizer-stat-icon.success {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.organizer-stat-icon.warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.organizer-stat-icon.info {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+/* Event cards */
+.organizer-event-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    overflow: hidden;
+    border-left: 5px solid;
+}
+
+.organizer-event-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    text-decoration: none;
+    color: inherit;
+}
+
+.organizer-event-card.status-publie {
+    border-left-color: #22c55e;
+}
+
+.organizer-event-card.status-brouillon {
+    border-left-color: #f59e0b;
+}
+
+.organizer-event-card.status-annule {
+    border-left-color: #ef4444;
+}
+
+.organizer-event-card.status-cache {
+    border-left-color: #6b7280;
+}
+
+/* Status badges */
+.organizer-status-badge {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid;
+}
+
+.organizer-status-badge.status-publie {
+    color: #22c55e;
+    background-color: rgba(34, 197, 94, 0.1);
+    border-color: #22c55e;
+}
+
+.organizer-status-badge.status-brouillon {
+    color: #f59e0b;
+    background-color: rgba(245, 158, 11, 0.1);
+    border-color: #f59e0b;
+}
+
+.organizer-status-badge.status-annule {
+    color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
+
+.organizer-status-badge.status-cache {
+    color: #6b7280;
+    background-color: rgba(107, 114, 128, 0.1);
+    border-color: #6b7280;
+}
+
+/* Participant info cards */
+.participant-info-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.participant-info-card:hover {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+}
+
+.participant-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* Export buttons */
+.export-button {
+    border-radius: 0.5rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s;
+}
+
+.export-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Reply sections */
+.reply-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.reply-form {
+    background: var(--bg-light);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+.reply-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    border-left: 3px solid var(--primary-color);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .organizer-welcome-banner {
+        padding: 1.5rem;
+    }
+    
+    .organizer-stat-card {
+        padding: 1rem;
+    }
+    
+    .organizer-event-card {
+        margin-bottom: 1rem;
+    }
+}

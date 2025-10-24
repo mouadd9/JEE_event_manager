@@ -9,14 +9,14 @@ import java.time.format.DateTimeFormatter;
  */
 public class InscriptionDTO {
     
-    private Integer inscriptionId;
+    private Long inscriptionId;
     private LocalDateTime dateInscription;
     private StatutInscription statut;
     private String typeBillet;
     private Integer quantite;
     
     // Détails de l'événement
-    private Integer evenementId;
+    private Long evenementId;
     private String evenementTitre;
     private String evenementDescription;
     private LocalDateTime evenementDateDebut;
@@ -33,11 +33,11 @@ public class InscriptionDTO {
     public InscriptionDTO() {}
     
     // Getters et Setters
-    public Integer getInscriptionId() {
+    public Long getInscriptionId() {
         return inscriptionId;
     }
     
-    public void setInscriptionId(Integer inscriptionId) {
+    public void setInscriptionId(Long inscriptionId) {
         this.inscriptionId = inscriptionId;
     }
     
@@ -76,11 +76,11 @@ public class InscriptionDTO {
         this.quantite = quantite;
     }
     
-    public Integer getEvenementId() {
+    public Long getEvenementId() {
         return evenementId;
     }
     
-    public void setEvenementId(Integer evenementId) {
+    public void setEvenementId(Long evenementId) {
         this.evenementId = evenementId;
     }
     

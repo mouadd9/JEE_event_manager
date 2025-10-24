@@ -23,7 +23,7 @@ public class CategorieRepositoryImpl implements CategorieRepository {
     }
     
     @Override
-    public Optional<Categorie> findById(Integer id) {
+    public Optional<Categorie> findById(Long id) {
         Categorie categorie = em.find(Categorie.class, id);
         return Optional.ofNullable(categorie);
     }
@@ -39,7 +39,7 @@ public class CategorieRepositoryImpl implements CategorieRepository {
     }
     
     @Override
-    public void delete(Integer id) {
+    public void delete(Long id) {
         Categorie categorie = em.find(Categorie.class, id);
         if (categorie != null) {
             em.remove(categorie);

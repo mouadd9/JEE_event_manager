@@ -9,9 +9,9 @@ public interface CategorieRepository {
     
     // Basic CRUD operations
     List<Categorie> findAll();
-    Optional<Categorie> findById(Integer id);
+    Optional<Categorie> findById(Long id);
     Categorie save(Categorie categorie);
-    void delete(Integer id);
+    void delete(Long id);
     Categorie update(Categorie categorie);
     
     // Search queries

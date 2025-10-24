@@ -22,7 +22,7 @@ public class Inscription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "inscription_id")
-    private Integer id;
+    private Long id;
     
     @NotNull(message = "La date d'inscription est obligatoire")
     @Column(name = "date_inscription", nullable = false)

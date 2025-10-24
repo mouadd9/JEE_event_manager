@@ -8,7 +8,7 @@ import jakarta.validation.constraints.*;
 public class EvaluationRequest {
     
     @NotNull(message = "L'identifiant de l'événement est obligatoire")
-    private Integer evenementId;
+    private Long evenementId;
     
     @NotNull(message = "La note est obligatoire")
     @Min(value = 0, message = "La note doit être entre 0 et 5")
@@ -21,18 +21,18 @@ public class EvaluationRequest {
     // Constructeurs
     public EvaluationRequest() {}
     
-    public EvaluationRequest(Integer evenementId, Integer note, String texte) {
+    public EvaluationRequest(Long evenementId, Integer note, String texte) {
         this.evenementId = evenementId;
         this.note = note;
         this.texte = texte;
     }
     
     // Getters et Setters
-    public Integer getEvenementId() {
+    public Long getEvenementId() {
         return evenementId;
     }
     
-    public void setEvenementId(Integer evenementId) {
+    public void setEvenementId(Long evenementId) {
         this.evenementId = evenementId;
     }
     

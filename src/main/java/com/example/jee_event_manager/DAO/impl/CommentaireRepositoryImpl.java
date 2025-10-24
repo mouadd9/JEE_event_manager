@@ -23,7 +23,7 @@ public class CommentaireRepositoryImpl implements CommentaireRepository {
     }
     
     @Override
-    public Optional<Commentaire> findById(Integer id) {
+    public Optional<Commentaire> findById(Long id) {
         Commentaire commentaire = em.find(Commentaire.class, id);
         return Optional.ofNullable(commentaire);
     }
@@ -39,7 +39,7 @@ public class CommentaireRepositoryImpl implements CommentaireRepository {
     }
     
     @Override
-    public void delete(Integer id) {
+    public void delete(Long id) {
         Commentaire commentaire = em.find(Commentaire.class, id);
         if (commentaire != null) {
             em.remove(commentaire);
@@ -52,7 +52,7 @@ public class CommentaireRepositoryImpl implements CommentaireRepository {
     }
     
     @Override
-    public List<Commentaire> findByEvenement(Integer evenementId) {
+    public List<Commentaire> findByEvenement(Long evenementId) {
         TypedQuery<Commentaire> query = em.createQuery(
             "SELECT c FROM Commentaire c WHERE c.evenement.id = :evenementId ORDER BY c.horodatage DESC",
             Commentaire.class
@@ -62,7 +62,7 @@ public class CommentaireRepositoryImpl implements CommentaireRepository {
     }
     
     @Override
-    public List<Commentaire> findByEvenementOrderByDate(Integer evenementId) {
+    public List<Commentaire> findByEvenementOrderByDate(Long evenementId) {
         TypedQuery<Commentaire> query = em.createQuery(
             "SELECT c FROM Commentaire c WHERE c.evenement.id = :evenementId ORDER BY c.horodatage ASC",
             Commentaire.class
@@ -82,7 +82,7 @@ public class CommentaireRepositoryImpl implements CommentaireRepository {
     }
     
     @Override
-    public List<Commentaire> findByParticipantAndEvenement(Long participantId, Integer evenementId) {
+    public List<Commentaire> findByParticipantAndEvenement(Long participantId, Long evenementId) {
         TypedQuery<Commentaire> query = em.createQuery(
             "SELECT c FROM Commentaire c WHERE c.participant.id = :participantId AND c.evenement.id = :evenementId ORDER BY c.horodatage DESC",
             Commentaire.class

@@ -1,29 +1,41 @@
 package com.example.jee_event_manager.service;
 
-import com.example.jee_event_manager.DAO.CategorieDAO;
+import com.example.jee_event_manager.DAO.CategorieRepository;
 import com.example.jee_event_manager.model.Categorie;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 
-@ApplicationScoped
+@Stateless
 public class CategorieService {
 
     @Inject
-    private CategorieDAO categorieDAO;
+    private CategorieRepository categorieRepository;
 
     public List<Categorie> findAll() {
-        return categorieDAO.findAll();
+        return categorieRepository.findAll();
     }
 
-    public Categorie findById(Long id) {
-        return categorieDAO.findById(id);
+    public Optional<Categorie> findById(Long id) {
+        return categorieRepository.findById(id);
     }
 
+    // === ADMINISTRATION METHODS (COMMENTED OUT) ===
+    
+    /*
     public Categorie save(Categorie categorie) {
-        return categorieDAO.save(categorie);
+        return categorieRepository.save(categorie);
     }
+    */
+    
+    /*
     public void delete(Long id) {
-        categorieDAO.delete(id);
+        categorieRepository.delete(id);
+    }
+    */
+    
+    public Optional<Categorie> findByNom(String nom) {
+        return categorieRepository.findByNom(nom);
     }
 }

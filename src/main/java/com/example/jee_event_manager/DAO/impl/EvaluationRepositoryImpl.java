@@ -23,7 +23,7 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
     }
     
     @Override
-    public Optional<Evaluation> findById(Integer id) {
+    public Optional<Evaluation> findById(Long id) {
         Evaluation evaluation = em.find(Evaluation.class, id);
         return Optional.ofNullable(evaluation);
     }
@@ -39,7 +39,7 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
     }
     
     @Override
-    public void delete(Integer id) {
+    public void delete(Long id) {
         Evaluation evaluation = em.find(Evaluation.class, id);
         if (evaluation != null) {
             em.remove(evaluation);
@@ -52,7 +52,7 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
     }
     
     @Override
-    public List<Evaluation> findByEvenement(Integer evenementId) {
+    public List<Evaluation> findByEvenement(Long evenementId) {
         TypedQuery<Evaluation> query = em.createQuery(
             "SELECT e FROM Evaluation e WHERE e.evenement.id = :evenementId ORDER BY e.horodatage DESC",
             Evaluation.class
@@ -62,7 +62,7 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
     }
     
     @Override
-    public List<Evaluation> findByEvenementOrderByDate(Integer evenementId) {
+    public List<Evaluation> findByEvenementOrderByDate(Long evenementId) {
         TypedQuery<Evaluation> query = em.createQuery(
             "SELECT e FROM Evaluation e WHERE e.evenement.id = :evenementId ORDER BY e.horodatage ASC",
             Evaluation.class
@@ -72,7 +72,7 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
     }
     
     @Override
-    public Optional<Evaluation> findByParticipantAndEvenement(Long participantId, Integer evenementId) {
+    public Optional<Evaluation> findByParticipantAndEvenement(Long participantId, Long evenementId) {
         TypedQuery<Evaluation> query = em.createQuery(
             "SELECT e FROM Evaluation e WHERE e.participant.id = :participantId AND e.evenement.id = :evenementId",
             Evaluation.class
@@ -97,7 +97,7 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
     }
     
     @Override
-    public Double getMoyenneNoteByEvenement(Integer evenementId) {
+    public Double getMoyenneNoteByEvenement(Long evenementId) {
         TypedQuery<Double> query = em.createQuery(
             "SELECT AVG(e.note) FROM Evaluation e WHERE e.evenement.id = :evenementId",
             Double.class
@@ -108,7 +108,7 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
     }
     
     @Override
-    public Long countByEvenement(Integer evenementId) {
+    public Long countByEvenement(Long evenementId) {
         TypedQuery<Long> query = em.createQuery(
             "SELECT COUNT(e) FROM Evaluation e WHERE e.evenement.id = :evenementId",
             Long.class
@@ -118,7 +118,7 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
     }
     
     @Override
-    public Long countByNote(Integer evenementId, Integer note) {
+    public Long countByNote(Long evenementId, Long note) {
         TypedQuery<Long> query = em.createQuery(
             "SELECT COUNT(e) FROM Evaluation e WHERE e.evenement.id = :evenementId AND e.note = :note",
             Long.class

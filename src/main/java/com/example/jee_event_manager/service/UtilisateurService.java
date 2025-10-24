@@ -1,31 +1,42 @@
 package com.example.jee_event_manager.service;
 
+import com.example.jee_event_manager.DAO.UtilisateurRepository;
+import com.example.jee_event_manager.DAO.ParticipantRepository;
+import com.example.jee_event_manager.DAO.OrganisateurRepository;
 import com.example.jee_event_manager.model.Utilisateur;
 import com.example.jee_event_manager.model.Participant;
 import com.example.jee_event_manager.model.Organisateur;
 import com.example.jee_event_manager.model.UserType;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.TypedQuery;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Optional;
 
-@ApplicationScoped
+@Stateless
 public class UtilisateurService {
 
     @Inject
-    private EntityManager em;
+    private UtilisateurRepository utilisateurRepository;
+    
+    @Inject
+    private ParticipantRepository participantRepository;
+    
+    @Inject
+    private OrganisateurRepository organisateurRepository;
 
+    // === AUTHENTICATION METHODS (COMMENTED OUT) ===
+    
+    /*
     /**
      * Crée un nouvel utilisateur (Participant ou Organisateur)
      */
+    /*
     public Utilisateur createUser(String nom, String email, String motDePasse, UserType userType) {
         // Vérifier si l'email existe déjà
-        if (findByEmail(email) != null) {
+        if (findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Un compte avec cet email existe déjà");
         }
 
@@ -42,31 +53,28 @@ public class UtilisateurService {
         utilisateur.setMotDePasseHash(hashPassword(motDePasse));
         utilisateur.setUserType(userType);
 
-        // Gérer la transaction manuellement
-        em.getTransaction().begin();
-        try {
-            em.persist(utilisateur);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
+        // Sauvegarder avec le repository approprié
+        if (userType == UserType.PARTICIPANT) {
+            return participantRepository.saveParticipant((Participant) utilisateur);
+        } else {
+            return organisateurRepository.saveOrganisateur((Organisateur) utilisateur);
         }
-        
-        return utilisateur;
     }
+    */
 
+    /*
     /**
      * Authentifie un utilisateur
      */
+    /*
     public Utilisateur authenticate(String email, String motDePasse) {
-        Utilisateur utilisateur = findByEmail(email);
+        Optional<Utilisateur> utilisateurOpt = findByEmail(email);
         
-        if (utilisateur == null) {
+        if (utilisateurOpt.isEmpty()) {
             return null;
         }
 
+        Utilisateur utilisateur = utilisateurOpt.get();
         String hashedPassword = hashPassword(motDePasse);
         if (utilisateur.getMotDePasseHash().equals(hashedPassword)) {
             return utilisateur;
@@ -74,130 +82,97 @@ public class UtilisateurService {
 
         return null;
     }
+    */
 
     /**
      * Trouve un utilisateur par email
      */
-    public Utilisateur findByEmail(String email) {
-        try {
-            TypedQuery<Utilisateur> query = em.createQuery(
-                "SELECT u FROM Utilisateur u WHERE u.email = :email", 
-                Utilisateur.class
-            );
-            query.setParameter("email", email);
-            return query.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
+    public Optional<Utilisateur> findByEmail(String email) {
+        return utilisateurRepository.findByEmail(email);
     }
 
     /**
      * Trouve un utilisateur par ID
      */
-    public Utilisateur findById(Long id) {
-        return em.find(Utilisateur.class, id);
+    public Optional<Utilisateur> findById(Long id) {
+        return utilisateurRepository.findById(id);
     }
 
     /**
      * Récupère tous les utilisateurs
      */
     public List<Utilisateur> findAll() {
-        TypedQuery<Utilisateur> query = em.createQuery(
-            "SELECT u FROM Utilisateur u", 
-            Utilisateur.class
-        );
-        return query.getResultList();
+        return utilisateurRepository.findAll();
     }
 
     /**
      * Récupère tous les participants
      */
     public List<Participant> findAllParticipants() {
-        TypedQuery<Participant> query = em.createQuery(
-            "SELECT p FROM Participant p", 
-            Participant.class
-        );
-        return query.getResultList();
+        return participantRepository.findAllParticipants();
     }
 
     /**
      * Récupère tous les organisateurs
      */
     public List<Organisateur> findAllOrganisateurs() {
-        TypedQuery<Organisateur> query = em.createQuery(
-            "SELECT o FROM Organisateur o", 
-            Organisateur.class
-        );
-        return query.getResultList();
+        return organisateurRepository.findAllOrganisateurs();
     }
 
+    // === ADMINISTRATION METHODS (COMMENTED OUT) ===
+    
+    /*
     /**
      * Met à jour un utilisateur
      */
+    /*
     public Utilisateur update(Utilisateur utilisateur) {
-        em.getTransaction().begin();
-        try {
-            Utilisateur updated = em.merge(utilisateur);
-            em.getTransaction().commit();
-            return updated;
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
+        if (utilisateur instanceof Participant) {
+            return participantRepository.update(utilisateur);
+        } else if (utilisateur instanceof Organisateur) {
+            return organisateurRepository.update(utilisateur);
+        } else {
+            return utilisateurRepository.save(utilisateur);
         }
     }
+    */
 
+    /*
     /**
      * Supprime un utilisateur
      */
+    /*
     public void delete(Long id) {
-        em.getTransaction().begin();
-        try {
-            Utilisateur utilisateur = findById(id);
-            if (utilisateur != null) {
-                em.remove(utilisateur);
-            }
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
-        }
+        utilisateurRepository.delete(id);
     }
+    */
 
+    /*
     /**
      * Change le mot de passe d'un utilisateur
      */
+    /*
     public void changePassword(Long userId, String ancienMotDePasse, String nouveauMotDePasse) {
-        Utilisateur utilisateur = findById(userId);
-        
-        if (utilisateur == null) {
-            throw new IllegalArgumentException("Utilisateur introuvable");
-        }
+        Utilisateur utilisateur = findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
 
         String hashedOldPassword = hashPassword(ancienMotDePasse);
         if (!utilisateur.getMotDePasseHash().equals(hashedOldPassword)) {
             throw new IllegalArgumentException("Ancien mot de passe incorrect");
         }
 
-        em.getTransaction().begin();
-        try {
-            utilisateur.setMotDePasseHash(hashPassword(nouveauMotDePasse));
-            em.merge(utilisateur);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
-        }
+        utilisateur.setMotDePasseHash(hashPassword(nouveauMotDePasse));
+        update(utilisateur);
     }
+    */
 
+    // === PASSWORD & EMAIL UTILITY METHODS (COMMENTED OUT) ===
+    
+    /*
     /**
      * Hash un mot de passe avec SHA-256
      */
+    /*
     private String hashPassword(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -213,49 +188,50 @@ public class UtilisateurService {
             throw new RuntimeException("Erreur lors du hashage du mot de passe", e);
         }
     }
+    */
 
+    /*
     /**
      * Vérifie si un email est disponible
      */
+    /*
     public boolean isEmailAvailable(String email) {
-        return findByEmail(email) == null;
+        return findByEmail(email).isEmpty();
     }
+    */
     
+    /*
     /**
      * Vérifie si un email existe déjà
      */
+    /*
     public boolean emailExists(String email) {
-        return findByEmail(email) != null;
+        return findByEmail(email).isPresent();
     }
+    */
     
+    /*
     /**
      * Vérifie un mot de passe contre son hash
      */
+    /*
     public boolean verifyPassword(String plainPassword, String hashedPassword) {
         String hashedInput = hashPassword(plainPassword);
         return hashedInput.equals(hashedPassword);
     }
+    */
     
+    /*
     /**
      * Change le mot de passe d'un utilisateur (surcharge sans vérification ancien mot de passe)
      */
+    /*
     public void changePassword(Long userId, String nouveauMotDePasse) {
-        Utilisateur utilisateur = findById(userId);
+        Utilisateur utilisateur = findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
         
-        if (utilisateur == null) {
-            throw new IllegalArgumentException("Utilisateur introuvable");
-        }
-        
-        em.getTransaction().begin();
-        try {
-            utilisateur.setMotDePasseHash(hashPassword(nouveauMotDePasse));
-            em.merge(utilisateur);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
-        }
+        utilisateur.setMotDePasseHash(hashPassword(nouveauMotDePasse));
+        update(utilisateur);
     }
+    */
 }

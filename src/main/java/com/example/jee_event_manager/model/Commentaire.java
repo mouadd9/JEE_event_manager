@@ -18,7 +18,7 @@ public class Commentaire {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "commentaire_id")
-    private Integer id;
+    private Long id;
     
     @NotBlank(message = "Le texte du commentaire ne peut pas être vide")
     @Size(max = 1000, message = "Le commentaire ne peut pas dépasser 1000 caractères")

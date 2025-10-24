@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class EvenementDetailDTO {
     
-    private Integer evenementId;
+    private Long evenementId;
     private String titre;
     private String description;
     private LocalDateTime dateDebut;
@@ -48,11 +48,11 @@ public class EvenementDetailDTO {
     public EvenementDetailDTO() {}
     
     // Getters et Setters
-    public Integer getEvenementId() {
+    public Long getEvenementId() {
         return evenementId;
     }
     
-    public void setEvenementId(Integer evenementId) {
+    public void setEvenementId(Long evenementId) {
         this.evenementId = evenementId;
     }
     

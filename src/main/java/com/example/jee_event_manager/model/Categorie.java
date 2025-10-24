@@ -22,7 +22,7 @@ public class Categorie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "categorie_id")
-    private Integer id;
+    private Long id;
     
     @NotBlank(message = "Le nom de la catégorie est obligatoire")
     @Column(nullable = false, unique = true)

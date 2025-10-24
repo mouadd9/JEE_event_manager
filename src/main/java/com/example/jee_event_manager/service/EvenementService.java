@@ -2,8 +2,8 @@ package com.example.jee_event_manager.service;
 
 import com.example.jee_event_manager.DAO.EvenementRepository;
 import com.example.jee_event_manager.DAO.OrganisateurRepository;
-import com.example.jee_event_manager.dto.EventDto;
-import com.example.jee_event_manager.mappers.EventMapper;
+import com.example.jee_event_manager.dto.EvenementDTO;
+import com.example.jee_event_manager.mappers.EvenementMapper;
 import com.example.jee_event_manager.model.Evenement;
 import com.example.jee_event_manager.model.Organisateur;
 import com.example.jee_event_manager.model.StatutEvenement;
@@ -30,26 +30,26 @@ public class EvenementService {
     /**
      * Créer un nouvel événement
      */
-    public EventDto createEvent(EventDto eventDto, Long organisateurId) {
+    public EvenementDTO createEvent(EvenementDTO eventDto, Long organisateurId) {
         Organisateur organisateur = organisateurRepository.findOrganisateurById(organisateurId)
                 .orElseThrow(() -> new EntityNotFoundException("Organisateur avec ID " + organisateurId + " introuvable"));
 
-        Evenement evenement = EventMapper.toEntity(eventDto);
+        Evenement evenement = EvenementMapper.toEntity(eventDto);
         evenement.setOrganisateur(organisateur);
         Evenement saved = evenementRepository.save(evenement);
-        return EventMapper.toDto(saved);
+        return EvenementMapper.toDto(saved);
     }
 
     /**
      * Mettre à jour un événement existant
      */
-    public EventDto updateEvent(EventDto eventDto) {
+    public EvenementDTO updateEvent(EvenementDTO eventDto) {
         Evenement existing = evenementRepository.findById(eventDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Événement avec ID " + eventDto.getId() + " introuvable"));
         
-        EventMapper.updateEntityFromDto(existing, eventDto);
+        EvenementMapper.updateEntityFromDto(existing, eventDto);
         Evenement updated = evenementRepository.update(existing);
-        return EventMapper.toDto(updated);
+        return EvenementMapper.toDto(updated);
     }
 
     /**
@@ -82,30 +82,35 @@ public class EvenementService {
         evenementRepository.update(evenement);
     }
 
+    // === ADMINISTRATION METHODS (COMMENTED OUT) ===
+    
+    /*
     /**
      * Supprimer un événement
      */
+    /*
     public void deleteEvent(Long eventId) {
         Evenement evenement = evenementRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Événement avec ID " + eventId + " introuvable"));
         evenementRepository.delete(evenement.getId());
     }
+    */
 
     /**
      * Récupérer un événement par son ID
      */
-    public EventDto getEventById(Long eventId) {
+    public EvenementDTO getEventById(Long eventId) {
         Evenement evenement = evenementRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Événement avec ID " + eventId + " introuvable"));
-        return EventMapper.toDto(evenement);
+        return EvenementMapper.toDto(evenement);
     }
 
     /**
      * Récupérer tous les événements d'un organisateur
      */
-    public List<EventDto> getEventsByOrganizer(Long organisateurId) {
+    public List<EvenementDTO> getEventsByOrganizer(Long organisateurId) {
         return evenementRepository.findByOrganisateurId(organisateurId).stream()
-                .map(EventMapper::toDto)
+                .map(EvenementMapper::toDto)
                 .toList();
     }
     
@@ -135,7 +140,7 @@ public class EvenementService {
             }
             
             // Utiliser la méthode du repository pour la recherche complexe
-            return evenementRepository.findEvenementsPublies(date, lieu, categorieId, search);
+            return evenementRepository.getEvenementsPublies(date, lieu, categorie, search);
             
         } catch (Exception e) {
             System.err.println("=== ERREUR lors de la récupération des événements:");
@@ -160,25 +165,33 @@ public class EvenementService {
         return evenementRepository.findByStatut(statut);
     }
     
+    // === ADMINISTRATION METHODS (COMMENTED OUT) ===
+    
+    /*
     /**
      * Sauvegarder un événement (validation incluse)
      */
+    /*
     public Evenement save(Evenement evenement) {
         if (evenement.validate()) {
             return evenementRepository.save(evenement);
         }
         throw new IllegalArgumentException("Événement invalide");
     }
+    */
     
+    /*
     /**
      * Supprimer un événement par ID
      */
+    /*
     public void delete(Long id) {
         Optional<Evenement> evenement = findById(id);
         if (evenement.isPresent()) {
             evenementRepository.delete(id);
         }
     }
+    */
     
     /**
      * Récupérer tous les événements

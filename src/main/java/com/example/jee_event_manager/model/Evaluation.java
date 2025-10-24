@@ -26,7 +26,7 @@ public class Evaluation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "evaluation_id")
-    private Integer id;
+    private Long id;
     
     @NotNull(message = "La note est obligatoire")
     @Min(value = 0, message = "La note doit être entre 0 et 5")
