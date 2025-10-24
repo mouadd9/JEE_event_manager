@@ -113,12 +113,11 @@ public class EvaluationService {
     
     // === ADMINISTRATION METHODS (COMMENTED OUT) ===
     
-    /*
+
     /**
      * Supprimer une évaluation
      * Validation: seul l'auteur peut supprimer son évaluation
      */
-    /*
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void supprimerEvaluation(Long evaluationId, Long participantId) {
         // Vérifier que l'évaluation existe
@@ -133,7 +132,7 @@ public class EvaluationService {
         // Supprimer l'évaluation
         evaluationRepository.delete(evaluationId);
     }
-    */
+
     
     /**
      * Récupérer une évaluation par son ID

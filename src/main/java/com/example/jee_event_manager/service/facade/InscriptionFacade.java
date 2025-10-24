@@ -1,13 +1,12 @@
 package com.example.jee_event_manager.service.facade;
 
-import com.example.jee_event_manager.DAO.EvenementDAO;
-import com.example.jee_event_manager.DAO.InscriptionDAO;
+import com.example.jee_event_manager.DAO.EvenementRepository;
+import com.example.jee_event_manager.DAO.InscriptionRepository;
+import com.example.jee_event_manager.DAO.ParticipantRepository;
 import com.example.jee_event_manager.model.Evenement;
 import com.example.jee_event_manager.model.Inscription;
 import com.example.jee_event_manager.model.Participant;
 import com.example.jee_event_manager.model.StatutInscription;
-import com.example.jee_event_manager.service.EvenementService;
-import com.example.jee_event_manager.service.InscriptionService;
 
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -19,17 +18,15 @@ import java.util.List;
 @Stateless
 public class InscriptionFacade {
     
-    @Inject
-    private InscriptionService inscriptionService;
     
     @Inject
-    private EvenementService evenementService;
+    private InscriptionRepository inscriptionRepository;
     
     @Inject
-    private InscriptionDAO inscriptionDAO;
+    private EvenementRepository evenementRepository;
     
     @Inject
-    private EvenementDAO evenementDAO;
+    private ParticipantRepository participantRepository;
     
     @Inject
     private EntityManager em;
@@ -37,9 +34,6 @@ public class InscriptionFacade {
     private EntityManager getEm() {
         if (em != null) {
             return em;
-        }
-        if (evenementDAO != null && evenementDAO.getEntityManager() != null) {
-            return evenementDAO.getEntityManager();
         }
         throw new IllegalStateException("EntityManager indisponible");
     }
@@ -56,16 +50,12 @@ public class InscriptionFacade {
             validateInputData(userId, evenementId, typeBillet, quantite);
             
             // 2. Récupérer l'événement
-            Evenement evenement = evenementService.findById(evenementId);
-            if (evenement == null) {
-                throw new IllegalStateException("Événement introuvable");
-            }
+            Evenement evenement = evenementRepository.findById(evenementId)
+                .orElseThrow(() -> new IllegalStateException("Événement introuvable"));
             
             // 3. Récupérer le participant
-            Participant participant = entityManager.find(Participant.class, userId);
-            if (participant == null) {
-                throw new IllegalStateException("Participant introuvable");
-            }
+            Participant participant = participantRepository.findParticipantById(userId)
+                .orElseThrow(() -> new IllegalStateException("Participant introuvable"));
             
             // 4. Vérifier la capacité disponible
             validateCapacity(evenementId, quantite, evenement.getCapacite());
@@ -83,7 +73,7 @@ public class InscriptionFacade {
             Inscription inscription = createInscription(participant, evenement, typeBillet, quantite, statut);
             
             // 9. Persister l'inscription
-            inscriptionDAO.save(inscription);
+            inscriptionRepository.save(inscription);
             
             // Committer la transaction
             entityManager.getTransaction().commit();
@@ -156,7 +146,7 @@ public class InscriptionFacade {
                 throw new IllegalStateException(
                     String.format("Conflit d'horaire avec l'événement '%s' le %s", 
                         evenementExistant.getTitre(), 
-                        evenementExistant.getDate())
+                        evenementExistant.getDateDebut())
                 );
             }
         }
@@ -166,11 +156,11 @@ public class InscriptionFacade {
      * Vérifie si deux événements se chevauchent dans le temps
      */
     private boolean eventsOverlap(Evenement event1, Evenement event2) {
-        LocalDateTime start1 = event1.getDate();
-        LocalDateTime end1 = start1.plusHours(event1.getDuree() != null ? event1.getDuree() : 2);
+        LocalDateTime start1 = event1.getDateDebut();
+        LocalDateTime end1 = event1.getDateFin();
         
-        LocalDateTime start2 = event2.getDate();
-        LocalDateTime end2 = start2.plusHours(event2.getDuree() != null ? event2.getDuree() : 2);
+        LocalDateTime start2 = event2.getDateDebut();
+        LocalDateTime end2 = event2.getDateFin();
         
         return start1.isBefore(end2) && start2.isBefore(end1);
     }
@@ -238,7 +228,7 @@ public class InscriptionFacade {
      * Récupère le nombre de places disponibles pour un événement
      */
     public int getPlacesDisponibles(Long evenementId) {
-        Evenement evenement = evenementService.findById(evenementId);
+        Evenement evenement = evenementRepository.findById(evenementId).orElse(null);
         if (evenement == null) {
             return 0;
         }

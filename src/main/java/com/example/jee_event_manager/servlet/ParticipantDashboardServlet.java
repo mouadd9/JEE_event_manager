@@ -61,7 +61,11 @@ public class ParticipantDashboardServlet extends HttpServlet {
             Map<String, Object> dashboardData = new HashMap<>();
             
             // 1. Informations du participant
-            Participant participant = (Participant) utilisateurService.findById(participantId);
+            Optional<Utilisateur> utilisateurOpt = utilisateurService.findById(participantId);
+            Participant participant = null;
+            if (utilisateurOpt.isPresent() && utilisateurOpt.get() instanceof Participant) {
+                participant = (Participant) utilisateurOpt.get();
+            }
             if (participant != null) {
                 Map<String, Object> participantInfo = new HashMap<>();
                 participantInfo.put("id", participant.getId());
@@ -153,7 +157,7 @@ public class ParticipantDashboardServlet extends HttpServlet {
         dto.setNombreEvaluations(evaluationService.countEvaluationsEvenement(evenement.getId()));
         dto.setNombreInscrits(inscriptionService.countInscritsEvenement(evenement.getId()));
         dto.setCapaciteDisponible(inscriptionService.getCapaciteDisponible(evenement.getId()));
-        dto.setNombreCommentaires(commentaireService.countCommentairesEvenement(evenement.getId()));
+        dto.setNombreCommentaires(commentaireService.countByEvenement(evenement.getId()));
         
         // Ajouter le statut d'inscription du participant
         Optional<StatutInscription> statutInscription = inscriptionService.getStatutInscription(participantId, evenement.getId());
@@ -167,9 +171,13 @@ public class ParticipantDashboardServlet extends HttpServlet {
     }
     
     /**
-     * Récupérer l'ID du participant depuis la session
+     * Récupérer l'ID du participant (hardcoded for testing)
      */
     private Long getParticipantIdFromSession(HttpServletRequest request) {
+        // Hardcoded participant ID for testing
+        return 2L;
+        
+        /* TODO: Restore session-based authentication
         HttpSession session = request.getSession(false);
         if (session == null) {
             // Créer une session pour les tests
@@ -197,5 +205,6 @@ public class ParticipantDashboardServlet extends HttpServlet {
         session.setAttribute("userName", "Utilisateur Test");
         session.setAttribute("userEmail", "test@example.com");
         return 1L;
+        */
     }
 }

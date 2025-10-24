@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 
 public class CommentaireDTO {
     
-    private Integer commentaireId;
+    private Long commentaireId;
     private String texte;
     private LocalDateTime horodatage;
     private String horodatageFormate;
@@ -13,16 +13,16 @@ public class CommentaireDTO {
     private Long participantId;
     private String participantNom;
     
-    private Integer evenementId;
+    private Long evenementId;
     private String evenementTitre;
     
     public CommentaireDTO() {}
     
-    public Integer getCommentaireId() {
+    public Long getCommentaireId() {
         return commentaireId;
     }
     
-    public void setCommentaireId(Integer commentaireId) {
+    public void setCommentaireId(Long commentaireId) {
         this.commentaireId = commentaireId;
     }
     
@@ -65,11 +65,11 @@ public class CommentaireDTO {
         this.participantNom = participantNom;
     }
     
-    public Integer getEvenementId() {
+    public Long getEvenementId() {
         return evenementId;
     }
     
-    public void setEvenementId(Integer evenementId) {
+    public void setEvenementId(Long evenementId) {
         this.evenementId = evenementId;
     }
     

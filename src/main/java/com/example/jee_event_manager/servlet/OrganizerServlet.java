@@ -2,7 +2,7 @@ package com.example.jee_event_manager.servlet;
 
 import com.example.jee_event_manager.DAO.OrganisateurRepository;
 import com.example.jee_event_manager.dto.EvenementDTO;
-import com.example.jee_event_manager.enums.StatutEvenement;
+import com.example.jee_event_manager.model.StatutEvenement;
 import com.example.jee_event_manager.model.Organisateur;
 import com.example.jee_event_manager.service.EvenementService;
 import com.example.jee_event_manager.service.FileUploadService;
@@ -14,7 +14,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+// import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 
 import java.io.IOException;

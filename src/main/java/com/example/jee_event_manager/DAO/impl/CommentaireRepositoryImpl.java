@@ -72,6 +72,16 @@ public class CommentaireRepositoryImpl implements CommentaireRepository {
     }
     
     @Override
+    public Long countByEvenement(Long evenementId) {
+        TypedQuery<Long> query = em.createQuery(
+            "SELECT COUNT(c) FROM Commentaire c WHERE c.evenement.id = :evenementId",
+            Long.class
+        );
+        query.setParameter("evenementId", evenementId);
+        return query.getSingleResult();
+    }
+    
+    @Override
     public List<Commentaire> findByParticipant(Long participantId) {
         TypedQuery<Commentaire> query = em.createQuery(
             "SELECT c FROM Commentaire c WHERE c.participant.id = :participantId ORDER BY c.horodatage DESC",

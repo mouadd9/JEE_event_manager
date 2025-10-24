@@ -38,7 +38,7 @@ public class InscriptionConfirmationServlet extends HttpServlet {
         }
         
         try {
-            Integer inscriptionId = Integer.parseInt(idStr);
+            Long inscriptionId = Long.parseLong(idStr);
             Inscription inscription = inscriptionService.findById(inscriptionId)
                 .orElse(null);
             

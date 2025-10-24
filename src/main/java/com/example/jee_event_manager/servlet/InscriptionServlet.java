@@ -1,9 +1,10 @@
 package com.example.jee_event_manager.servlet;
 
-import com.example.jee_event_manager.model.Evenement;
+import com.example.jee_event_manager.dto.EvenementDTO;
 import com.example.jee_event_manager.model.Inscription;
 import com.example.jee_event_manager.service.EvenementService;
 import com.example.jee_event_manager.service.facade.InscriptionFacade;
+import com.example.jee_event_manager.util.DTOMapper;
 
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
@@ -45,14 +46,20 @@ public class InscriptionServlet extends HttpServlet {
             return;
         }
         
-        // Stub d'authentification
+        // Hardcoded participant ID for testing
         HttpSession session = request.getSession(true);
+        session.setAttribute("userId", 2L);
+        session.setAttribute("userName", "Participant Test");
+        session.setAttribute("userEmail", "participant@example.com");
+        
+        /* TODO: Restore session-based authentication
         if (session.getAttribute("userId") == null) {
-            // Simulation d'un utilisateur connecté (ID = 1 pour les tests)
-            session.setAttribute("userId", 1L);
-            session.setAttribute("userName", "Utilisateur Test");
-            session.setAttribute("userEmail", "test@example.com");
+            // Simulation d'un utilisateur connecté (ID = 2 pour les tests)
+            session.setAttribute("userId", 2L);
+            session.setAttribute("userName", "Participant Test");
+            session.setAttribute("userEmail", "participant@example.com");
         }
+        */
         
         // Extraire l'ID de l'événement depuis l'URL
         Long evenementId = extractEventIdFromUrl(request.getRequestURI());
@@ -64,9 +71,9 @@ public class InscriptionServlet extends HttpServlet {
         
         try {
             // Récupérer les détails de l'événement
-            Evenement evenement = evenementService.findById(evenementId);
+            EvenementDTO evenementDTO = evenementService.getEventById(evenementId);
             
-            if (evenement == null) {
+            if (evenementDTO == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Événement introuvable");
                 return;
             }
@@ -75,7 +82,7 @@ public class InscriptionServlet extends HttpServlet {
             int placesDisponibles = inscriptionFacade.getPlacesDisponibles(evenementId);
             
             // Passer les données à la JSP
-            request.setAttribute("evenement", evenement);
+            request.setAttribute("evenement", evenementDTO);
             request.setAttribute("placesDisponibles", placesDisponibles);
             request.setAttribute("userId", session.getAttribute("userId"));
             request.setAttribute("userName", session.getAttribute("userName"));
@@ -101,17 +108,24 @@ public class InscriptionServlet extends HttpServlet {
             return;
         }
         
-        // Stub d'authentification
+        // Hardcoded participant ID for testing
         HttpSession session = request.getSession(true);
+        Long userId = 2L;
+        session.setAttribute("userId", userId);
+        session.setAttribute("userName", "Participant Test");
+        session.setAttribute("userEmail", "participant@example.com");
+        
+        /* TODO: Restore session-based authentication
         Long userId = (Long) session.getAttribute("userId");
         
         if (userId == null) {
             // Hardcode pour les tests
-            userId = 1L;
+            userId = 2L;
             session.setAttribute("userId", userId);
-            session.setAttribute("userName", "Utilisateur Test");
-            session.setAttribute("userEmail", "test@example.com");
+            session.setAttribute("userName", "Participant Test");
+            session.setAttribute("userEmail", "participant@example.com");
         }
+        */
         
         // Extraire l'ID de l'événement
         Long evenementId = extractEventIdFromUrl(request.getRequestURI());
@@ -125,10 +139,10 @@ public class InscriptionServlet extends HttpServlet {
         String step = request.getParameter("step");
         
         try {
-            Evenement evenement = evenementService.findById(evenementId);
+            EvenementDTO evenementDTO = evenementService.getEventById(evenementId);
             int placesDisponibles = inscriptionFacade.getPlacesDisponibles(evenementId);
             
-            request.setAttribute("evenement", evenement);
+            request.setAttribute("evenement", evenementDTO);
             request.setAttribute("placesDisponibles", placesDisponibles);
             
             if ("tickets".equals(step)) {

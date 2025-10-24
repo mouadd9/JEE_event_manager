@@ -16,6 +16,7 @@
         <class>com.example.jee_event_manager.model.Inscription</class>
         <class>com.example.jee_event_manager.model.Commentaire</class>
         <class>com.example.jee_event_manager.model.Evaluation</class>
+        <class>com.example.jee_event_manager.model.EvenementReport</class>
         
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         

@@ -29,11 +29,11 @@ public class UtilisateurService {
 
     // === AUTHENTICATION METHODS (COMMENTED OUT) ===
     
-    /*
+   
     /**
      * Crée un nouvel utilisateur (Participant ou Organisateur)
      */
-    /*
+   
     public Utilisateur createUser(String nom, String email, String motDePasse, UserType userType) {
         // Vérifier si l'email existe déjà
         if (findByEmail(email).isPresent()) {
@@ -60,13 +60,13 @@ public class UtilisateurService {
             return organisateurRepository.saveOrganisateur((Organisateur) utilisateur);
         }
     }
-    */
+   
 
-    /*
+    
     /**
      * Authentifie un utilisateur
      */
-    /*
+   
     public Utilisateur authenticate(String email, String motDePasse) {
         Optional<Utilisateur> utilisateurOpt = findByEmail(email);
         
@@ -82,7 +82,7 @@ public class UtilisateurService {
 
         return null;
     }
-    */
+  
 
     /**
      * Trouve un utilisateur par email
@@ -121,11 +121,11 @@ public class UtilisateurService {
 
     // === ADMINISTRATION METHODS (COMMENTED OUT) ===
     
-    /*
+
     /**
      * Met à jour un utilisateur
      */
-    /*
+
     public Utilisateur update(Utilisateur utilisateur) {
         if (utilisateur instanceof Participant) {
             return participantRepository.update(utilisateur);
@@ -135,23 +135,21 @@ public class UtilisateurService {
             return utilisateurRepository.save(utilisateur);
         }
     }
-    */
 
-    /*
+
+
     /**
      * Supprime un utilisateur
      */
-    /*
+
     public void delete(Long id) {
         utilisateurRepository.delete(id);
     }
-    */
 
-    /*
+
     /**
      * Change le mot de passe d'un utilisateur
      */
-    /*
     public void changePassword(Long userId, String ancienMotDePasse, String nouveauMotDePasse) {
         Utilisateur utilisateur = findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
@@ -164,15 +162,12 @@ public class UtilisateurService {
         utilisateur.setMotDePasseHash(hashPassword(nouveauMotDePasse));
         update(utilisateur);
     }
-    */
 
     // === PASSWORD & EMAIL UTILITY METHODS (COMMENTED OUT) ===
     
-    /*
     /**
      * Hash un mot de passe avec SHA-256
      */
-    /*
     private String hashPassword(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -188,44 +183,42 @@ public class UtilisateurService {
             throw new RuntimeException("Erreur lors du hashage du mot de passe", e);
         }
     }
-    */
 
     /*
     /**
      * Vérifie si un email est disponible
      */
-    /*
+  
     public boolean isEmailAvailable(String email) {
         return findByEmail(email).isEmpty();
     }
-    */
+   
     
-    /*
+  
     /**
      * Vérifie si un email existe déjà
      */
-    /*
+   
     public boolean emailExists(String email) {
         return findByEmail(email).isPresent();
     }
-    */
+   
     
-    /*
+    
     /**
      * Vérifie un mot de passe contre son hash
      */
-    /*
+
     public boolean verifyPassword(String plainPassword, String hashedPassword) {
         String hashedInput = hashPassword(plainPassword);
         return hashedInput.equals(hashedPassword);
     }
-    */
     
-    /*
+    
+
     /**
      * Change le mot de passe d'un utilisateur (surcharge sans vérification ancien mot de passe)
      */
-    /*
     public void changePassword(Long userId, String nouveauMotDePasse) {
         Utilisateur utilisateur = findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
@@ -233,5 +226,4 @@ public class UtilisateurService {
         utilisateur.setMotDePasseHash(hashPassword(nouveauMotDePasse));
         update(utilisateur);
     }
-    */
 }

@@ -152,7 +152,7 @@ public class CatalogueServlet extends HttpServlet {
         dto.setNombreEvaluations(evaluationService.countEvaluationsEvenement(evenement.getId()));
         dto.setNombreInscrits(inscriptionService.countInscritsEvenement(evenement.getId()));
         dto.setCapaciteDisponible(inscriptionService.getCapaciteDisponible(evenement.getId()));
-        dto.setNombreCommentaires(commentaireService.countCommentairesEvenement(evenement.getId()));
+        dto.setNombreCommentaires(commentaireService.countByEvenement(evenement.getId()));
         
         // Si un participant est connecté, ajouter son statut d'inscription
         if (participantId != null) {

@@ -17,6 +17,7 @@ public interface CommentaireRepository {
     // Event-related queries
     List<Commentaire> findByEvenement(Long evenementId);
     List<Commentaire> findByEvenementOrderByDate(Long evenementId);
+    Long countByEvenement(Long evenementId);
     
     // Participant-related queries
     List<Commentaire> findByParticipant(Long participantId);

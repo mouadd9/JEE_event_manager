@@ -65,9 +65,10 @@ public class CommentaireService {
         return commentaireRepository.findByParticipant(participantId);
     }
     
-    // === ADMINISTRATION METHODS (COMMENTED OUT) ===
+    public Long countByEvenement(Long evenementId) {
+        return commentaireRepository.countByEvenement(evenementId);
+    }
     
-    /*
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void supprimerCommentaire(Long commentaireId, Long participantId) {
         // Vérifier que le commentaire existe
@@ -82,7 +83,6 @@ public class CommentaireService {
         // Supprimer le commentaire
         commentaireRepository.delete(commentaireId);
     }
-    */
     
     public Commentaire getCommentaireById(Long commentaireId) {
         return commentaireRepository.findById(commentaireId)
