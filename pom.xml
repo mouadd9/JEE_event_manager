@@ -76,6 +76,14 @@
             <version>8.0.1.Final</version>
         </dependency>
         
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.42</version>
+            <scope>provided</scope>
+        </dependency>
+        
         <!-- JAXB API (nécessaire pour certains composants) -->
         <dependency>
             <groupId>jakarta.xml.bind</groupId>

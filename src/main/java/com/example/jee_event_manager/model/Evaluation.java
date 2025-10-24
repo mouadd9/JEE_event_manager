@@ -2,8 +2,11 @@ package com.example.jee_event_manager.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.time.LocalDateTime;
 
 @Entity
 @Table(
@@ -15,7 +18,10 @@ import java.time.LocalDateTime;
         )
     }
 )
-public class Evaluation extends BaseEntity {
+@AllArgsConstructor
+@Getter
+@Setter
+public class Evaluation {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,6 +51,13 @@ public class Evaluation extends BaseEntity {
     @NotNull(message = "L'événement est obligatoire")
     private Evenement evenement;
     
+    // Timestamps
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
     // Constructeurs
     public Evaluation() {
         this.horodatage = LocalDateTime.now();
@@ -62,99 +75,18 @@ public class Evaluation extends BaseEntity {
         this.texte = texte;
     }
     
-    // Getters et Setters
-    public Integer getId() {
-        return id;
-    }
-    
-    public void setId(Integer id) {
-        this.id = id;
-    }
-    
-    public Integer getNote() {
-        return note;
-    }
-    
-    public void setNote(Integer note) {
-        this.note = note;
-    }
-    
-    public String getTexte() {
-        return texte;
-    }
-    
-    public void setTexte(String texte) {
-        this.texte = texte;
-    }
-    
-    public LocalDateTime getHorodatage() {
-        return horodatage;
-    }
-    
-    public void setHorodatage(LocalDateTime horodatage) {
-        this.horodatage = horodatage;
-    }
-    
-    public Participant getParticipant() {
-        return participant;
-    }
-    
-    public void setParticipant(Participant participant) {
-        this.participant = participant;
-    }
-    
-    public Evenement getEvenement() {
-        return evenement;
-    }
-    
-    public void setEvenement(Evenement evenement) {
-        this.evenement = evenement;
-    }
-    
-    // Méthode de validation personnalisée
-    @Override
-    public boolean validate() {
-        // Validation de la note
-        if (note == null) {
-            throw new IllegalStateException("La note est obligatoire");
-        }
-        
-        if (note < 0 || note > 5) {
-            throw new IllegalStateException("La note doit être entre 0 et 5 étoiles");
-        }
-        
-        // Validation du texte optionnel
-        if (texte != null && texte.length() > 500) {
-            throw new IllegalStateException("Le texte de l'évaluation ne peut pas dépasser 500 caractères");
-        }
-        
-        // Validation des relations
-        if (participant == null) {
-            throw new IllegalStateException("Le participant est obligatoire");
-        }
-        
-        if (evenement == null) {
-            throw new IllegalStateException("L'événement est obligatoire");
-        }
-        
-        return true;
-    }
-    
-    // Méthode PrePersist pour initialiser l'horodatage
     @PrePersist
-    @Override
     protected void onCreate() {
-        super.onCreate();
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
         if (horodatage == null) {
             horodatage = LocalDateTime.now();
         }
     }
     
-    // Méthode PreUpdate pour mettre à jour l'horodatage lors de modification
     @PreUpdate
-    @Override
     protected void onUpdate() {
-        super.onUpdate();
+        updatedAt = LocalDateTime.now();
         horodatage = LocalDateTime.now();
     }
     

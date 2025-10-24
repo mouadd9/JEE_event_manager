@@ -2,13 +2,22 @@ package com.example.jee_event_manager.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "inscription", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"participant_id", "evenement_id"})
 })
-public class Inscription extends BaseEntity {
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class Inscription {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +33,7 @@ public class Inscription extends BaseEntity {
     private StatutInscription statut = StatutInscription.EN_ATTENTE;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "participant_id", nullable = false, columnDefinition = "INTEGER")
+    @JoinColumn(name = "participant_id", nullable = false, columnDefinition = "BIGINT")
     private Participant participant;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,65 +46,21 @@ public class Inscription extends BaseEntity {
     @Column(name = "quantite")
     private int quantite = 1; // Nombre de places réservées
     
-    // Getters and Setters
-    public Integer getId() {
-        return id;
-    }
-
-    public LocalDateTime getDateInscription() {
-        return dateInscription;
-    }
-
-    public void setDateInscription(LocalDateTime dateInscription) {
-        this.dateInscription = dateInscription;
-    }
-
-    public StatutInscription getStatut() {
-        return statut;
-    }
-
-    public void setStatut(StatutInscription statut) {
-        this.statut = statut;
-    }
-
-    public Participant getParticipant() {
-        return participant;
-    }
-
-    public void setParticipant(Participant participant) {
-        this.participant = participant;
-    }
-
-    public Evenement getEvenement() {
-        return evenement;
-    }
-
-    public void setEvenement(Evenement evenement) {
-        this.evenement = evenement;
-    }
-
-    public String getTypeBillet() {
-        return typeBillet;
-    }
-
-    public void setTypeBillet(String typeBillet) {
-        this.typeBillet = typeBillet;
-    }
-
-    public int getQuantite() {
-        return quantite;
-    }
-
-    public void setQuantite(int quantite) {
-        this.quantite = quantite;
+    // Timestamps
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
     
-    @Override
-    public boolean validate() {
-        return participant != null 
-                && evenement != null 
-                && dateInscription != null 
-                && statut != null
-                && quantite > 0;
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

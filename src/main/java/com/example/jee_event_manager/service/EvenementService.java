@@ -1,20 +1,115 @@
 package com.example.jee_event_manager.service;
 
-import jakarta.persistence.TypedQuery;
-import com.example.jee_event_manager.DAO.EvenementDAO;
+import com.example.jee_event_manager.DAO.EvenementRepository;
+import com.example.jee_event_manager.DAO.OrganisateurRepository;
+import com.example.jee_event_manager.dto.EventDto;
+import com.example.jee_event_manager.mappers.EventMapper;
 import com.example.jee_event_manager.model.Evenement;
+import com.example.jee_event_manager.model.Organisateur;
 import com.example.jee_event_manager.model.StatutEvenement;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityNotFoundException;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-@ApplicationScoped
+@Stateless
 public class EvenementService {
     
     @Inject
-    private EvenementDAO evenementDAO;
+    private EvenementRepository evenementRepository;
+    
+    @Inject
+    private OrganisateurRepository organisateurRepository;
+    
+    // ===== CRUD Operations (from Branch B) =====
+    
+    /**
+     * Créer un nouvel événement
+     */
+    public EventDto createEvent(EventDto eventDto, Long organisateurId) {
+        Organisateur organisateur = organisateurRepository.findOrganisateurById(organisateurId)
+                .orElseThrow(() -> new EntityNotFoundException("Organisateur avec ID " + organisateurId + " introuvable"));
+
+        Evenement evenement = EventMapper.toEntity(eventDto);
+        evenement.setOrganisateur(organisateur);
+        Evenement saved = evenementRepository.save(evenement);
+        return EventMapper.toDto(saved);
+    }
+
+    /**
+     * Mettre à jour un événement existant
+     */
+    public EventDto updateEvent(EventDto eventDto) {
+        Evenement existing = evenementRepository.findById(eventDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Événement avec ID " + eventDto.getId() + " introuvable"));
+        
+        EventMapper.updateEntityFromDto(existing, eventDto);
+        Evenement updated = evenementRepository.update(existing);
+        return EventMapper.toDto(updated);
+    }
+
+    /**
+     * Publier un événement (changer le statut à PUBLIE)
+     */
+    public void publishEvent(Long eventId) {
+        Evenement evenement = evenementRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Événement avec ID " + eventId + " introuvable"));
+        evenement.setStatut(StatutEvenement.PUBLIE);
+        evenementRepository.update(evenement);
+    }
+
+    /**
+     * Dépublier un événement (changer le statut à BROUILLON)
+     */
+    public void unpublishEvent(Long eventId) {
+        Evenement evenement = evenementRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Événement avec ID " + eventId + " introuvable"));
+        evenement.setStatut(StatutEvenement.BROUILLON);
+        evenementRepository.update(evenement);
+    }
+
+    /**
+     * Annuler un événement (changer le statut à ANNULE)
+     */
+    public void cancelEvent(Long eventId) {
+        Evenement evenement = evenementRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Événement avec ID " + eventId + " introuvable"));
+        evenement.setStatut(StatutEvenement.ANNULE);
+        evenementRepository.update(evenement);
+    }
+
+    /**
+     * Supprimer un événement
+     */
+    public void deleteEvent(Long eventId) {
+        Evenement evenement = evenementRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Événement avec ID " + eventId + " introuvable"));
+        evenementRepository.delete(evenement.getId());
+    }
+
+    /**
+     * Récupérer un événement par son ID
+     */
+    public EventDto getEventById(Long eventId) {
+        Evenement evenement = evenementRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Événement avec ID " + eventId + " introuvable"));
+        return EventMapper.toDto(evenement);
+    }
+
+    /**
+     * Récupérer tous les événements d'un organisateur
+     */
+    public List<EventDto> getEventsByOrganizer(Long organisateurId) {
+        return evenementRepository.findByOrganisateurId(organisateurId).stream()
+                .map(EventMapper::toDto)
+                .toList();
+    }
+    
+    // ===== Advanced Filtering (from Branch A) =====
     
     /**
      * Récupère la liste des événements publiés avec des filtres optionnels
@@ -39,65 +134,9 @@ public class EvenementService {
                 }
             }
             
-            // Créer une requête avec les jointures nécessaires
-            String jpql = "SELECT DISTINCT e FROM Evenement e " +
-                         "LEFT JOIN FETCH e.categories " +
-                         "LEFT JOIN FETCH e.organisateur " +
-                         "WHERE e.statut = 'PUBLIE'";
+            // Utiliser la méthode du repository pour la recherche complexe
+            return evenementRepository.findEvenementsPublies(date, lieu, categorieId, search);
             
-            // Liste pour stocker les conditions de filtrage
-            List<String> conditions = new ArrayList<>();
-            
-            // Filtre par date (comparer uniquement la partie date)
-            if (date != null) {
-                conditions.add("FUNCTION('DATE', e.dateDebut) = :date");
-            }
-            
-            // Filtre par lieu (recherche insensible à la casse)
-            if (lieu != null && !lieu.trim().isEmpty()) {
-                conditions.add("LOWER(e.lieu) LIKE LOWER(CONCAT('%', :lieu, '%'))");
-            }
-            
-            // Filtre par catégorie (par ID) - utiliser une sous-requête avec jointure
-            if (hasCategorieFilter) {
-                conditions.add(":categorieId IN (SELECT c.id FROM e.categories c)");
-            }
-            
-            // Filtre par recherche textuelle (titre ou description)
-            if (search != null && !search.trim().isEmpty()) {
-                conditions.add("(LOWER(e.titre) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(e.description) LIKE LOWER(CONCAT('%', :search, '%')))");
-            }
-            
-            // Ajouter les conditions à la requête
-            if (!conditions.isEmpty()) {
-                jpql += " AND " + String.join(" AND ", conditions);
-            }
-            
-            // Trier par date de début croissante
-            jpql += " ORDER BY e.dateDebut ASC";
-            
-            // Créer la requête
-            TypedQuery<Evenement> query = evenementDAO.getEntityManager().createQuery(jpql, Evenement.class);
-            
-            // Définir les paramètres
-            if (date != null) {
-                query.setParameter("date", date);
-            }
-            if (lieu != null && !lieu.trim().isEmpty()) {
-                query.setParameter("lieu", lieu.trim());
-            }
-            if (hasCategorieFilter && categorieId != null) {
-                query.setParameter("categorieId", categorieId);
-            }
-            if (search != null && !search.trim().isEmpty()) {
-                query.setParameter("search", search.trim());
-            }
-            
-            // Exécuter la requête et retourner les résultats
-            List<Evenement> result = query.getResultList();
-            System.out.println("=== DEBUG: Nombre d'événements trouvés: " + result.size());
-            System.out.println("=== DEBUG: Paramètres - search=" + search + ", categorie=" + categorie);
-            return result;
         } catch (Exception e) {
             System.err.println("=== ERREUR lors de la récupération des événements:");
             e.printStackTrace();
@@ -105,47 +144,46 @@ public class EvenementService {
         }
     }
     
+    // ===== Basic Repository Operations =====
+    
     /**
-     * Méthode template pour exécuter une opération avec validation de session
-     * @param operation Opération à exécuter
-     * @param <T> Type de retour de l'opération
-     * @return Le résultat de l'opération
+     * Trouver un événement par ID (retourne l'entité)
      */
-    protected <T> T executeWithValidation(DatabaseOperation<T> operation) {
-        // Ici, on pourrait ajouter une validation de session utilisateur
-        // Pour l'instant, on exécute simplement l'opération
-        return operation.execute();
+    public Optional<Evenement> findById(Long id) {
+        return evenementRepository.findById(id);
     }
     
-    public Evenement findById(Long id) {
-        return evenementDAO.findById(id);
-    }
-    
+    /**
+     * Trouver des événements par statut
+     */
     public List<Evenement> findByStatut(StatutEvenement statut) {
-        return evenementDAO.findByStatut(statut);
+        return evenementRepository.findByStatut(statut);
     }
     
+    /**
+     * Sauvegarder un événement (validation incluse)
+     */
     public Evenement save(Evenement evenement) {
         if (evenement.validate()) {
-            evenementDAO.save(evenement);
-            return evenement;
+            return evenementRepository.save(evenement);
         }
         throw new IllegalArgumentException("Événement invalide");
     }
     
+    /**
+     * Supprimer un événement par ID
+     */
     public void delete(Long id) {
-        Evenement evenement = findById(id);
-        if (evenement != null) {
-            evenementDAO.delete(evenement);
+        Optional<Evenement> evenement = findById(id);
+        if (evenement.isPresent()) {
+            evenementRepository.delete(id);
         }
     }
     
     /**
-     * Interface fonctionnelle pour les opérations de base de données
-     * @param <T> Type de retour de l'opération
+     * Récupérer tous les événements
      */
-    @FunctionalInterface
-    public interface DatabaseOperation<T> {
-        T execute();
+    public List<Evenement> findAll() {
+        return evenementRepository.findAll();
     }
 }

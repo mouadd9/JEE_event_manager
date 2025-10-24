@@ -2,12 +2,22 @@ package com.example.jee_event_manager.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "categorie")
-public class Categorie extends BaseEntity {
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class Categorie {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,33 +31,21 @@ public class Categorie extends BaseEntity {
     @ManyToMany(mappedBy = "categories")
     private Set<Evenement> evenements = new HashSet<>();
     
-    // Getters and Setters
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getNom() {
-        return nom;
-    }
-
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
-
-    public Set<Evenement> getEvenements() {
-        return evenements;
-    }
-
-    public void setEvenements(Set<Evenement> evenements) {
-        this.evenements = evenements;
+    // Timestamps
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
     
-    @Override
-    public boolean validate() {
-        return nom != null && !nom.trim().isEmpty();
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

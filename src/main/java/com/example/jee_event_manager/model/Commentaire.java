@@ -2,11 +2,18 @@ package com.example.jee_event_manager.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "commentaire")
-public class Commentaire extends BaseEntity {
+@AllArgsConstructor
+@Getter
+@Setter
+public class Commentaire {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,8 +38,15 @@ public class Commentaire extends BaseEntity {
     @NotNull(message = "L'événement est obligatoire")
     private Evenement evenement;
     
+    // Timestamps
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
     // Constructeurs
-    public Commentaire() {
+     public Commentaire() {
         this.horodatage = LocalDateTime.now();
     }
     
@@ -43,79 +57,18 @@ public class Commentaire extends BaseEntity {
         this.evenement = evenement;
     }
     
-    // Getters et Setters
-    public Integer getId() {
-        return id;
-    }
-    
-    public void setId(Integer id) {
-        this.id = id;
-    }
-    
-    public String getTexte() {
-        return texte;
-    }
-    
-    public void setTexte(String texte) {
-        this.texte = texte;
-    }
-    
-    public LocalDateTime getHorodatage() {
-        return horodatage;
-    }
-    
-    public void setHorodatage(LocalDateTime horodatage) {
-        this.horodatage = horodatage;
-    }
-    
-    public Participant getParticipant() {
-        return participant;
-    }
-    
-    public void setParticipant(Participant participant) {
-        this.participant = participant;
-    }
-    
-    public Evenement getEvenement() {
-        return evenement;
-    }
-    
-    public void setEvenement(Evenement evenement) {
-        this.evenement = evenement;
-    }
-    
-    // Méthode de validation personnalisée
-    @Override
-    public boolean validate() {
-        // Validation du texte
-        if (texte == null || texte.trim().isEmpty()) {
-            throw new IllegalStateException("Le texte du commentaire ne peut pas être vide");
-        }
-        
-        if (texte.length() > 1000) {
-            throw new IllegalStateException("Le commentaire ne peut pas dépasser 1000 caractères");
-        }
-        
-        // Validation des relations
-        if (participant == null) {
-            throw new IllegalStateException("Le participant est obligatoire");
-        }
-        
-        if (evenement == null) {
-            throw new IllegalStateException("L'événement est obligatoire");
-        }
-        
-        return true;
-    }
-    
-    // Méthode PrePersist pour initialiser l'horodatage
     @PrePersist
-    @Override
     protected void onCreate() {
-        super.onCreate();
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
         if (horodatage == null) {
             horodatage = LocalDateTime.now();
         }
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
     
     @Override
