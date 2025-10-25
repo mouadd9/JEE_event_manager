@@ -203,21 +203,12 @@ public class ParticipantInscriptionServlet extends HttpServlet {
     }
     
     /**
-     * Récupérer l'ID du participant (hardcoded for testing)
+     * Récupérer l'ID du participant depuis la session
      */
     private Long getParticipantIdFromSession(HttpServletRequest request) {
-        // Hardcoded participant ID for testing
-        return 2L;
-        
-        /* TODO: Restore session-based authentication
         HttpSession session = request.getSession(false);
         if (session == null) {
-            // Créer une session pour les tests
-            session = request.getSession(true);
-            session.setAttribute("userId", 1L);
-            session.setAttribute("userName", "Utilisateur Test");
-            session.setAttribute("userEmail", "test@example.com");
-            return 1L;
+            return null;
         }
         
         // Essayer d'abord avec "userId" (principal)
@@ -232,11 +223,6 @@ public class ParticipantInscriptionServlet extends HttpServlet {
             return (Long) participantId;
         }
         
-        // Si aucun ID trouvé, créer une session de test
-        session.setAttribute("userId", 1L);
-        session.setAttribute("userName", "Utilisateur Test");
-        session.setAttribute("userEmail", "test@example.com");
-        return 1L;
-        */
+        return null;
     }
 }

@@ -46,20 +46,12 @@ public class InscriptionServlet extends HttpServlet {
             return;
         }
         
-        // Hardcoded participant ID for testing
-        HttpSession session = request.getSession(true);
-        session.setAttribute("userId", 2L);
-        session.setAttribute("userName", "Participant Test");
-        session.setAttribute("userEmail", "participant@example.com");
-        
-        /* TODO: Restore session-based authentication
-        if (session.getAttribute("userId") == null) {
-            // Simulation d'un utilisateur connecté (ID = 2 pour les tests)
-            session.setAttribute("userId", 2L);
-            session.setAttribute("userName", "Participant Test");
-            session.setAttribute("userEmail", "participant@example.com");
+        // Get participant ID from session
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
         }
-        */
         
         // Extraire l'ID de l'événement depuis l'URL
         Long evenementId = extractEventIdFromUrl(request.getRequestURI());
@@ -108,24 +100,18 @@ public class InscriptionServlet extends HttpServlet {
             return;
         }
         
-        // Hardcoded participant ID for testing
-        HttpSession session = request.getSession(true);
-        Long userId = 2L;
-        session.setAttribute("userId", userId);
-        session.setAttribute("userName", "Participant Test");
-        session.setAttribute("userEmail", "participant@example.com");
-        
-        /* TODO: Restore session-based authentication
-        Long userId = (Long) session.getAttribute("userId");
-        
-        if (userId == null) {
-            // Hardcode pour les tests
-            userId = 2L;
-            session.setAttribute("userId", userId);
-            session.setAttribute("userName", "Participant Test");
-            session.setAttribute("userEmail", "participant@example.com");
+        // Get participant ID from session
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
         }
-        */
+        
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         
         // Extraire l'ID de l'événement
         Long evenementId = extractEventIdFromUrl(request.getRequestURI());

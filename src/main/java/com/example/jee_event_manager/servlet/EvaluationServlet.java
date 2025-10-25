@@ -288,13 +288,9 @@ public class EvaluationServlet extends HttpServlet {
     }
     
     /**
-     * Récupérer l'ID du participant (hardcoded for testing)
+     * Récupérer l'ID du participant depuis la session
      */
     private Long getParticipantIdFromSession(HttpServletRequest request) {
-        // Hardcoded participant ID for testing
-        return 2L;
-        
-        /* TODO: Restore session-based authentication
         HttpSession session = request.getSession(false);
         if (session == null) return null;
         
@@ -309,6 +305,5 @@ public class EvaluationServlet extends HttpServlet {
         }
         
         return null;
-        */
     }
 }

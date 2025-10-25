@@ -74,18 +74,31 @@ public class UtilisateurService {
      */
    
     public Utilisateur authenticate(String email, String motDePasse) {
+        System.out.println("=== AUTHENTICATE METHOD ===");
+        System.out.println("Email: " + email);
+        System.out.println("Password: " + motDePasse);
+        
         Optional<Utilisateur> utilisateurOpt = findByEmail(email);
         
         if (utilisateurOpt.isEmpty()) {
+            System.out.println("User not found with email: " + email);
             return null;
         }
 
         Utilisateur utilisateur = utilisateurOpt.get();
+        System.out.println("User found: ID=" + utilisateur.getId() + ", Email=" + utilisateur.getEmail() + ", Name=" + utilisateur.getNom());
+        System.out.println("Stored password hash: " + utilisateur.getMotDePasseHash());
+        
         String hashedPassword = hashPassword(motDePasse);
+        System.out.println("Computed password hash: " + hashedPassword);
+        System.out.println("Hashes match: " + utilisateur.getMotDePasseHash().equals(hashedPassword));
+        
         if (utilisateur.getMotDePasseHash().equals(hashedPassword)) {
+            System.out.println("Authentication SUCCESS for user: " + utilisateur.getEmail());
             return utilisateur;
         }
 
+        System.out.println("Authentication FAILED - Password mismatch");
         return null;
     }
   

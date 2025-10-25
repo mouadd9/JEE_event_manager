@@ -37,7 +37,7 @@ public class Inscription {
     private Participant participant;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "evenement_id", nullable = false, columnDefinition = "INTEGER")
+    @JoinColumn(name = "evenement_id", nullable = false, columnDefinition = "BIGINT")
     private Evenement evenement;
     
     @Column(name = "type_billet", length = 50)

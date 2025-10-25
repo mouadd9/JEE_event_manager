@@ -50,6 +50,10 @@ public class LoginServlet extends HttpServlet {
             String email = request.getParameter("email");
             String password = request.getParameter("password");
 
+            System.out.println("=== LOGIN ATTEMPT ===");
+            System.out.println("Email: " + email);
+            System.out.println("Password length: " + (password != null ? password.length() : 0));
+
             // Validation des données
             if (email == null || email.trim().isEmpty() ||
                 password == null || password.trim().isEmpty()) {
@@ -61,6 +65,14 @@ public class LoginServlet extends HttpServlet {
 
             // Authentifier l'utilisateur
             Utilisateur utilisateur = utilisateurService.authenticate(email, password);
+
+            System.out.println("Authentication result: " + (utilisateur != null ? "SUCCESS" : "FAILED"));
+            if (utilisateur != null) {
+                System.out.println("Logged in user ID: " + utilisateur.getId());
+                System.out.println("Logged in user email: " + utilisateur.getEmail());
+                System.out.println("Logged in user name: " + utilisateur.getNom());
+                System.out.println("Logged in user type: " + utilisateur.getUserType());
+            }
 
             if (utilisateur == null) {
                 request.setAttribute("error", "Email ou mot de passe incorrect");
