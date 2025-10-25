@@ -41,6 +41,18 @@ public abstract class Utilisateur {
     @Column(name = "user_type", nullable = false)
     private UserType userType;
     
+    @Column(name = "is_active")
+    private Boolean isActive = true;
+    
+    @Column(name = "is_suspended")
+    private Boolean isSuspended = false;
+    
+    @Column(name = "is_verified")
+    private Boolean isVerified = false;
+    
+    @Column(name = "suspension_reason")
+    private String suspensionReason;
+    
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
@@ -51,6 +63,9 @@ public abstract class Utilisateur {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (isActive == null) isActive = true;
+        if (isSuspended == null) isSuspended = false;
+        if (isVerified == null) isVerified = false;
     }
     
     @PreUpdate

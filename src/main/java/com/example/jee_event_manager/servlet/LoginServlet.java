@@ -93,6 +93,8 @@ public class LoginServlet extends HttpServlet {
                 session.setAttribute("participantId", utilisateur.getId());
             } else if ("ORGANISATEUR".equals(utilisateur.getUserType().toString())) {
                 session.setAttribute("organisateurId", utilisateur.getId());
+            } else if ("ADMIN".equals(utilisateur.getUserType().toString())) {
+                session.setAttribute("adminId", utilisateur.getId());
             }
 
             // Rediriger selon le type d'utilisateur
@@ -101,6 +103,8 @@ public class LoginServlet extends HttpServlet {
                 redirectUrl = request.getContextPath() + "/participant/dashboard";
             } else if ("ORGANISATEUR".equals(utilisateur.getUserType().toString())) {
                 redirectUrl = request.getContextPath() + "/organisateur/dashboard";
+            } else if ("ADMIN".equals(utilisateur.getUserType().toString())) {
+                redirectUrl = request.getContextPath() + "/admin/dashboard";
             } else {
                 redirectUrl = request.getContextPath() + "/catalogue";
             }
