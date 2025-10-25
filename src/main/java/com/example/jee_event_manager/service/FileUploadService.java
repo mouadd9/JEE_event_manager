@@ -1,6 +1,7 @@
 package com.example.jee_event_manager.service;
 
 import jakarta.ejb.Stateless;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.Part;
 
 import java.io.File;
@@ -21,10 +22,12 @@ public class FileUploadService {
     private static final List<String> ALLOWED_TYPES = Arrays.asList("image/jpeg", "image/png", "image/webp");
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     
+    // We'll inject ServletContext in the servlet and pass it to this method
+    
     /**
      * Sauvegarde une image d'événement et retourne l'URL relative
      */
-    public String saveEventImage(Part filePart) throws IOException {
+    public String saveEventImage(Part filePart, ServletContext servletContext) throws IOException {
         if (filePart == null || filePart.getSize() == 0) {
             return null;
         }
@@ -41,9 +44,13 @@ public class FileUploadService {
         }
         
         // Créer le répertoire s'il n'existe pas
-        Path uploadPath = Paths.get(UPLOAD_DIR);
+        String realPath = servletContext.getRealPath("/");
+        System.out.println("DEBUG: Real path: " + realPath);
+        Path uploadPath = Paths.get(realPath, UPLOAD_DIR);
+        System.out.println("DEBUG: Upload path: " + uploadPath.toString());
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
+            System.out.println("DEBUG: Created upload directory: " + uploadPath.toString());
         }
         
         // Générer un nom de fichier unique
@@ -58,7 +65,9 @@ public class FileUploadService {
         }
         
         // Retourner l'URL relative
-        return UPLOAD_DIR + uniqueFileName;
+        String imageUrl = UPLOAD_DIR + uniqueFileName;
+        System.out.println("DEBUG: Saved image with URL: " + imageUrl);
+        return imageUrl;
     }
     
     /**

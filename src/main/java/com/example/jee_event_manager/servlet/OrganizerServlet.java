@@ -275,7 +275,7 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         try {
             Part imagePart = request.getPart("eventImage");
             if (imagePart != null && imagePart.getSize() > 0) {
-                String imageUrl = fileUploadService.saveEventImage(imagePart);
+                String imageUrl = fileUploadService.saveEventImage(imagePart, getServletContext());
                 dto.setImageUrl(imageUrl);
             }
         } catch (Exception e) {
@@ -323,7 +323,7 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
                     fileUploadService.deleteEventImage(dto.getImageUrl());
                 }
                 // Save new image
-                String imageUrl = fileUploadService.saveEventImage(imagePart);
+                String imageUrl = fileUploadService.saveEventImage(imagePart, getServletContext());
                 dto.setImageUrl(imageUrl);
             }
         } catch (Exception e) {
