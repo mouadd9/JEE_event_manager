@@ -4,6 +4,7 @@ import com.example.jee_event_manager.DAO.OrganisateurRepository;
 import com.example.jee_event_manager.config.qualifiers.OrganisateurQualifier;
 import com.example.jee_event_manager.dto.EvenementDTO;
 import com.example.jee_event_manager.model.StatutEvenement;
+import com.example.jee_event_manager.model.Commentaire;
 import com.example.jee_event_manager.model.Organisateur;
 import com.example.jee_event_manager.service.EvenementService;
 import com.example.jee_event_manager.service.FileUploadService;
@@ -141,12 +142,6 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
             eventId = Long.parseLong(eventIdParam);
 
             switch (action) {
-                case "publish":
-                    evenementService.publishEvent(eventId);
-                    break;
-                case "unpublish":
-                    evenementService.unpublishEvent(eventId);
-                    break;
                 case "cancel":
                     evenementService.cancelEvent(eventId);
                     break;
@@ -207,8 +202,12 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         Long eventId = Long.parseLong(request.getParameter("id"));
         EvenementDTO event = evenementService.getEventById(eventId);
 
-        // Put the event data into the request
+        // Get comments for this event
+        List<Commentaire> comments = evenementService.getCommentsByEventId(eventId);
+
+        // Put the event data and comments into the request
         request.setAttribute("event", event);
+        request.setAttribute("comments", comments);
         request.getRequestDispatcher("/WEB-INF/views/organizer/detail.jsp").forward(request, response);
     }
 
@@ -270,7 +269,7 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
             dto.setCapacite(100); // Default capacity
         }
 
-        dto.setStatut(StatutEvenement.BROUILLON);
+        dto.setStatut(StatutEvenement.PUBLIE);
 
         // Handle image upload (this part was already correct)
         try {

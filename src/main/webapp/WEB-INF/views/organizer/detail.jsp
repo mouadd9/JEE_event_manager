@@ -2,348 +2,482 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
-<html>
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-  <title>Détails: <c:out value="${event.titre}"/></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails: <c:out value="${event.titre}"/> - EventHub</title>
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js'></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/organizer-theme.css">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Professional Redesign CSS */
-    :root {
-      --color-bg: #1a1a1e;
-      --color-bg-secondary: #25252a;
-      --color-text: #dadada;
-      --color-text-secondary: #9a9a9a;
-      --color-border: #3a3a42;
-      --color-primary: #3d8bfd;
-      --color-primary-hover: #5a9eff;
-      --color-green: #28a745;
-      --color-orange: #fd7e14;
-      --color-red: #dc3545;
-      --color-yellow: #ffc107;
-      --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-      --border-radius: 6px;
-    }
-    body {
-      font-family: var(--font-family-sans);
-      background-color: var(--color-bg);
-      color: var(--color-text);
-      margin: 0;
-      padding: 0;
-      line-height: 1.6;
-    }
-
-    /* Navigation */
-    .nav {
-      background-color: var(--color-bg-secondary);
-      border-bottom: 1px solid var(--color-border);
-      padding: 0 20px;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #1f2937;
+        }
+        
+        .detail-card { /* Changed from detail-container */
+            background: white;
+            border-radius: 0.75rem; /* Slightly smaller radius */
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Softer shadow */
+            margin-top: 2rem;
+            border: 1px solid #e5e7eb; /* Subtle border */
+        }
+        
+        .detail-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-    }
-    .nav-links {
-      overflow: hidden;
-    }
-    .nav a {
-      float: left;
-      color: var(--color-text-secondary);
-      text-align: center;
-      padding: 18px 16px;
-      text-decoration: none;
-      font-size: 16px;
-      font-weight: 500;
-      transition: color 0.2s, border-bottom-color 0.2s;
-      border-bottom: 3px solid transparent;
-    }
-    .nav a:hover {
-      color: var(--color-text);
-    }
-    .nav a.active {
-      color: var(--color-primary);
-      border-bottom: 3px solid var(--color-primary);
-    }
-    .nav-user {
-      color: var(--color-text);
-      font-weight: 500;
-      padding: 18px 0;
-    }
+            align-items: flex-start; /* Align items to the top */
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            gap: 1rem; /* Space between title/status and actions */
+        }
 
-    /* Main Content Area */
-    .main-content {
-      max-width: 900px;
-      margin: 30px auto;
-      padding: 0 20px;
-    }
-
-    /* Detail Header */
-    .detail-header {
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 20px;
-      margin-bottom: 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-    .detail-header h1 {
-      margin: 0;
-      color: var(--color-text);
-      font-size: 28px;
+        .header-info {
+           flex-grow: 1; /* Allow title section to take available space */
+        }
+        
+        .detail-title {
+            font-size: 1.75rem; /* Slightly smaller */
+            font-weight: 700;
+            color: #111827; /* Darker title */
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+        
+        .status-badge {
+            font-size: 0.8rem;
       font-weight: 600;
-      flex-grow: 1;
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .status-badge {
-      font-size: 14px;
-      font-weight: 500;
-      padding: 5px 10px;
-      border-radius: 4px;
-      margin-left: 15px;
-      border: 1px solid;
-      background-color: rgba(255,255,255, 0.05);
-    }
-    .status-badge.publie { color: var(--color-green); border-color: var(--color-green); }
-    .status-badge.brouillon { color: var(--color-orange); border-color: var(--color-orange); }
-    .status-badge.annule { color: var(--color-red); border-color: var(--color-red); }
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.375rem; /* Bootstrap's default */
+            vertical-align: middle; /* Align better with title if wrapped */
+        }
 
     .detail-actions {
-      white-space: nowrap;
-    }
+      display: flex;
+            gap: 0.5rem; /* Smaller gap */
+            flex-wrap: nowrap; /* Prevent wrapping if possible */
+            align-items: center; /* Vertically align buttons */
+            margin-top: 0; /* Removed top margin */
+        }
+        
     .detail-actions form {
-      display: inline-block !important;
-      margin-left: 8px;
-    }
-    .detail-actions a, .detail-actions button {
-      text-decoration: none;
-      padding: 9px 15px;
-      border: 1px solid var(--color-border);
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      color: var(--color-text);
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s;
-      background-color: var(--color-bg-secondary);
-    }
-    .detail-actions a:hover, .detail-actions button:hover {
-      border-color: var(--color-text-secondary);
-    }
-    /* Button Colors */
-    .btn-edit { background-color: var(--color-primary); color: white; border-color: var(--color-primary); }
-    .btn-edit:hover { background-color: var(--color-primary-hover); border-color: var(--color-primary-hover); }
-    .btn-publish { color: var(--color-green); }
-    .btn-publish:hover { border-color: var(--color-green); background-color: rgba(40, 167, 69, 0.1); }
-    .btn-unpublish { color: var(--color-yellow); }
-    .btn-unpublish:hover { border-color: var(--color-yellow); background-color: rgba(255, 193, 7, 0.1); }
-    .btn-cancel { color: var(--color-orange); }
-    .btn-cancel:hover { border-color: var(--color-orange); background-color: rgba(253, 126, 20, 0.1); }
-    .btn-delete { color: var(--color-red); }
-    .btn-delete:hover { border-color: var(--color-red); background-color: rgba(220, 53, 69, 0.1); }
-
-    /* Detail Body */
-    .detail-body {
-      line-height: 1.7;
-    }
-    .detail-body h2 {
-      font-size: 22px;
+            display: inline-block;
+      margin: 0;
+        }
+        
+        .btn-action {
+            padding: 0.5rem 1rem; /* Smaller padding */
+            border-radius: 0.375rem; /* Bootstrap default */
       font-weight: 600;
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 10px;
-      margin-top: 40px;
-      margin-bottom: 20px;
-      color: var(--color-text);
-    }
-    .detail-body p {
-      margin-bottom: 15px;
-      color: var(--color-text-secondary);
-      font-size: 16px;
-    }
-    .detail-body p.description {
-      color: var(--color-text);
-      font-size: 17px;
-      white-space: pre-wrap; /* Preserves line breaks in description */
-    }
-    .detail-body strong {
-      color: var(--color-text);
+            font-size: 0.875rem; /* Smaller font */
+      text-decoration: none;
+            border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+            display: inline-flex; /* Align icon and text */
+      align-items: center;
+            gap: 0.35rem; /* Space between icon and text */
+        }
+        
+        .btn-edit {
+            background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+            color: white;
+        }
+        .btn-edit:hover { opacity: 0.9; color: white; }
+        
+        .btn-cancel { background-color: #ef4444; color: white; }
+        .btn-cancel:hover { background-color: #dc2626; color: white; }
+        
+        .btn-delete { background-color: #6b7280; color: white; }
+        .btn-delete:hover { background-color: #4b5563; color: white; }
+        
+        /* Image Styles */
+        .event-image-container {
+            width: 100%;
+            margin-bottom: 2rem; /* Space below image */
+            border-radius: 0.5rem; /* Consistent radius */
+            overflow: hidden;
+            background-color: #f3f4f6; /* Lighter placeholder background */
+            border: 1px solid #e5e7eb;
+        }
+
+        .event-image {
+            width: 100%;
+            height: 400px; 
+            object-fit: cover;
+            display: block;
+        }
+
+        .event-image-placeholder {
+            width: 100%;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #9ca3af; /* Lighter placeholder text */
       font-weight: 500;
     }
 
-    /* Map and Calendar */
-    #map, #calendar {
-      height: 450px;
-      width: 100%;
-      border-radius: var(--border-radius);
-      background-color: var(--color-bg-secondary);
-      border: 1px solid var(--color-border);
-    }
-    #calendar {
-      height: 600px;
-      padding: 20px;
-      box-sizing: border-box;
-      background-color: var(--color-bg-secondary);
-    }
-    /* FullCalendar Dark Theme */
-    :root {
-      --fc-border-color: var(--color-border);
-      --fc-page-bg-color: var(--color-bg-secondary);
-      --fc-neutral-bg-color: var(--color-bg-secondary);
-      --fc-list-even-row-bg-color: var(--color-bg-secondary);
-      --fc-list-odd-row-bg-color: var(--color-bg);
-      --fc-daygrid-event-dot-width: 8px;
-      --fc-list-event-dot-width: 8px;
-      --fc-event-bg-color: var(--color-primary);
-      --fc-event-border-color: var(--color-primary);
-      --fc-event-text-color: #fff;
-    }
-    .fc {
-      color: var(--color-text);
-    }
-    .fc .fc-toolbar-title {
-      color: var(--color-text);
-      font-size: 1.5em;
-    }
-    .fc .fc-button-primary {
-      background-color: var(--color-bg-secondary);
-      border-color: var(--color-border);
-      color: var(--color-text);
-    }
-    .fc .fc-button-primary:hover {
-      background-color: var(--color-border);
-    }
-    .fc .fc-button-primary:not(:disabled).fc-button-active,
-    .fc .fc-button-primary:not(:disabled):active {
-      background-color: var(--color-border);
-      border-color: var(--color-border);
-    }
-    .fc .fc-daygrid-day-number {
-      color: var(--color-text-secondary);
-    }
-    .fc .fc-day-today {
-      background-color: rgba(61, 139, 253, 0.1) !important;
-    }
-    .fc-theme-standard td, .fc-theme-standard th {
-      border-color: var(--color-border);
-    }
-    .fc .fc-col-header-cell-cushion {
-      color: var(--color-text);
+        .event-image-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Info Section - Using Bootstrap Grid */
+        .info-section .row {
+            margin-bottom: 1.5rem;
+        }
+        .info-section .info-item {
+            background-color: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            border: 1px solid #e5e7eb;
+            height: 100%; /* Make columns equal height */
+            display: flex;
+            flex-direction: column; /* Stack icon/label and value */
+        }
+        .info-label {
+      font-weight: 600;
+            color: #374151;
+            font-size: 0.85rem; /* Smaller label */
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem; /* Space between label and value */
+        }
+        .info-label i {
+             color: #a855f7; /* Accent color for icons */
+        }
+        .info-value {
+            color: #111827; /* Darker value text */
+            font-size: 1rem;
       font-weight: 500;
+    }
+
+        /* Section Headings */
+         h2.section-title { /* Added class for consistency */
+            font-size: 1.35rem; /* Slightly larger */
+            font-weight: 600;
+            color: #111827;
+            margin-top: 2.5rem; /* More space above sections */
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 2px solid #a855f7; /* Accent border */
+            display: inline-block; /* Make border fit content */
+        }
+         h2.section-title i {
+            margin-right: 0.5rem; /* Space after icon */
+            color: #a855f7; /* Accent color */
+         }
+        
+        /* Description */
+        .description {
+            color: #374151;
+            font-size: 1rem;
+            line-height: 1.7;
+            white-space: pre-wrap; /* Keep line breaks */
+            margin-bottom: 2rem;
+        }
+        
+        /* Map */
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 2rem;
+        }
+        
+        /* Comments Section */
+        .comments-section {
+            margin-top: 2rem;
+        }
+        
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .commentaire-item:last-child {
+            border-bottom: none !important;
+        }
+        
+        .commentaires-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        /* Ratings Section */
+        .ratings-section {
+            margin-top: 2rem;
+        }
+        
+        .rating-summary {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            padding: 1rem;
+        }
+        
+        .rating-stars {
+            font-size: 1.2rem;
     }
 
   </style>
 </head>
 <body>
-
-<div class="nav">
-  <div class="nav-links">
-    <a href="${pageContext.request.contextPath}/organizer/dashboard">Tableau de Bord</a>
-    <a href="${pageContext.request.contextPath}/organizer/events/new">Nouvel Événement</a>
-  </div>
-  <div class="nav-user">
-    <c:out value="${organizer.firstName}"/> <c:out value="${organizer.lastName}"/>
+    <nav class="navbar navbar-expand-lg organizer-navbar sticky-top shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="${pageContext.request.contextPath}/organizer/dashboard">
+                <i class="bi bi-calendar-event"></i> EventHub Organisateur
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/organizer/dashboard">
+                            <i class="bi bi-speedometer2 me-1"></i> Tableau de Bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/organizer/events/new">
+                            <i class="bi bi-plus-circle me-1"></i> Nouvel Événement
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown ms-3">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <div class="user-avatar me-2"><i class="bi bi-person-fill"></i></div>
+                            <span><c:out value="${organizer.nom}"/></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i> Mon Profil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/logout"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</a></li>
+                        </ul>
+                    </li>
+                </ul>
   </div>
 </div>
+    </nav>
 
-<div class="main-content">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9"> 
+                <div class="detail-card"> 
 
+                    <%-- Header Section: Title, Status, Actions --%>
   <div class="detail-header">
-    <h1>
+                        <div class="header-info">
+                            <h1 class="detail-title">
       <c:out value="${event.titre}"/>
+                            </h1>
       <c:choose>
-        <c:when test="${event.statut == 'PUBLIE'}">
-          <span class="status-badge publie">Publié</span>
-        </c:when>
-        <c:when test="${event.statut == 'BROUILLON'}">
-          <span class="status-badge brouillon">Non Publié</span>
-        </c:when>
-        <c:when test="${event.statut == 'ANNULE'}">
-          <span class="status-badge annule">Annulé</span>
-        </c:when>
+                                <c:when test="${event.statut == 'PUBLIE'}"><span class="badge bg-success status-badge">Publié</span></c:when>
+                                <c:when test="${event.statut == 'BROUILLON'}"><span class="badge bg-warning status-badge">Brouillon</span></c:when>
+                                <c:when test="${event.statut == 'ANNULE'}"><span class="badge bg-danger status-badge">Annulé</span></c:when>
+                                <c:otherwise><span class="badge bg-secondary status-badge"><c:out value="${event.statut}"/></span></c:otherwise>
       </c:choose>
-    </h1>
-
+                        </div>                        
     <div class="detail-actions">
-      <a href="${pageContext.request.contextPath}/organizer/events/edit?id=${event.id}" class="btn-edit">Modifier</a>
-
-      <c:choose>
-        <c:when test="${event.statut == 'PUBLIE'}">
-          <form action="${pageContext.request.contextPath}/organizer/events" method="POST">
-            <input type="hidden" name="action" value="unpublish">
-            <input type="hidden" name="eventId" value="${event.id}">
-            <button type="submit" class="btn-unpublish">Dépublier</button>
-          </form>
-        </c:when>
-        <c:when test="${event.statut == 'BROUILLON'}">
-          <form action="${pageContext.request.contextPath}/organizer/events" method="POST">
-            <input type="hidden" name="action" value="publish">
-            <input type="hidden" name="eventId" value="${event.id}">
-            <button type="submit" class="btn-publish">Publier</button>
-          </form>
-        </c:when>
-      </c:choose>
-
+                            <a href="${pageContext.request.contextPath}/organizer/events/edit?id=${event.id}" class="btn-action btn-edit">
+                                <i class="bi bi-pencil-square"></i> Modifier
+                            </a>
       <c:if test="${event.statut != 'ANNULE'}">
-        <form action="${pageContext.request.contextPath}/organizer/events" method="POST">
+                                <form action="${pageContext.request.contextPath}/organizer/events" method="POST" class="d-inline">
           <input type="hidden" name="action" value="cancel">
           <input type="hidden" name="eventId" value="${event.id}">
-          <button type="submit" class="btn-cancel">Annuler</button>
+                                    <button type="submit" class="btn-action btn-cancel">
+                                        <i class="bi bi-x-circle"></i> Annuler
+                                    </button>
         </form>
       </c:if>
-
-      <form action="${pageContext.request.contextPath}/organizer/events" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?');">
-        <input type="hidden" name="action" value="delete">
-        <input type="hidden" name="eventId" value="${event.id}">
-        <button type="submit" class="btn-delete">Supprimer</button>
-      </form>
     </div>
   </div>
 
-  <div class="detail-body">
+                    <%-- Image Section --%>
+                    <div class="event-image-container">
+                        <c:choose>
+                            <c:when test="${not empty event.imageUrl}">
+                                <img src="${pageContext.request.contextPath}/${event.imageUrl}" 
+                                     alt="${event.titre}" 
+                                     class="event-image">
+                            </c:when>
+                            <c:otherwise>
+                                <div class="event-image-placeholder">
+                                    <i class="bi bi-image-alt"></i>
+                                    <span>Aucune image pour cet événement</span>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
 
-    <p>
-      <strong>Période:</strong>
-      De <fmt:formatDate value="${event.dateDebutAsDate}" pattern="dd/MM/yyyy 'à' HH:mm"/>
-      à <fmt:formatDate value="${event.dateFinAsDate}" pattern="dd/MM/yyyy 'à' HH:mm"/>
-    </p>
-    <p><strong>Lieu:</strong> <c:out value="${event.lieu}"/></p>
+                    <%-- Info Section (Using Bootstrap Grid) --%>
+                    <div class="info-section">
+                        <div class="row g-3"> <%-- g-3 adds gutters --%>
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <span class="info-label"><i class="bi bi-calendar-event"></i> Période</span>
+                                    <span class="info-value">
+                                        <fmt:formatDate value="${event.dateDebutAsDate}" pattern="dd/MM/yy HH:mm"/> - 
+                                        <fmt:formatDate value="${event.dateFinAsDate}" pattern="dd/MM/yy HH:mm"/>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <span class="info-label"><i class="bi bi-geo-alt"></i> Lieu</span>
+                                    <span class="info-value"><c:out value="${event.lieu}"/></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <span class="info-label"><i class="bi bi-people"></i> Capacité</span>
+                                    <span class="info-value"><c:out value="${event.capacite}"/> places</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <span class="info-label"><i class="bi bi-person-check"></i> Inscrits</span>
+                                    <span class="info-value">
+                                        <c:out value="${event.nombreInscrits != null ? event.nombreInscrits : 0}"/>
+                                        <c:if test="${event.capacite != null}">
+                                            / <c:out value="${event.capacite}"/>
+                                        </c:if>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <p><strong>Participants:</strong> 0</p>
-    <h2>Description</h2>
+                    <%-- Description Section --%>
+                    <h2 class="section-title"><i class="bi bi-card-text"></i> Description</h2>
     <p class="description"><c:out value="${event.description}"/></p>
-    <h2>Localisation</h2>
+
+                    <%-- Map Section --%>
+                    <h2 class="section-title"><i class="bi bi-map"></i> Localisation</h2>
     <div id="map"></div>
 
-    <h2>Commentaires</h2>
-    <div id="calendar"></div>
+                    <%-- Comments Section --%>
+                    <div class="comments-section">
+                         <h2 class="section-title"><i class="bi bi-chat-dots"></i> Commentaires des participants</h2>
+                         <c:choose>
+                             <c:when test="${not empty comments}">
+                                 <div class="commentaires-list">
+                                     <c:forEach var="comment" items="${comments}">
+                                         <div class="commentaire-item border-bottom py-3">
+                                             <div class="d-flex justify-content-between align-items-start mb-2">
+                                                 <div class="d-flex align-items-center">
+                                                     <div class="avatar-circle bg-primary text-white me-2">
+                                                         <c:choose>
+                                                             <c:when test="${not empty comment.participant.nom}">
+                                                                 ${fn:substring(comment.participant.nom, 0, 1).toUpperCase()}
+                                                             </c:when>
+                                                             <c:otherwise>U</c:otherwise>
+                                                         </c:choose>
+                                                     </div>
+                                                     <div>
+                                                         <div class="fw-semibold">
+                                                             <c:out value="${comment.participant.nom != null ? comment.participant.nom : 'Utilisateur'}"/>
+                                                         </div>
+                                                         <div class="text-muted small">
+                                                             <fmt:formatDate value="${comment.horodatageAsDate}" pattern="dd/MM/yyyy à HH:mm"/>
+                                                         </div>
+                                                     </div>
+                                                 </div>
+                                             </div>
+                                             <p class="mb-0"><c:out value="${comment.texte}"/></p>
+                                         </div>
+                                     </c:forEach>
+                                 </div>
+                             </c:when>
+                             <c:otherwise>
+                                 <div class="text-center py-4">
+                                     <i class="bi bi-chat-square-dots text-muted" style="font-size: 3rem;"></i>
+                                     <p class="text-muted mt-2">Aucun commentaire pour le moment</p>
+                                 </div>
+                             </c:otherwise>
+                         </c:choose>
+                    </div>
+                    
+                    <%-- Ratings Section --%>
+                    <div class="ratings-section">
+                         <h2 class="section-title"><i class="bi bi-star"></i> Évaluations des participants</h2>
+                         <c:choose>
+                             <c:when test="${event.nombreEvaluations != null && event.nombreEvaluations > 0}">
+                                 <div class="rating-summary mb-3">
+                                     <div class="d-flex align-items-center">
+                                         <div class="rating-stars me-3">
+                                             <c:forEach begin="1" end="5" var="star">
+                                                 <i class="bi bi-star${star <= (event.noteMoyenne != null ? event.noteMoyenne : 0) ? '-fill' : ''} text-warning"></i>
+                                             </c:forEach>
+                                         </div>
+                                         <div>
+                                             <span class="fw-bold fs-5">
+                                                 <fmt:formatNumber value="${event.noteMoyenne != null ? event.noteMoyenne : 0}" maxFractionDigits="1"/>
+                                             </span>
+                                             <span class="text-muted">/ 5</span>
+                                             <span class="text-muted ms-2">(${event.nombreEvaluations} évaluation${event.nombreEvaluations > 1 ? 's' : ''})</span>
+                                         </div>
+                                     </div>
+                                 </div>
+                                 <div class="text-muted">
+                                     <i class="bi bi-info-circle me-1"></i>
+                                     Les évaluations individuelles ne sont pas affichées pour préserver l'anonymat des participants.
+                                 </div>
+                             </c:when>
+                             <c:otherwise>
+                                 <div class="text-muted text-center py-4">
+                                     <i class="bi bi-star fs-1 mb-2"></i>
+                                     <p>Aucune évaluation pour le moment</p>
+                                 </div>
+                             </c:otherwise>
+                         </c:choose>
+                    </div>
 
   </div>
 </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-  // --- Map Display ---
+        document.addEventListener('DOMContentLoaded', function() {
   <c:if test="${event.latitude != null && event.longitude != null}">
+                try {
   const lat = ${event.latitude};
   const lon = ${event.longitude};
   const map = L.map('map').setView([lat, lon], 15);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
-  }).addTo(map);
-  L.marker([lat, lon]).addTo(map)
-          .bindPopup('<c:out value="${event.titre}"/>')
-          .openPopup();
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+                    L.marker([lat, lon]).addTo(map).bindPopup('<c:out value="${event.titre}"/>').openPopup();
+                } catch (e) {
+                    console.error("Error initializing Leaflet map:", e);
+                    document.getElementById('map').innerHTML = "<p style='padding: 20px; color: red;'>Erreur lors de l'affichage de la carte.</p>";
+                }
   </c:if>
   <c:if test="${event.latitude == null || event.longitude == null}">
-  document.getElementById('map').innerHTML = "<p style='padding: 20px; color: var(--color-text-secondary);'>Aucune localisation GPS n'a été fournie pour cet événement.</p>";
+                document.getElementById('map').innerHTML = "<p style='padding: 20px; color: #6c757d; text-align: center;'>Aucune localisation GPS fournie.</p>";
   </c:if>
-
+        });
 </script>
 
 </body>

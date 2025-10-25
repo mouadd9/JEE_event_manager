@@ -91,7 +91,7 @@ public class CommentaireRepositoryImpl implements CommentaireRepository {
     @Override
     public List<Commentaire> findByEvenement(Long evenementId) {
         TypedQuery<Commentaire> query = em.createQuery(
-            "SELECT c FROM Commentaire c WHERE c.evenement.id = :evenementId ORDER BY c.horodatage DESC",
+            "SELECT c FROM Commentaire c LEFT JOIN FETCH c.participant WHERE c.evenement.id = :evenementId ORDER BY c.horodatage DESC",
             Commentaire.class
         );
         query.setParameter("evenementId", evenementId);
@@ -101,7 +101,7 @@ public class CommentaireRepositoryImpl implements CommentaireRepository {
     @Override
     public List<Commentaire> findByEvenementOrderByDate(Long evenementId) {
         TypedQuery<Commentaire> query = em.createQuery(
-            "SELECT c FROM Commentaire c WHERE c.evenement.id = :evenementId ORDER BY c.horodatage ASC",
+            "SELECT c FROM Commentaire c LEFT JOIN FETCH c.participant WHERE c.evenement.id = :evenementId ORDER BY c.horodatage ASC",
             Commentaire.class
         );
         query.setParameter("evenementId", evenementId);

@@ -148,9 +148,6 @@
                     <h2 class="h4 mb-0">
                         <i class="bi bi-calendar-event text-primary me-2"></i>Vos Événements
                     </h2>
-                    <a href="${pageContext.request.contextPath}/organizer/events/new" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-1"></i>Créer un événement
-                    </a>
                 </div>
 
                 <div class="row g-3">
@@ -180,10 +177,19 @@
                                         <i class="bi bi-calendar3 me-1"></i>
                                         <fmt:formatDate value="${event.dateDebutAsDate}" pattern="dd MMM yyyy, HH:mm"/>
                                     </p>
-                                    <p class="text-muted mb-0">
+                                    <p class="text-muted mb-2">
                                         <i class="bi bi-geo-alt me-1"></i>
                                         <c:out value="${event.lieu}"/>
                                     </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted small">
+                                            <i class="bi bi-people me-1"></i>
+                                            <c:out value="${event.nombreInscrits != null ? event.nombreInscrits : 0}"/> inscrits
+                                        </span>
+                                        <span class="text-muted small">
+                                            <c:out value="${event.capacite != null ? event.capacite : 0}"/> places
+                                        </span>
+                                    </div>
                                 </div>
                             </a>
                         </div>

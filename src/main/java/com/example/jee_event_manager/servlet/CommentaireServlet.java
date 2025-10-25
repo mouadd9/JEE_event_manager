@@ -91,12 +91,14 @@ public class CommentaireServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        System.out.println("DEBUG: CommentaireServlet.doPost called");
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         
         try {
             // Vérifier l'authentification
             Long participantId = getParticipantIdFromSession(request);
+            System.out.println("DEBUG: Participant ID from session: " + participantId);
             if (participantId == null) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write(gson.toJson(JsonResponse.error("Vous devez être connecté pour commenter")));
@@ -114,6 +116,7 @@ public class CommentaireServlet extends HttpServlet {
             Long evenementId;
             try {
                 evenementId = Long.parseLong(evenementIdParam);
+                System.out.println("DEBUG: Parsed event ID: " + evenementId);
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write(gson.toJson(JsonResponse.error("ID d'événement invalide")));

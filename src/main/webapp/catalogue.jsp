@@ -440,7 +440,7 @@
                         <c:forEach items="${evenements}" var="evenement">
                             <div class="event-card">
                                 <div style="position: relative;">
-                                    <img src="${not empty evenement.imageUrl ? evenement.imageUrl : 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800'}" 
+                                    <img src="${not empty evenement.imageUrl ? pageContext.request.contextPath.concat('/').concat(evenement.imageUrl) : 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800'}" 
                                          alt="${evenement.titre}" 
                                          class="event-image">
                                     <c:if test="${not empty evenement.categories}">

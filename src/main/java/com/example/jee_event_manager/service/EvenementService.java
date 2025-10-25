@@ -5,6 +5,7 @@ import com.example.jee_event_manager.DAO.OrganisateurRepository;
 import com.example.jee_event_manager.config.qualifiers.OrganisateurQualifier;
 import com.example.jee_event_manager.dto.EvenementDTO;
 import com.example.jee_event_manager.mappers.EvenementMapper;
+import com.example.jee_event_manager.model.Commentaire;
 import com.example.jee_event_manager.model.Evenement;
 import com.example.jee_event_manager.model.Organisateur;
 import com.example.jee_event_manager.model.StatutEvenement;
@@ -26,6 +27,15 @@ public class EvenementService {
     @Inject
     @OrganisateurQualifier
     private OrganisateurRepository organisateurRepository;
+    
+    @Inject
+    private CommentaireService commentaireService;
+    
+    @Inject
+    private EvaluationService evaluationService;
+    
+    @Inject
+    private InscriptionService inscriptionService;
     
     // ===== CRUD Operations (from Branch B) =====
     
@@ -104,7 +114,7 @@ public class EvenementService {
     public EvenementDTO getEventById(Long eventId) {
         Evenement evenement = evenementRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Événement avec ID " + eventId + " introuvable"));
-        return EvenementMapper.toDto(evenement);
+        return enrichirEvenementDTO(evenement);
     }
 
     /**
@@ -112,7 +122,7 @@ public class EvenementService {
      */
     public List<EvenementDTO> getEventsByOrganizer(Long organisateurId) {
         return evenementRepository.findByOrganisateurId(organisateurId).stream()
-                .map(EvenementMapper::toDto)
+                .map(this::enrichirEvenementDTO)
                 .toList();
     }
     
@@ -128,6 +138,9 @@ public class EvenementService {
      */
     public List<Evenement> getEvenementsPublies(LocalDate date, String lieu, String categorie, String search) {
         try {
+            System.out.println("=== DEBUG EvenementService.getEvenementsPublies ===");
+            System.out.println("Parameters: date=" + date + ", lieu=" + lieu + ", categorie=" + categorie + ", search=" + search);
+            
             // Déterminer si on a besoin d'un filtre de catégorie
             boolean hasCategorieFilter = categorie != null && !categorie.trim().isEmpty();
             Long categorieId = null;
@@ -142,7 +155,14 @@ public class EvenementService {
             }
             
             // Utiliser la méthode du repository pour la recherche complexe
-            return evenementRepository.getEvenementsPublies(date, lieu, categorie, search);
+            List<Evenement> result = evenementRepository.getEvenementsPublies(date, lieu, categorie, search);
+            System.out.println("Repository returned " + (result != null ? result.size() : "null") + " events");
+            
+            if (result != null && !result.isEmpty()) {
+                System.out.println("First event from repository: " + result.get(0).getTitre());
+            }
+            
+            return result;
             
         } catch (Exception e) {
             System.err.println("=== ERREUR lors de la récupération des événements:");
@@ -200,5 +220,28 @@ public class EvenementService {
      */
     public List<Evenement> findAll() {
         return evenementRepository.findAll();
+    }
+    
+    /**
+     * Récupérer les commentaires d'un événement
+     */
+    public List<Commentaire> getCommentsByEventId(Long eventId) {
+        return commentaireService.getCommentairesEvenement(eventId);
+    }
+    
+    /**
+     * Enrichir un EvenementDTO avec les statistiques
+     */
+    private EvenementDTO enrichirEvenementDTO(Evenement evenement) {
+        EvenementDTO dto = EvenementMapper.toDto(evenement);
+        
+        // Ajouter les statistiques
+        dto.setNoteMoyenne(evaluationService.getMoyenneEvenement(evenement.getId()));
+        dto.setNombreEvaluations(evaluationService.countEvaluationsEvenement(evenement.getId()));
+        dto.setNombreInscrits(inscriptionService.countInscritsEvenement(evenement.getId()));
+        dto.setCapaciteDisponible(inscriptionService.getCapaciteDisponible(evenement.getId()));
+        dto.setNombreCommentaires(commentaireService.countByEvenement(evenement.getId()));
+        
+        return dto;
     }
 }

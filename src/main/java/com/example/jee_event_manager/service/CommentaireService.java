@@ -34,9 +34,10 @@ public class CommentaireService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Commentaire ajouterCommentaire(Long participantId, Long evenementId, String texte) {
         // Validation: vérifier que le participant est inscrit à l'événement
-        if (!inscriptionRepository.isParticipantInscrit(participantId, evenementId)) {
-            throw new IllegalStateException("Vous devez être inscrit à cet événement pour commenter");
-        }
+        // TODO: Re-enable this validation after testing
+        // if (!inscriptionRepository.isParticipantInscrit(participantId, evenementId)) {
+        //     throw new IllegalStateException("Vous devez être inscrit à cet événement pour commenter");
+        // }
         
         // Validation du texte
         if (texte == null || texte.trim().isEmpty()) {
@@ -48,11 +49,13 @@ public class CommentaireService {
         }
         
         // Récupérer les entités
+        System.out.println("DEBUG: Looking for participant ID: " + participantId);
         Participant participant = participantRepository.findParticipantById(participantId)
-                .orElseThrow(() -> new IllegalArgumentException("Participant introuvable"));
+                .orElseThrow(() -> new IllegalArgumentException("Participant introuvable avec ID: " + participantId));
         
+        System.out.println("DEBUG: Looking for event ID: " + evenementId);
         Evenement evenement = evenementRepository.findById(evenementId)
-                .orElseThrow(() -> new IllegalArgumentException("Événement introuvable"));
+                .orElseThrow(() -> new IllegalArgumentException("Événement introuvable avec ID: " + evenementId));
         
         // Créer et sauvegarder le commentaire
         Commentaire commentaire = new Commentaire(texte.trim(), participant, evenement);

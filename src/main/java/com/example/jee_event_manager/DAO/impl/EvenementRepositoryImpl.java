@@ -117,6 +117,9 @@ public class EvenementRepositoryImpl implements EvenementRepository {
     
     @Override
     public List<Evenement> getEvenementsPublies(LocalDate date, String lieu, String categorie, String search) {
+        System.out.println("=== DEBUG EvenementRepositoryImpl.getEvenementsPublies ===");
+        System.out.println("Parameters: date=" + date + ", lieu=" + lieu + ", categorie=" + categorie + ", search=" + search);
+        
         // This is the complex query from Branch A's EvenementService
         boolean hasCategorieFilter = categorie != null && !categorie.trim().isEmpty();
         Long categorieId = null;
@@ -152,6 +155,8 @@ public class EvenementRepositoryImpl implements EvenementRepository {
         
         jpql += " ORDER BY e.dateDebut ASC";
         
+        System.out.println("JPQL Query: " + jpql);
+        
         TypedQuery<Evenement> query = em.createQuery(jpql, Evenement.class);
         
         if (date != null) {
@@ -167,7 +172,14 @@ public class EvenementRepositoryImpl implements EvenementRepository {
             query.setParameter("search", search.trim());
         }
         
-        return query.getResultList();
+        List<Evenement> result = query.getResultList();
+        System.out.println("Query returned " + result.size() + " events");
+        
+        if (!result.isEmpty()) {
+            System.out.println("First event: " + result.get(0).getTitre() + " - Status: " + result.get(0).getStatut());
+        }
+        
+        return result;
     }
     
     @Override

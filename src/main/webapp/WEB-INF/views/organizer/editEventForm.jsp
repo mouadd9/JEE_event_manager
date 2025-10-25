@@ -198,7 +198,7 @@
                             <div class="form-text">Formats acceptés: JPG, PNG, WEBP (max 5MB)</div>
                             <c:if test="${not empty event.imageUrl}">
                                 <div class="mt-2">
-                                    <img src="${event.imageUrl}" class="image-preview" alt="Image actuelle">
+                                    <img src="${pageContext.request.contextPath}/${event.imageUrl}" class="image-preview" alt="Image actuelle">
                                     <div class="text-muted small">Image actuelle</div>
                                 </div>
                             </c:if>

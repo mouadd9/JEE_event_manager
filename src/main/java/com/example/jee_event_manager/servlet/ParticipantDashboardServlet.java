@@ -75,14 +75,28 @@ public class ParticipantDashboardServlet extends HttpServlet {
             }
             
             // 2. Événements disponibles (publiés, futurs)
-            List<Evenement> evenementsDisponibles = evenementService.findByStatut(StatutEvenement.PUBLIE)
+            System.out.println("=== DEBUG ParticipantDashboardServlet ===");
+            System.out.println("Participant ID: " + participantId);
+            
+            List<Evenement> allPublishedEvents = evenementService.getEvenementsPublies(null, null, null, null);
+            System.out.println("Total published events found: " + (allPublishedEvents != null ? allPublishedEvents.size() : "null"));
+            
+            if (allPublishedEvents != null && !allPublishedEvents.isEmpty()) {
+                System.out.println("First event: " + allPublishedEvents.get(0).getTitre() + " - Date: " + allPublishedEvents.get(0).getDateDebut());
+            }
+            
+            List<Evenement> evenementsDisponibles = allPublishedEvents
                 .stream()
                 .filter(e -> e.getDateDebut().isAfter(LocalDateTime.now()))
                 .collect(Collectors.toList());
             
+            System.out.println("Future events after filtering: " + evenementsDisponibles.size());
+            
             List<EvenementDetailDTO> evenementsDTO = evenementsDisponibles.stream()
                 .map(evt -> enrichirEvenementDTO(evt, participantId))
                 .collect(Collectors.toList());
+            
+            System.out.println("DTOs created: " + evenementsDTO.size());
             
             dashboardData.put("evenementsDisponibles", evenementsDTO);
             

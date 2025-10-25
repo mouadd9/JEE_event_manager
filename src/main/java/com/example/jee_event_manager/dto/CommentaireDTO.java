@@ -2,6 +2,7 @@ package com.example.jee_event_manager.dto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.sql.Timestamp;
 
 public class CommentaireDTO {
     
@@ -47,6 +48,17 @@ public class CommentaireDTO {
     
     public String getHorodatageFormate() {
         return horodatageFormate;
+    }
+    
+    /**
+     * Helper method for JSTL <fmt:formatDate> tag.
+     * Converts LocalDateTime to java.util.Date for JSP formatting.
+     */
+    public java.util.Date getHorodatageAsDate() {
+        if (this.horodatage == null) {
+            return null;
+        }
+        return Timestamp.valueOf(this.horodatage);
     }
     
     public Long getParticipantId() {

@@ -17,26 +17,28 @@
 .organizer-navbar {
     background: #fff !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    padding: 1rem 0;
+    padding: 0.5rem 0;
 }
 
 .organizer-navbar .navbar-brand {
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.25rem;
+    font-weight: 600;
     color: var(--primary-color) !important;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 
 .organizer-navbar .navbar-brand i {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
 }
 
 .organizer-navbar .nav-link {
     color: var(--text-dark) !important;
     font-weight: 500;
-    margin: 0 0.8rem;
+    font-size: 0.9rem;
+    margin: 0 0.5rem;
+    padding: 0.5rem 0.75rem !important;
     transition: color 0.3s;
 }
 
@@ -47,6 +49,18 @@
 .organizer-navbar .nav-link.active {
     color: var(--primary-color) !important;
     font-weight: 600;
+}
+
+.organizer-navbar .user-avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
 }
 
 /* Organizer welcome banner */
@@ -143,10 +157,10 @@
 
 /* Status badges */
 .organizer-status-badge {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     font-weight: 500;
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.5rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.25rem;
     border: 1px solid;
 }
 

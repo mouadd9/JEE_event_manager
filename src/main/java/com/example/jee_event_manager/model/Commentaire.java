@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "commentaire")
@@ -69,6 +70,17 @@ public class Commentaire {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+    
+    /**
+     * Helper method for JSTL <fmt:formatDate> tag.
+     * Converts LocalDateTime to java.util.Date for JSP formatting.
+     */
+    public java.util.Date getHorodatageAsDate() {
+        if (this.horodatage == null) {
+            return null;
+        }
+        return Timestamp.valueOf(this.horodatage);
     }
     
     @Override
