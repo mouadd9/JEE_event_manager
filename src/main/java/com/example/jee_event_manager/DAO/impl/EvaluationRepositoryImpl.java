@@ -30,25 +30,62 @@ public class EvaluationRepositoryImpl implements EvaluationRepository {
     
     @Override
     public Evaluation save(Evaluation evaluation) {
-        if (evaluation.getId() == null) {
-            em.persist(evaluation);
-        } else {
-            evaluation = em.merge(evaluation);
+        try {
+            em.getTransaction().begin();
+            
+            if (evaluation.getId() == null) {
+                em.persist(evaluation);
+            } else {
+                evaluation = em.merge(evaluation);
+            }
+            
+            em.getTransaction().commit();
+            return evaluation;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to save Evaluation: " + e.getMessage(), e);
         }
-        return evaluation;
     }
     
     @Override
     public void delete(Long id) {
-        Evaluation evaluation = em.find(Evaluation.class, id);
-        if (evaluation != null) {
-            em.remove(evaluation);
+        try {
+            em.getTransaction().begin();
+            
+            Evaluation evaluation = em.find(Evaluation.class, id);
+            if (evaluation != null) {
+                em.remove(evaluation);
+            }
+            
+            em.getTransaction().commit();
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to delete Evaluation: " + e.getMessage(), e);
         }
     }
     
     @Override
     public Evaluation update(Evaluation evaluation) {
-        return em.merge(evaluation);
+        try {
+            em.getTransaction().begin();
+            
+            evaluation = em.merge(evaluation);
+            
+            em.getTransaction().commit();
+            return evaluation;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to update Evaluation: " + e.getMessage(), e);
+        }
     }
     
     @Override

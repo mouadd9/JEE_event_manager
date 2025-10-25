@@ -2,6 +2,7 @@ package com.example.jee_event_manager.service;
 
 import com.example.jee_event_manager.DAO.EvenementRepository;
 import com.example.jee_event_manager.DAO.OrganisateurRepository;
+import com.example.jee_event_manager.config.qualifiers.OrganisateurQualifier;
 import com.example.jee_event_manager.dto.EvenementDTO;
 import com.example.jee_event_manager.mappers.EvenementMapper;
 import com.example.jee_event_manager.model.Evenement;
@@ -23,6 +24,7 @@ public class EvenementService {
     private EvenementRepository evenementRepository;
     
     @Inject
+    @OrganisateurQualifier
     private OrganisateurRepository organisateurRepository;
     
     // ===== CRUD Operations (from Branch B) =====

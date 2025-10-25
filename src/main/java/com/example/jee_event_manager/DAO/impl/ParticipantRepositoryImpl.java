@@ -1,6 +1,7 @@
 package com.example.jee_event_manager.DAO.impl;
 
 import com.example.jee_event_manager.DAO.ParticipantRepository;
+import com.example.jee_event_manager.config.qualifiers.ParticipantQualifier;
 import com.example.jee_event_manager.model.Participant;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
+@ParticipantQualifier
 public class ParticipantRepositoryImpl implements ParticipantRepository {
     
     @Inject
@@ -30,12 +32,24 @@ public class ParticipantRepositoryImpl implements ParticipantRepository {
     
     @Override
     public Participant saveParticipant(Participant participant) {
-        if (participant.getId() == null) {
-            em.persist(participant);
-        } else {
-            participant = em.merge(participant);
+        try {
+            em.getTransaction().begin();
+            
+            if (participant.getId() == null) {
+                em.persist(participant);
+            } else {
+                participant = em.merge(participant);
+            }
+            
+            em.getTransaction().commit();
+            return participant;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to save Participant: " + e.getMessage(), e);
         }
-        return participant;
     }
     
     @Override
@@ -81,18 +95,44 @@ public class ParticipantRepositoryImpl implements ParticipantRepository {
     
     @Override
     public void delete(Long id) {
-        Participant participant = em.find(Participant.class, id);
-        if (participant != null) {
-            em.remove(participant);
+        try {
+            em.getTransaction().begin();
+            
+            Participant participant = em.find(Participant.class, id);
+            if (participant != null) {
+                em.remove(participant);
+            }
+            
+            em.getTransaction().commit();
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to delete Participant: " + e.getMessage(), e);
         }
     }
     
     @Override
     public com.example.jee_event_manager.model.Utilisateur update(com.example.jee_event_manager.model.Utilisateur utilisateur) {
-        if (utilisateur instanceof Participant) {
-            return em.merge((Participant) utilisateur);
+        try {
+            em.getTransaction().begin();
+            
+            if (utilisateur instanceof Participant) {
+                utilisateur = em.merge((Participant) utilisateur);
+            } else {
+                throw new IllegalArgumentException("Expected Participant instance");
+            }
+            
+            em.getTransaction().commit();
+            return utilisateur;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to update Participant: " + e.getMessage(), e);
         }
-        throw new IllegalArgumentException("Expected Participant instance");
     }
     
     @Override

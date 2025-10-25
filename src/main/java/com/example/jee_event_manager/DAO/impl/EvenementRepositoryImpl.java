@@ -32,25 +32,62 @@ public class EvenementRepositoryImpl implements EvenementRepository {
     
     @Override
     public Evenement save(Evenement evenement) {
-        if (evenement.getId() == null) {
-            em.persist(evenement);
-        } else {
-            evenement = em.merge(evenement);
+        try {
+            em.getTransaction().begin();
+            
+            if (evenement.getId() == null) {
+                em.persist(evenement);
+            } else {
+                evenement = em.merge(evenement);
+            }
+            
+            em.getTransaction().commit();
+            return evenement;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to save Evenement: " + e.getMessage(), e);
         }
-        return evenement;
     }
     
     @Override
     public void delete(Long id) {
-        Evenement evenement = em.find(Evenement.class, id);
-        if (evenement != null) {
-            em.remove(evenement);
+        try {
+            em.getTransaction().begin();
+            
+            Evenement evenement = em.find(Evenement.class, id);
+            if (evenement != null) {
+                em.remove(evenement);
+            }
+            
+            em.getTransaction().commit();
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to delete Evenement: " + e.getMessage(), e);
         }
     }
     
     @Override
     public Evenement update(Evenement evenement) {
-        return em.merge(evenement);
+        try {
+            em.getTransaction().begin();
+            
+            evenement = em.merge(evenement);
+            
+            em.getTransaction().commit();
+            return evenement;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to update Evenement: " + e.getMessage(), e);
+        }
     }
     
     @Override

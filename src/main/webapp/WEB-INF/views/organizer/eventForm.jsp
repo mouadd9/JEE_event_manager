@@ -141,16 +141,17 @@
 
                     <form action="${pageContext.request.contextPath}/organizer/events" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="create">
-                        <input type="hidden" id="dateDebut" name="dateDebut">
-                        <input type="hidden" id="dateFin" name="dateFin">
-                        <input type="hidden" id="latitude" name="latitude">
-                        <input type="hidden" id="longitude" name="longitude">
+
+                        <input type="hidden" id="latitude" name="latitude" value="">
+                        <input type="hidden" id="longitude" name="longitude" value="">
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="titre" class="form-label">Titre de l'événement</label>
                                 <input type="text" class="form-control" id="titre" name="titre" required 
-                                       placeholder="Ex: Conférence sur l'IA">
+                                       minlength="5" maxlength="100"
+                                       placeholder="Ex: Conférence sur l'IA (5-100 caractères)">
+                                <div class="form-text">Le titre doit contenir entre 5 et 100 caractères</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="capacite" class="form-label">Capacité</label>
@@ -161,7 +162,7 @@
 
                         <div class="mb-3">
                             <label for="lieu" class="form-label">Nom du lieu</label>
-                            <input type="text" class="form-control" id="lieu" name="lieu" 
+                            <input type="text" class="form-control" id="lieu" name="lieu" required
                                    placeholder="Ex: Palais des Congrès, Salle de conférence">
                         </div>
 
@@ -173,18 +174,19 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="dateDebutInput" class="form-label">Date de début</label>
-                                <input type="datetime-local" class="form-control" id="dateDebutInput" required>
+                                <input type="datetime-local" class="form-control" id="dateDebutInput" name="dateDebut" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="dateFinInput" class="form-label">Date de fin</label>
-                                <input type="datetime-local" class="form-control" id="dateFinInput" required>
+                                <input type="datetime-local" class="form-control" id="dateFinInput" name="dateFin" required>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
                             <textarea class="form-control" id="description" name="description" rows="4" 
-                                      placeholder="Décrivez votre événement..."></textarea>
+                                      maxlength="1000" placeholder="Décrivez votre événement..."></textarea>
+                            <div class="form-text">Maximum 1000 caractères</div>
                         </div>
 
                         <div class="mb-3">
@@ -213,27 +215,33 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Leaflet JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    
+
     <script>
-        // Wait for window to fully load (including all scripts)
+        // No formatForBackend function needed
+
         window.addEventListener('load', function() {
             console.log('Window loaded, initializing...');
 
-            // --- Image Preview ---
+            // Get all form elements
+            const form = document.querySelector('form');
             const imageInput = document.getElementById('eventImage');
             const imagePreview = document.getElementById('imagePreview');
+            // 'dateDebut' and 'dateFin' (hidden inputs) are removed
+            const dateDebutInput = document.getElementById('dateDebutInput'); // Used for validation
+            const dateFinInput = document.getElementById('dateFinInput'); // Used for validation
+            const latInput = document.getElementById('latitude');
+            const lonInput = document.getElementById('longitude');
 
+            // --- Image Preview ---
             imageInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
-                    // Validate file size (5MB max)
                     if (file.size > 5 * 1024 * 1024) {
                         alert('Le fichier est trop volumineux. Taille maximale: 5MB');
                         this.value = '';
                         return;
                     }
 
-                    // Validate file type
                     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
                     if (!allowedTypes.includes(file.type)) {
                         alert('Format de fichier non supporté. Utilisez JPG, PNG ou WEBP.');
@@ -241,13 +249,12 @@
                         return;
                     }
 
-                    // Show preview
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         imagePreview.innerHTML = `
-                            <img src="${e.target.result}" class="image-preview" alt="Aperçu">
-                            <div class="text-muted small mt-1">Aperçu de l'image</div>
-                        `;
+                    <img src="${e.target.result}" class="image-preview" alt="Aperçu">
+                    <div class="text-muted small mt-1">Aperçu de l'image</div>
+                `;
                     };
                     reader.readAsDataURL(file);
                 } else {
@@ -255,40 +262,14 @@
                 }
             });
 
-            // --- Date Time Inputs ---
-            const debutInput = document.getElementById('dateDebut');
-            const finInput = document.getElementById('dateFin');
-            const dateDebutInput = document.getElementById('dateDebutInput');
-            const dateFinInput = document.getElementById('dateFinInput');
-
-            // Convert datetime-local format to backend format
-            function formatForBackend(datetimeLocalValue) {
-                if (!datetimeLocalValue) return "";
-                return datetimeLocalValue;
-            }
-
-            // Update hidden fields when user changes dates
-            dateDebutInput.addEventListener('change', function() {
-                debutInput.value = formatForBackend(this.value);
-                console.log('Start date:', debutInput.value);
-            });
-
-            dateFinInput.addEventListener('change', function() {
-                finInput.value = formatForBackend(this.value);
-                console.log('End date:', finInput.value);
-            });
+            // --- Date Time Inputs (Block Removed) ---
+            // No longer needed as 'name' attribute is on the visible inputs
 
             // --- Map (Leaflet) ---
-            const latInput = document.getElementById('latitude');
-            const lonInput = document.getElementById('longitude');
-
             const startLat = 35.5785;
             const startLon = -5.3684;
             const startZoom = 12;
 
-            console.log('Initializing map...');
-
-            // Check if Leaflet is loaded
             if (typeof L === 'undefined') {
                 console.error('Leaflet is not loaded!');
                 return;
@@ -305,29 +286,90 @@
                 let marker = null;
 
                 map.on('click', function(e) {
-                    const lat = e.latlng.lat;
-                    const lon = e.latlng.lng;
-
                     if (marker) {
                         marker.setLatLng(e.latlng);
                     } else {
                         marker = L.marker(e.latlng).addTo(map);
                     }
 
-                    latInput.value = lat;
-                    lonInput.value = lon;
-                    console.log('Location selected:', lat, lon);
+                    latInput.value = e.latlng.lat;
+                    lonInput.value = e.latlng.lng;
+                    console.log('Location selected:', e.latlng.lat, e.latlng.lng);
                 });
 
-                // Force map to resize after container is visible
-                setTimeout(function() {
-                    map.invalidateSize();
-                    console.log('Map initialized successfully');
-                }, 100);
+                setTimeout(() => map.invalidateSize(), 100);
 
             } catch (error) {
                 console.error('Error initializing map:', error);
             }
+
+            // --- Form Submission Handler ---
+            form.addEventListener('submit', function(e) {
+                console.log('=== FORM SUBMISSION STARTED ===');
+
+                // Get form values
+                const titre = document.getElementById('titre').value.trim();
+                const lieu = document.getElementById('lieu').value.trim();
+                const description = document.getElementById('description').value.trim();
+                const startDate = dateDebutInput.value;
+                const endDate = dateFinInput.value;
+
+                // Validate title (5-100 characters)
+                if (!titre || titre.length < 5 || titre.length > 100) {
+                    e.preventDefault();
+                    alert('Le titre doit contenir entre 5 et 100 caractères.');
+                    document.getElementById('titre').focus();
+                    return false;
+                }
+
+                // Validate location name (required)
+                if (!lieu || lieu.trim() === '') {
+                    e.preventDefault();
+                    alert('Le nom du lieu est obligatoire.');
+                    document.getElementById('lieu').focus();
+                    return false;
+                }
+
+                // Validate description (max 1000 characters)
+                if (description.length > 1000) {
+                    e.preventDefault();
+                    alert('La description ne peut pas dépasser 1000 caractères.');
+                    document.getElementById('description').focus();
+                    return false;
+                }
+
+                // Validate dates
+                if (!startDate || startDate.trim() === '') {
+                    e.preventDefault();
+                    alert('Veuillez sélectionner la date de début.');
+                    dateDebutInput.focus();
+                    return false;
+                }
+
+                if (!endDate || endDate.trim() === '') {
+                    e.preventDefault();
+                    alert('Veuillez sélectionner la date de fin.');
+                    dateFinInput.focus();
+                    return false;
+                }
+
+                // Validate location coordinates
+                if (!latInput.value || !lonInput.value) {
+                    e.preventDefault();
+                    alert('Veuillez sélectionner un lieu sur la carte.');
+                    return false;
+                }
+
+                console.log('Submitting fields:', {
+                    titre: titre,
+                    lieu: lieu,
+                    description: description,
+                    dateDebut: startDate,
+                    dateFin: endDate,
+                    latitude: latInput.value,
+                    longitude: lonInput.value
+                });
+            });
         });
     </script>
 

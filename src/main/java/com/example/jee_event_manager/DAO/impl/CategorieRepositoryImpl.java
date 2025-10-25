@@ -30,25 +30,62 @@ public class CategorieRepositoryImpl implements CategorieRepository {
     
     @Override
     public Categorie save(Categorie categorie) {
-        if (categorie.getId() == null) {
-            em.persist(categorie);
-        } else {
-            categorie = em.merge(categorie);
+        try {
+            em.getTransaction().begin();
+            
+            if (categorie.getId() == null) {
+                em.persist(categorie);
+            } else {
+                categorie = em.merge(categorie);
+            }
+            
+            em.getTransaction().commit();
+            return categorie;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to save Categorie: " + e.getMessage(), e);
         }
-        return categorie;
     }
     
     @Override
     public void delete(Long id) {
-        Categorie categorie = em.find(Categorie.class, id);
-        if (categorie != null) {
-            em.remove(categorie);
+        try {
+            em.getTransaction().begin();
+            
+            Categorie categorie = em.find(Categorie.class, id);
+            if (categorie != null) {
+                em.remove(categorie);
+            }
+            
+            em.getTransaction().commit();
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to delete Categorie: " + e.getMessage(), e);
         }
     }
     
     @Override
     public Categorie update(Categorie categorie) {
-        return em.merge(categorie);
+        try {
+            em.getTransaction().begin();
+            
+            categorie = em.merge(categorie);
+            
+            em.getTransaction().commit();
+            return categorie;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to update Categorie: " + e.getMessage(), e);
+        }
     }
     
     @Override

@@ -3,6 +3,9 @@ package com.example.jee_event_manager.service;
 import com.example.jee_event_manager.DAO.UtilisateurRepository;
 import com.example.jee_event_manager.DAO.ParticipantRepository;
 import com.example.jee_event_manager.DAO.OrganisateurRepository;
+import com.example.jee_event_manager.config.qualifiers.UtilisateurQualifier;
+import com.example.jee_event_manager.config.qualifiers.ParticipantQualifier;
+import com.example.jee_event_manager.config.qualifiers.OrganisateurQualifier;
 import com.example.jee_event_manager.model.Utilisateur;
 import com.example.jee_event_manager.model.Participant;
 import com.example.jee_event_manager.model.Organisateur;
@@ -19,12 +22,15 @@ import java.util.Optional;
 public class UtilisateurService {
 
     @Inject
+    @UtilisateurQualifier
     private UtilisateurRepository utilisateurRepository;
     
     @Inject
+    @ParticipantQualifier
     private ParticipantRepository participantRepository;
     
     @Inject
+    @OrganisateurQualifier
     private OrganisateurRepository organisateurRepository;
 
     // === AUTHENTICATION METHODS (COMMENTED OUT) ===

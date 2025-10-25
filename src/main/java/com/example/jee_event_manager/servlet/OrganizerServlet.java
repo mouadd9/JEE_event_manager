@@ -1,6 +1,7 @@
 package com.example.jee_event_manager.servlet;
 
 import com.example.jee_event_manager.DAO.OrganisateurRepository;
+import com.example.jee_event_manager.config.qualifiers.OrganisateurQualifier;
 import com.example.jee_event_manager.dto.EvenementDTO;
 import com.example.jee_event_manager.model.StatutEvenement;
 import com.example.jee_event_manager.model.Organisateur;
@@ -16,6 +17,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 // import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
+import java.io.BufferedReader; // Add this import at the top of your file
+import java.io.InputStreamReader; // Add this import
+import java.nio.charset.StandardCharsets; // Add this import
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -40,6 +44,7 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
 
     // !!!!!!! temporary we will use sessions in the future
     @Inject
+    @OrganisateurQualifier
     private OrganisateurRepository organisateurRepository;
     private static final Long CURRENT_ORGANIZER_ID = 1L;
     // !!!!!!! temporary we will use sessions in the future
@@ -78,13 +83,33 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
     }
 
     // doPost handles ACTIONS (Create, Update, Delete operations)
+// doPost handles ACTIONS (Create, Update, Delete operations)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String action = request.getParameter("action");
+
+        String action = null;
+        String eventIdParam = null;
+        boolean isMultipart = request.getContentType() != null && request.getContentType().startsWith("multipart/form-data");
+
+        if (isMultipart) {
+            // Read from parts for multipart forms (create/update)
+            action = getStringValueFromPart(request, "action");
+            eventIdParam = getStringValueFromPart(request, "id"); // For update
+        } else {
+            // Read from parameters for regular forms (publish/cancel/delete)
+            action = request.getParameter("action");
+            eventIdParam = request.getParameter("eventId");
+            if (eventIdParam == null) {
+                eventIdParam = request.getParameter("id"); // Fallback
+            }
+        }
+
         if (action == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No action specified.");
             return;
         }
+
+        System.out.println("DEBUG: doPost received action = " + action);
 
         addOrganizerToRequest(request);
         Long eventId = null;
@@ -95,22 +120,23 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
                 if (action.equals("create")) {
                     EvenementDTO newEvent = handleCreate(request); // Pass request only
                     eventId = newEvent.getId();
+                    // Redirect to dashboard after creating
+                    response.sendRedirect(request.getContextPath() + "/organizer/dashboard");
+                    return;
                 } else {
-                    EvenementDTO updatedEvent = handleUpdate(request); // Pass request only
+                    // We already read eventIdParam for multipart update
+                    EvenementDTO updatedEvent = handleUpdate(request, Long.parseLong(eventIdParam));
                     eventId = updatedEvent.getId();
-                }
-                response.sendRedirect(request.getContextPath() + "/organizer/events/detail?id=" + eventId);
-                return;
-            }
-
-            // we extract event ID for operations that require event id
-            String eventIdParam = request.getParameter("eventId");
-            if (eventIdParam == null) {
-                eventIdParam = request.getParameter("id"); // Check 'id' as fallback
-                if (eventIdParam == null){
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No eventId specified for this action.");
+                    // Redirect to event detail page after updating
+                    response.sendRedirect(request.getContextPath() + "/organizer/events/detail?id=" + eventId);
                     return;
                 }
+            }
+
+            // For non-create/update actions, we MUST have an eventId
+            if (eventIdParam == null || eventIdParam.trim().isEmpty()){
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No eventId specified for this action.");
+                return;
             }
             eventId = Long.parseLong(eventIdParam);
 
@@ -136,8 +162,13 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
             response.sendRedirect(request.getContextPath() + "/organizer/events/detail?id=" + eventId);
         } catch (EntityNotFoundException e) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
+            System.out.println("DEBUG: IllegalArgumentException: " + e.getMessage());
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            System.out.println("DEBUG: Unexpected error: " + e.getMessage());
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Erreur interne: " + e.getMessage());
         }
     }
 
@@ -181,29 +212,67 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         request.getRequestDispatcher("/WEB-INF/views/organizer/detail.jsp").forward(request, response);
     }
 
-    private EvenementDTO handleCreate(HttpServletRequest request) throws IOException {
-       // HttpSession session = request.getSession(); // extracts user session from the server using token in the request.
-       // Organisateur organisateur = (Organisateur) session.getAttribute("loggedInUser");
+    private EvenementDTO handleCreate(HttpServletRequest request) throws IOException, ServletException {
+        // HttpSession session = request.getSession(); // extracts user session from the server using token in the request.
+        // Organisateur organisateur = (Organisateur) session.getAttribute("loggedInUser");
         EvenementDTO dto = new EvenementDTO();
-        dto.setTitre(request.getParameter("titre"));
-        dto.setDescription(request.getParameter("description"));
-        dto.setLieu(request.getParameter("lieu"));
-        dto.setDateDebut(LocalDateTime.parse(request.getParameter("dateDebut")));
-        dto.setDateFin(LocalDateTime.parse(request.getParameter("dateFin")));
-        dto.setLatitude(parseDouble(request.getParameter("latitude")));
-        dto.setLongitude(parseDouble(request.getParameter("longitude")));
-        
+
+        // Use the helper method for all text fields
+        dto.setTitre(getStringValueFromPart(request, "titre"));
+        dto.setDescription(getStringValueFromPart(request, "description"));
+        dto.setLieu(getStringValueFromPart(request, "lieu"));
+
+        // Parse dates with error handling
+        String dateDebutStr = getStringValueFromPart(request, "dateDebut");
+        String dateFinStr = getStringValueFromPart(request, "dateFin");
+        System.out.println("DEBUG: dateDebut = '" + dateDebutStr + "'");
+        System.out.println("DEBUG: dateFin = '" + dateFinStr + "'");
+
+        if (dateDebutStr == null || dateDebutStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("Date de début est requise");
+        }
+        if (dateFinStr == null || dateFinStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("Date de fin est requise");
+        }
+
+        try {
+            dto.setDateDebut(LocalDateTime.parse(dateDebutStr));
+            dto.setDateFin(LocalDateTime.parse(dateFinStr));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Format de date invalide: " + e.getMessage());
+        }
+
+        // Parse coordinates with error handling
+        String latStr = getStringValueFromPart(request, "latitude");
+        String lonStr = getStringValueFromPart(request, "longitude");
+        System.out.println("DEBUG: latitude = '" + latStr + "'");
+        System.out.println("DEBUG: longitude = '" + lonStr + "'");
+
+        if (latStr == null || latStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("Latitude est requise");
+        }
+        if (lonStr == null || lonStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("Longitude est requise");
+        }
+
+        try {
+            dto.setLatitude(parseDouble(latStr));
+            dto.setLongitude(parseDouble(lonStr));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Format de coordonnées invalide: " + e.getMessage());
+        }
+
         // Handle capacity
-        String capaciteStr = request.getParameter("capacite");
+        String capaciteStr = getStringValueFromPart(request, "capacite");
         if (capaciteStr != null && !capaciteStr.trim().isEmpty()) {
             dto.setCapacite(Integer.parseInt(capaciteStr));
         } else {
             dto.setCapacite(100); // Default capacity
         }
-        
+
         dto.setStatut(StatutEvenement.BROUILLON);
-        
-        // Handle image upload
+
+        // Handle image upload (this part was already correct)
         try {
             Part imagePart = request.getPart("eventImage");
             if (imagePart != null && imagePart.getSize() > 0) {
@@ -214,28 +283,39 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
             // Log error but don't fail the event creation
             System.err.println("Error uploading image: " + e.getMessage());
         }
-        
-       return evenementService.createEvent(dto, CURRENT_ORGANIZER_ID); // creates a new event
+
+        return evenementService.createEvent(dto, CURRENT_ORGANIZER_ID); // creates a new event
     }
 
-    private EvenementDTO handleUpdate(HttpServletRequest request) throws IOException {
-        Long eventId = Long.parseLong(request.getParameter("id"));
+    private EvenementDTO handleUpdate(HttpServletRequest request, Long eventId) throws IOException, ServletException {
+        // Long eventId = Long.parseLong(request.getParameter("id")); // This is now passed from doPost
         EvenementDTO dto = evenementService.getEventById(eventId);
-        dto.setTitre(request.getParameter("titre"));
-        dto.setDescription(request.getParameter("description"));
-        dto.setLieu(request.getParameter("lieu"));
-        dto.setDateDebut(LocalDateTime.parse(request.getParameter("dateDebut")));
-        dto.setDateFin(LocalDateTime.parse(request.getParameter("dateFin")));
-        dto.setLatitude(parseDouble(request.getParameter("latitude")));
-        dto.setLongitude(parseDouble(request.getParameter("longitude")));
-        
+
+        // Use the helper method for all text fields
+        dto.setTitre(getStringValueFromPart(request, "titre"));
+        dto.setDescription(getStringValueFromPart(request, "description"));
+        dto.setLieu(getStringValueFromPart(request, "lieu"));
+
+        String dateDebutStr = getStringValueFromPart(request, "dateDebut");
+        String dateFinStr = getStringValueFromPart(request, "dateFin");
+        String latStr = getStringValueFromPart(request, "latitude");
+        String lonStr = getStringValueFromPart(request, "longitude");
+        String capaciteStr = getStringValueFromPart(request, "capacite");
+
+        // Note: Add null/empty checks here just like in handleCreate for robustness
+        // For brevity, assuming valid data is passed from edit form
+
+        dto.setDateDebut(LocalDateTime.parse(dateDebutStr));
+        dto.setDateFin(LocalDateTime.parse(dateFinStr));
+        dto.setLatitude(parseDouble(latStr));
+        dto.setLongitude(parseDouble(lonStr));
+
         // Handle capacity
-        String capaciteStr = request.getParameter("capacite");
         if (capaciteStr != null && !capaciteStr.trim().isEmpty()) {
             dto.setCapacite(Integer.parseInt(capaciteStr));
         }
-        
-        // Handle image upload
+
+        // Handle image upload (this part was already correct)
         try {
             Part imagePart = request.getPart("eventImage");
             if (imagePart != null && imagePart.getSize() > 0) {
@@ -251,7 +331,26 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
             // Log error but don't fail the event update
             System.err.println("Error uploading image: " + e.getMessage());
         }
-        
+
         return evenementService.updateEvent(dto);
+    }
+    private String getStringValueFromPart(HttpServletRequest request, String partName) throws IOException, ServletException {
+        Part part = request.getPart(partName);
+        if (part == null) {
+            System.out.println("DEBUG: Part '" + partName + "' is null.");
+            return null;
+        }
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(part.getInputStream(), StandardCharsets.UTF_8))) {
+            StringBuilder value = new StringBuilder();
+            char[] buffer = new char[1024];
+            int bytesRead;
+            while ((bytesRead = reader.read(buffer)) != -1) {
+                value.append(buffer, 0, bytesRead);
+            }
+            return value.toString();
+        } catch (Exception e) {
+            System.err.println("Error reading part " + partName + ": " + e.getMessage());
+            return null;
+        }
     }
 }

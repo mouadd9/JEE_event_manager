@@ -3,6 +3,7 @@ package com.example.jee_event_manager.service;
 import com.example.jee_event_manager.DAO.InscriptionRepository;
 import com.example.jee_event_manager.DAO.EvenementRepository;
 import com.example.jee_event_manager.DAO.ParticipantRepository;
+import com.example.jee_event_manager.config.qualifiers.ParticipantQualifier;
 import com.example.jee_event_manager.model.Evenement;
 import com.example.jee_event_manager.model.Inscription;
 import com.example.jee_event_manager.model.Participant;
@@ -26,6 +27,7 @@ public class InscriptionService {
     private EvenementRepository evenementRepository;
     
     @Inject
+    @ParticipantQualifier
     private ParticipantRepository participantRepository;
     
     @Inject

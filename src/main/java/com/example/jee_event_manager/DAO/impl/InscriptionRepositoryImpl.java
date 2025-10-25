@@ -31,25 +31,62 @@ public class InscriptionRepositoryImpl implements InscriptionRepository {
     
     @Override
     public Inscription save(Inscription inscription) {
-        if (inscription.getId() == null) {
-            em.persist(inscription);
-        } else {
-            inscription = em.merge(inscription);
+        try {
+            em.getTransaction().begin();
+            
+            if (inscription.getId() == null) {
+                em.persist(inscription);
+            } else {
+                inscription = em.merge(inscription);
+            }
+            
+            em.getTransaction().commit();
+            return inscription;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to save Inscription: " + e.getMessage(), e);
         }
-        return inscription;
     }
     
     @Override
     public void delete(Long id) {
-        Inscription inscription = em.find(Inscription.class, id);
-        if (inscription != null) {
-            em.remove(inscription);
+        try {
+            em.getTransaction().begin();
+            
+            Inscription inscription = em.find(Inscription.class, id);
+            if (inscription != null) {
+                em.remove(inscription);
+            }
+            
+            em.getTransaction().commit();
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to delete Inscription: " + e.getMessage(), e);
         }
     }
     
     @Override
     public Inscription update(Inscription inscription) {
-        return em.merge(inscription);
+        try {
+            em.getTransaction().begin();
+            
+            inscription = em.merge(inscription);
+            
+            em.getTransaction().commit();
+            return inscription;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to update Inscription: " + e.getMessage(), e);
+        }
     }
     
     @Override
@@ -153,14 +190,26 @@ public class InscriptionRepositoryImpl implements InscriptionRepository {
     
     @Override
     public void cancelInscription(Long inscriptionId) {
-        TypedQuery<Inscription> query = em.createQuery(
-            "SELECT i FROM Inscription i WHERE i.id = :inscriptionId",
-            Inscription.class
-        );
-        query.setParameter("inscriptionId", inscriptionId);
-        Inscription inscription = query.getSingleResult();
-        inscription.setStatut(StatutInscription.ANNULEE);
-        em.merge(inscription);
+        try {
+            em.getTransaction().begin();
+            
+            TypedQuery<Inscription> query = em.createQuery(
+                "SELECT i FROM Inscription i WHERE i.id = :inscriptionId",
+                Inscription.class
+            );
+            query.setParameter("inscriptionId", inscriptionId);
+            Inscription inscription = query.getSingleResult();
+            inscription.setStatut(StatutInscription.ANNULEE);
+            em.merge(inscription);
+            
+            em.getTransaction().commit();
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to cancel Inscription: " + e.getMessage(), e);
+        }
     }
     
     @Override

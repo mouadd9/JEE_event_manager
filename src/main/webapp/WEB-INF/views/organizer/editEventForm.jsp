@@ -151,7 +151,9 @@
                             <div class="col-md-6 mb-3">
                                 <label for="titre" class="form-label">Titre de l'événement</label>
                                 <input type="text" class="form-control" id="titre" name="titre" required 
-                                       value="${event.titre}" placeholder="Ex: Conférence sur l'IA">
+                                       minlength="5" maxlength="100"
+                                       value="${event.titre}" placeholder="Ex: Conférence sur l'IA (5-100 caractères)">
+                                <div class="form-text">Le titre doit contenir entre 5 et 100 caractères</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="capacite" class="form-label">Capacité</label>
@@ -162,7 +164,7 @@
 
                         <div class="mb-3">
                             <label for="lieu" class="form-label">Nom du lieu</label>
-                            <input type="text" class="form-control" id="lieu" name="lieu" 
+                            <input type="text" class="form-control" id="lieu" name="lieu" required
                                    value="${event.lieu}" placeholder="Ex: Palais des Congrès, Salle de conférence">
                         </div>
 
@@ -185,7 +187,8 @@
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
                             <textarea class="form-control" id="description" name="description" rows="4" 
-                                      placeholder="Décrivez votre événement...">${event.description}</textarea>
+                                      maxlength="1000" placeholder="Décrivez votre événement...">${event.description}</textarea>
+                            <div class="form-text">Maximum 1000 caractères</div>
                         </div>
 
                         <div class="mb-3">
@@ -352,6 +355,68 @@
             } catch (error) {
                 console.error('Error initializing map:', error);
             }
+
+            // --- Form Submission Handler ---
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(e) {
+                console.log('=== EDIT FORM SUBMISSION STARTED ===');
+
+                // Get form values
+                const titre = document.getElementById('titre').value.trim();
+                const lieu = document.getElementById('lieu').value.trim();
+                const description = document.getElementById('description').value.trim();
+                const startDate = dateDebutInput.value;
+                const endDate = dateFinInput.value;
+
+                // Validate title (5-100 characters)
+                if (!titre || titre.length < 5 || titre.length > 100) {
+                    e.preventDefault();
+                    alert('Le titre doit contenir entre 5 et 100 caractères.');
+                    document.getElementById('titre').focus();
+                    return false;
+                }
+
+                // Validate location name (required)
+                if (!lieu || lieu.trim() === '') {
+                    e.preventDefault();
+                    alert('Le nom du lieu est obligatoire.');
+                    document.getElementById('lieu').focus();
+                    return false;
+                }
+
+                // Validate description (max 1000 characters)
+                if (description.length > 1000) {
+                    e.preventDefault();
+                    alert('La description ne peut pas dépasser 1000 caractères.');
+                    document.getElementById('description').focus();
+                    return false;
+                }
+
+                // Validate dates
+                if (!startDate || startDate.trim() === '') {
+                    e.preventDefault();
+                    alert('Veuillez sélectionner la date de début.');
+                    dateDebutInput.focus();
+                    return false;
+                }
+
+                if (!endDate || endDate.trim() === '') {
+                    e.preventDefault();
+                    alert('Veuillez sélectionner la date de fin.');
+                    dateFinInput.focus();
+                    return false;
+                }
+
+                console.log('Submitting edit fields:', {
+                    titre: titre,
+                    lieu: lieu,
+                    description: description,
+                    dateDebut: startDate,
+                    dateFin: endDate,
+                    latitude: latInput.value,
+                    longitude: lonInput.value
+                });
+            });
         });
     </script>
 

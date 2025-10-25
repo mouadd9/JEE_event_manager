@@ -1,6 +1,7 @@
 package com.example.jee_event_manager.service;
 
 import com.example.jee_event_manager.DAO.*;
+import com.example.jee_event_manager.config.qualifiers.ParticipantQualifier;
 import com.example.jee_event_manager.dto.*;
 import com.example.jee_event_manager.model.*;
 import jakarta.ejb.Stateless;
@@ -26,6 +27,7 @@ public class OrganisateurAnalyticsService {
     private EvenementRepository evenementRepo;
     
     @Inject 
+    @ParticipantQualifier
     private ParticipantRepository participantRepo;
     
     /**

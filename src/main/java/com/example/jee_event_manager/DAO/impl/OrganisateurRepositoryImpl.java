@@ -1,6 +1,7 @@
 package com.example.jee_event_manager.DAO.impl;
 
 import com.example.jee_event_manager.DAO.OrganisateurRepository;
+import com.example.jee_event_manager.config.qualifiers.OrganisateurQualifier;
 import com.example.jee_event_manager.model.Organisateur;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
+@OrganisateurQualifier
 public class OrganisateurRepositoryImpl implements OrganisateurRepository {
     
     @Inject
@@ -30,12 +32,24 @@ public class OrganisateurRepositoryImpl implements OrganisateurRepository {
     
     @Override
     public Organisateur saveOrganisateur(Organisateur organisateur) {
-        if (organisateur.getId() == null) {
-            em.persist(organisateur);
-        } else {
-            organisateur = em.merge(organisateur);
+        try {
+            em.getTransaction().begin();
+            
+            if (organisateur.getId() == null) {
+                em.persist(organisateur);
+            } else {
+                organisateur = em.merge(organisateur);
+            }
+            
+            em.getTransaction().commit();
+            return organisateur;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to save Organisateur: " + e.getMessage(), e);
         }
-        return organisateur;
     }
     
     @Override
@@ -81,18 +95,44 @@ public class OrganisateurRepositoryImpl implements OrganisateurRepository {
     
     @Override
     public void delete(Long id) {
-        Organisateur organisateur = em.find(Organisateur.class, id);
-        if (organisateur != null) {
-            em.remove(organisateur);
+        try {
+            em.getTransaction().begin();
+            
+            Organisateur organisateur = em.find(Organisateur.class, id);
+            if (organisateur != null) {
+                em.remove(organisateur);
+            }
+            
+            em.getTransaction().commit();
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to delete Organisateur: " + e.getMessage(), e);
         }
     }
     
     @Override
     public com.example.jee_event_manager.model.Utilisateur update(com.example.jee_event_manager.model.Utilisateur utilisateur) {
-        if (utilisateur instanceof Organisateur) {
-            return em.merge((Organisateur) utilisateur);
+        try {
+            em.getTransaction().begin();
+            
+            if (utilisateur instanceof Organisateur) {
+                utilisateur = em.merge((Organisateur) utilisateur);
+            } else {
+                throw new IllegalArgumentException("Expected Organisateur instance");
+            }
+            
+            em.getTransaction().commit();
+            return utilisateur;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to update Organisateur: " + e.getMessage(), e);
         }
-        throw new IllegalArgumentException("Expected Organisateur instance");
     }
     
     @Override

@@ -3,10 +3,10 @@
              xmlns="https://jakarta.ee/xml/ns/persistence"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
-    
-    <persistence-unit name="default" transaction-type="JTA">
-        <jta-data-source>java:jboss/datasources/EventDS</jta-data-source>
-        
+
+    <persistence-unit name="default" transaction-type="RESOURCE_LOCAL">
+        <!-- Remove the jta-data-source line -->
+
         <!-- Liste des classes d'entités -->
         <class>com.example.jee_event_manager.model.Utilisateur</class>
         <class>com.example.jee_event_manager.model.Participant</class>
@@ -17,19 +17,24 @@
         <class>com.example.jee_event_manager.model.Commentaire</class>
         <class>com.example.jee_event_manager.model.Evaluation</class>
         <class>com.example.jee_event_manager.model.EvenementReport</class>
-        
+
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
-        
+
         <properties>
-            <!-- Configuration Hibernate -->
+            <!-- JDBC Connection Properties -->
+            <property name="jakarta.persistence.jdbc.url"
+                      value="jdbc:mysql://localhost:3306/event_manager?createDatabaseIfNotExist=true&amp;useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true"/>
+            <property name="jakarta.persistence.jdbc.user" value="eventuser"/>
+            <property name="jakarta.persistence.jdbc.password" value="eventpass"/>
+            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+
+            <!-- Hibernate Configuration -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
-            
-            <!-- Paramètres de logging (à désactiver en production) -->
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
             <property name="hibernate.use_sql_comments" value="true"/>
         </properties>
     </persistence-unit>
-    
+
 </persistence>

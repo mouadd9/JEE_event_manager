@@ -30,25 +30,62 @@ public class CommentaireRepositoryImpl implements CommentaireRepository {
     
     @Override
     public Commentaire save(Commentaire commentaire) {
-        if (commentaire.getId() == null) {
-            em.persist(commentaire);
-        } else {
-            commentaire = em.merge(commentaire);
+        try {
+            em.getTransaction().begin();
+            
+            if (commentaire.getId() == null) {
+                em.persist(commentaire);
+            } else {
+                commentaire = em.merge(commentaire);
+            }
+            
+            em.getTransaction().commit();
+            return commentaire;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to save Commentaire: " + e.getMessage(), e);
         }
-        return commentaire;
     }
     
     @Override
     public void delete(Long id) {
-        Commentaire commentaire = em.find(Commentaire.class, id);
-        if (commentaire != null) {
-            em.remove(commentaire);
+        try {
+            em.getTransaction().begin();
+            
+            Commentaire commentaire = em.find(Commentaire.class, id);
+            if (commentaire != null) {
+                em.remove(commentaire);
+            }
+            
+            em.getTransaction().commit();
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to delete Commentaire: " + e.getMessage(), e);
         }
     }
     
     @Override
     public Commentaire update(Commentaire commentaire) {
-        return em.merge(commentaire);
+        try {
+            em.getTransaction().begin();
+            
+            commentaire = em.merge(commentaire);
+            
+            em.getTransaction().commit();
+            return commentaire;
+            
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Failed to update Commentaire: " + e.getMessage(), e);
+        }
     }
     
     @Override

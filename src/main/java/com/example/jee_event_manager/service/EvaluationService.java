@@ -4,6 +4,7 @@ import com.example.jee_event_manager.DAO.EvaluationRepository;
 import com.example.jee_event_manager.DAO.InscriptionRepository;
 import com.example.jee_event_manager.DAO.EvenementRepository;
 import com.example.jee_event_manager.DAO.ParticipantRepository;
+import com.example.jee_event_manager.config.qualifiers.ParticipantQualifier;
 import com.example.jee_event_manager.model.Evaluation;
 import com.example.jee_event_manager.model.Evenement;
 import com.example.jee_event_manager.model.Participant;
@@ -28,6 +29,7 @@ public class EvaluationService {
     private EvenementRepository evenementRepository;
     
     @Inject
+    @ParticipantQualifier
     private ParticipantRepository participantRepository;
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Evaluation ajouterOuModifierEvaluation(Long participantId, Long evenementId, Integer note, String texte) {

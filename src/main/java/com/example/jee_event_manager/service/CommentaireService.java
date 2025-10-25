@@ -4,6 +4,7 @@ import com.example.jee_event_manager.DAO.CommentaireRepository;
 import com.example.jee_event_manager.DAO.InscriptionRepository;
 import com.example.jee_event_manager.DAO.EvenementRepository;
 import com.example.jee_event_manager.DAO.ParticipantRepository;
+import com.example.jee_event_manager.config.qualifiers.ParticipantQualifier;
 import com.example.jee_event_manager.model.Commentaire;
 import com.example.jee_event_manager.model.Evenement;
 import com.example.jee_event_manager.model.Participant;
@@ -27,6 +28,7 @@ public class CommentaireService {
     private EvenementRepository evenementRepository;
     
     @Inject
+    @ParticipantQualifier
     private ParticipantRepository participantRepository;
    
     @TransactionAttribute(TransactionAttributeType.REQUIRED)

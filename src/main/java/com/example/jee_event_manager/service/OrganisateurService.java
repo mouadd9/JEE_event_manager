@@ -2,6 +2,7 @@ package com.example.jee_event_manager.service;
 
 import com.example.jee_event_manager.DAO.OrganisateurRepository;
 import com.example.jee_event_manager.DAO.EvenementRepository;
+import com.example.jee_event_manager.config.qualifiers.OrganisateurQualifier;
 import com.example.jee_event_manager.model.Organisateur;
 import com.example.jee_event_manager.model.Evenement;
 import jakarta.ejb.Stateless;
@@ -14,6 +15,7 @@ import java.util.Optional;
 public class OrganisateurService {
     
     @Inject
+    @OrganisateurQualifier
     private OrganisateurRepository organisateurRepository;
     
     @Inject
