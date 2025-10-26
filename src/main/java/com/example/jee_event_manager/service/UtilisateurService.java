@@ -58,6 +58,19 @@ public class UtilisateurService {
         utilisateur.setEmail(email);
         utilisateur.setMotDePasseHash(hashPassword(motDePasse));
         utilisateur.setUserType(userType);
+        
+        // Set verification and activation status
+        utilisateur.setIsVerified(true); // Email is verified after code verification
+        
+        if (userType == UserType.PARTICIPANT) {
+            // Participants are active immediately after email verification
+            utilisateur.setIsActive(true);
+        } else {
+            // Organisateurs need admin approval - set as inactive
+            utilisateur.setIsActive(false);
+        }
+        
+        utilisateur.setIsSuspended(false);
 
         // Sauvegarder avec le repository approprié
         if (userType == UserType.PARTICIPANT) {

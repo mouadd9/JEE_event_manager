@@ -50,7 +50,7 @@ public class AdminService {
             .filter(u -> u.getUserType() == UserType.ADMIN)
             .count();
         long pendingOrganisateurs = allUsers.stream()
-            .filter(u -> u.getUserType() == UserType.ORGANISATEUR && (u.getIsVerified() == null || !u.getIsVerified()))
+            .filter(u -> u.getUserType() == UserType.ORGANISATEUR && (u.getIsActive() == null || !u.getIsActive()))
             .count();
         long suspendedUsers = allUsers.stream()
             .filter(u -> u.getIsSuspended() != null && u.getIsSuspended())
@@ -101,24 +101,24 @@ public class AdminService {
     }
     
     /**
-     * Get pending organisateurs (not verified)
+     * Get pending organisateurs (waiting for admin approval - isActive = false)
      */
     public List<Utilisateur> getPendingOrganisateurs() {
         return utilisateurRepository.findAll().stream()
             .filter(u -> u.getUserType() == UserType.ORGANISATEUR)
-            .filter(u -> u.getIsVerified() == null || !u.getIsVerified())
+            .filter(u -> u.getIsActive() == null || !u.getIsActive())
             .collect(Collectors.toList());
     }
     
     /**
-     * Verify/validate an organisateur
+     * Approve/activate an organisateur (set isActive to true)
      */
     public void verifyOrganisateur(Long userId) {
         Optional<Utilisateur> userOpt = utilisateurRepository.findById(userId);
         if (userOpt.isPresent()) {
             Utilisateur user = userOpt.get();
             if (user.getUserType() == UserType.ORGANISATEUR) {
-                user.setIsVerified(true);
+                user.setIsActive(true); // Approve the organisateur
                 utilisateurRepository.update(user);
             }
         }

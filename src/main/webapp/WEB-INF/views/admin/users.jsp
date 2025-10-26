@@ -161,7 +161,8 @@
         <!-- Pending Organisateurs Section -->
         <c:if test="${not empty pendingOrganisateurs && pendingOrganisateurs.size() > 0}">
             <div class="alert alert-warning mb-4">
-                <h5><i class="fas fa-exclamation-triangle me-2"></i>Organisateurs en attente de validation (${pendingOrganisateurs.size()})</h5>
+                <h5><i class="fas fa-exclamation-triangle me-2"></i>Organisateurs en attente d'approbation (${pendingOrganisateurs.size()})</h5>
+                <p class="mb-0">Ces organisateurs ont vérifié leur email et attendent votre approbation pour accéder à leur compte.</p>
             </div>
             <div class="row mb-4">
                 <c:forEach var="user" items="${pendingOrganisateurs}">
@@ -174,12 +175,17 @@
                                         <i class="fas fa-envelope me-2"></i>${user.email}
                                     </p>
                                     <span class="badge badge-pending">
-                                        <i class="fas fa-clock me-1"></i>En attente de validation
+                                        <i class="fas fa-clock me-1"></i>En attente d'approbation
                                     </span>
+                                    <c:if test="${user.isVerified}">
+                                        <span class="badge badge-verified">
+                                            <i class="fas fa-check me-1"></i>Email vérifié
+                                        </span>
+                                    </c:if>
                                 </div>
                                 <div class="col-md-6 text-end">
                                     <button class="btn btn-success btn-action" onclick="verifyUser(${user.id})">
-                                        <i class="fas fa-check me-1"></i>Valider
+                                        <i class="fas fa-check me-1"></i>Approuver
                                     </button>
                                     <button class="btn btn-danger btn-action" onclick="suspendUser(${user.id})">
                                         <i class="fas fa-ban me-1"></i>Refuser
@@ -210,7 +216,17 @@
                                 <span class="badge bg-secondary me-1">${user.userType}</span>
                                 <c:if test="${user.isVerified}">
                                     <span class="badge badge-verified">
-                                        <i class="fas fa-check me-1"></i>Vérifié
+                                        <i class="fas fa-check me-1"></i>Email vérifié
+                                    </span>
+                                </c:if>
+                                <c:if test="${user.userType == 'ORGANISATEUR' && user.isActive}">
+                                    <span class="badge badge-verified">
+                                        <i class="fas fa-check-circle me-1"></i>Approuvé
+                                    </span>
+                                </c:if>
+                                <c:if test="${user.userType == 'ORGANISATEUR' && !user.isActive && !user.isSuspended}">
+                                    <span class="badge badge-pending">
+                                        <i class="fas fa-clock me-1"></i>En attente
                                     </span>
                                 </c:if>
                                 <c:if test="${user.isSuspended}">
@@ -220,12 +236,12 @@
                                 </c:if>
                             </div>
                             <div class="col-md-6 text-end">
-                                <c:if test="${!user.isVerified && user.userType == 'ORGANISATEUR'}">
+                                <c:if test="${!user.isActive && user.userType == 'ORGANISATEUR' && !user.isSuspended}">
                                     <button class="btn btn-success btn-action" onclick="verifyUser(${user.id})">
-                                        <i class="fas fa-check me-1"></i>Valider
+                                        <i class="fas fa-check me-1"></i>Approuver
                                     </button>
                                 </c:if>
-                                <c:if test="${!user.isSuspended}">
+                                <c:if test="${!user.isSuspended && user.isActive}">
                                     <button class="btn btn-warning btn-action" onclick="suspendUser(${user.id})">
                                         <i class="fas fa-ban me-1"></i>Suspendre
                                     </button>
@@ -266,9 +282,9 @@
     
     <script>
         function verifyUser(userId) {
-            if (!confirm('Voulez-vous vraiment valider cet organisateur ?')) return;
+            if (!confirm('Voulez-vous vraiment approuver cet organisateur ?')) return;
             
-            console.log('Verify user:', userId);
+            console.log('Approve organisateur:', userId);
             performAction('verify', userId);
         }
         

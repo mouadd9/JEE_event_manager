@@ -187,19 +187,16 @@ public class RegisterServlet extends HttpServlet {
             session.removeAttribute("reg_password");
             session.removeAttribute("reg_userType");
 
-            // Create user session
-            session.setAttribute("user", utilisateur);
-            session.setAttribute("userId", utilisateur.getId());
-            session.setAttribute("userName", utilisateur.getNom());
-            session.setAttribute("userEmail", utilisateur.getEmail());
-            session.setAttribute("userType", utilisateur.getUserType().toString());
-
-            // Rediriger selon le type d'utilisateur
+            // Redirect to login page with success message
+            session.setAttribute("registrationSuccess", true);
+            
             if (userType == UserType.PARTICIPANT) {
-                response.sendRedirect(request.getContextPath() + "/catalogue");
+                session.setAttribute("successMessage", "Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter.");
             } else {
-                response.sendRedirect(request.getContextPath() + "/organizer/dashboard");
+                session.setAttribute("successMessage", "Votre compte a été créé avec succès ! Votre compte est en attente d'approbation par un administrateur. Vous recevrez une notification par email une fois votre compte approuvé.");
             }
+            
+            response.sendRedirect(request.getContextPath() + "/login");
 
         } catch (Exception e) {
             e.printStackTrace();

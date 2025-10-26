@@ -138,7 +138,7 @@ public class AdminUserManagementServlet extends HttpServlet {
                 case "verify":
                     adminService.verifyOrganisateur(userId);
                     result.put("success", true);
-                    result.put("message", "Organisateur vérifié avec succès");
+                    result.put("message", "Organisateur approuvé avec succès");
                     break;
                     
                 case "suspend":

@@ -37,6 +37,18 @@ public class LoginServlet extends HttpServlet {
             return;
         }
         
+        // Check for registration success message
+        if (session != null) {
+            Boolean registrationSuccess = (Boolean) session.getAttribute("registrationSuccess");
+            String successMessage = (String) session.getAttribute("successMessage");
+            
+            if (registrationSuccess != null && registrationSuccess) {
+                request.setAttribute("success", successMessage);
+                session.removeAttribute("registrationSuccess");
+                session.removeAttribute("successMessage");
+            }
+        }
+        
         // Afficher la page de connexion
         request.getRequestDispatcher("/login.jsp").forward(request, response);
     }
@@ -76,6 +88,34 @@ public class LoginServlet extends HttpServlet {
 
             if (utilisateur == null) {
                 request.setAttribute("error", "Email ou mot de passe incorrect");
+                request.getRequestDispatcher("/login.jsp").forward(request, response);
+                return;
+            }
+            
+            // Check if user is verified
+            if (utilisateur.getIsVerified() == null || !utilisateur.getIsVerified()) {
+                request.setAttribute("error", "Votre compte n'est pas vérifié. Veuillez vérifier votre email.");
+                request.getRequestDispatcher("/login.jsp").forward(request, response);
+                return;
+            }
+            
+            // Check if user is suspended
+            if (utilisateur.getIsSuspended() != null && utilisateur.getIsSuspended()) {
+                String reason = utilisateur.getSuspensionReason() != null 
+                    ? utilisateur.getSuspensionReason() 
+                    : "Violation des conditions d'utilisation";
+                request.setAttribute("error", "Votre compte est suspendu. Raison: " + reason);
+                request.getRequestDispatcher("/login.jsp").forward(request, response);
+                return;
+            }
+            
+            // Check if user is active (especially for organisateurs awaiting approval)
+            if (utilisateur.getIsActive() == null || !utilisateur.getIsActive()) {
+                if ("ORGANISATEUR".equals(utilisateur.getUserType().toString())) {
+                    request.setAttribute("error", "Votre compte est en attente d'approbation par un administrateur.");
+                } else {
+                    request.setAttribute("error", "Votre compte n'est pas actif. Veuillez contacter l'administration.");
+                }
                 request.getRequestDispatcher("/login.jsp").forward(request, response);
                 return;
             }
