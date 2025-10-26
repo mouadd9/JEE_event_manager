@@ -1,6 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="jakarta.tags.core" prefix="c"%>
 <%@ taglib uri="jakarta.tags.fmt" prefix="fmt"%>
+<%@ page import="java.time.format.DateTimeFormatter" %>
+<%
+    // Define date formatter for LocalDateTime
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    request.setAttribute("dateFormatter", dateFormatter);
+%>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -187,7 +193,7 @@
                                 </p>
                                 <p class="text-muted mb-2">
                                     <i class="fas fa-calendar me-1"></i>
-                                    <fmt:formatDate value="${event.dateDebut}" pattern="dd/MM/yyyy HH:mm"/>
+                                    ${event.dateDebut.format(dateFormatter)}
                                 </p>
                                 <span class="badge badge-${event.statut == 'PUBLIE' ? 'publié' : event.statut == 'BROUILLON' ? 'brouillon' : event.statut == 'CACHE' ? 'cache' : 'annule'}">
                                     ${event.statut}
@@ -209,7 +215,7 @@
                                 <button class="btn btn-danger btn-action" onclick="deleteEvent(${event.id})">
                                     <i class="fas fa-trash me-1"></i>Supprimer
                                 </button>
-                                <a href="${pageContext.request.contextPath}/catalogue?eventId=${event.id}" 
+                                <a href="${pageContext.request.contextPath}/events/${event.id}" 
                                    class="btn btn-info btn-action" target="_blank">
                                     <i class="fas fa-eye me-1"></i>Voir
                                 </a>
@@ -259,26 +265,49 @@
         }
         
         function performAction(action, eventId) {
-            const formData = new FormData();
-            formData.append('action', action);
-            formData.append('eventId', eventId);
+            console.log('performAction called with:', { action, eventId });
             
-            fetch('${pageContext.request.contextPath}/admin/events', {
+            // Validate parameters
+            if (!action || !eventId) {
+                console.error('Missing parameters:', { action, eventId });
+                alert('Erreur: Paramètres manquants');
+                return;
+            }
+            
+            // Use URLSearchParams instead of FormData for better compatibility
+            const params = new URLSearchParams();
+            params.append('action', action);
+            params.append('eventId', eventId.toString());
+            
+            const url = '${pageContext.request.contextPath}/admin/events';
+            console.log('Sending POST to:', url);
+            
+            fetch(url, {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: params.toString()
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Response data:', data);
                 if (data.success) {
                     alert(data.message);
                     location.reload();
                 } else {
-                    alert('Erreur: ' + data.message);
+                    alert('Erreur: ' + (data.message || 'Opération échouée'));
                 }
             })
             .catch(error => {
-                alert('Erreur lors de l\'opération');
-                console.error('Error:', error);
+                console.error('Fetch error:', error);
+                alert('Erreur lors de l\'opération. Veuillez vérifier la console pour plus de détails.');
             });
         }
     </script>

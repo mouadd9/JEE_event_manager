@@ -1,6 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="jakarta.tags.core" prefix="c"%>
 <%@ taglib uri="jakarta.tags.fmt" prefix="fmt"%>
+<%@ page import="java.time.format.DateTimeFormatter" %>
+<%
+    // Define date formatter for LocalDateTime
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm");
+    request.setAttribute("dateTimeFormatter", dateTimeFormatter);
+%>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -215,7 +221,7 @@
                 <div class="detail-row">
                     <span class="detail-label">Date</span>
                     <span class="detail-value">
-                        <fmt:formatDate value="${inscription.evenement.dateDebut}" pattern="dd/MM/yyyy à HH:mm" />
+                        ${inscription.evenement.dateDebut.format(dateTimeFormatter)}
                     </span>
                 </div>
                 <div class="detail-row">

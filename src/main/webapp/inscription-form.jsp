@@ -1,6 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="jakarta.tags.core" prefix="c"%>
 <%@ taglib uri="jakarta.tags.fmt" prefix="fmt"%>
+<%@ page import="java.time.format.DateTimeFormatter" %>
+<%
+    // Define date formatter for LocalDateTime
+    DateTimeFormatter fullDateTimeFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy à HH:mm");
+    request.setAttribute("fullDateTimeFormatter", fullDateTimeFormatter);
+%>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -423,7 +429,7 @@
                     <h5>${evenement.titre}</h5>
                     <p>
                         <i class="far fa-calendar me-2"></i>
-                        <fmt:formatDate value="${evenement.dateDebut}" pattern="EEE, dd MMM yyyy à HH:mm" />
+                        ${evenement.dateDebut.format(fullDateTimeFormatter)}
                     </p>
                     <p>
                         <i class="fas fa-map-marker-alt me-2"></i>

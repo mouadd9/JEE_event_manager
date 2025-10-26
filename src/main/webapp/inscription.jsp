@@ -1,6 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="jakarta.tags.core" prefix="c"%>
 <%@ taglib uri="jakarta.tags.fmt" prefix="fmt"%>
+<%@ page import="java.time.format.DateTimeFormatter" %>
+<%
+    // Define date formatters for LocalDateTime
+    DateTimeFormatter fullDateFormatter = DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy");
+    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+    DateTimeFormatter fullDateTimeFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy à HH:mm");
+    request.setAttribute("fullDateFormatter", fullDateFormatter);
+    request.setAttribute("timeFormatter", timeFormatter);
+    request.setAttribute("fullDateTimeFormatter", fullDateTimeFormatter);
+%>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -260,11 +270,11 @@
             <h1 class="event-title">${evenement.titre}</h1>
             <div class="event-info-item">
                 <i class="far fa-calendar"></i>
-                <span><fmt:formatDate value="${evenement.dateDebut}" pattern="EEEE dd MMMM yyyy" /></span>
+                <span>${evenement.dateDebut.format(fullDateFormatter)}</span>
             </div>
             <div class="event-info-item">
                 <i class="far fa-clock"></i>
-                <span><fmt:formatDate value="${evenement.dateDebut}" pattern="HH:mm" /> - <fmt:formatDate value="${evenement.dateFin}" pattern="HH:mm" /></span>
+                <span>${evenement.dateDebut.format(timeFormatter)} - ${evenement.dateFin.format(timeFormatter)}</span>
             </div>
             <div class="event-info-item">
                 <i class="fas fa-map-marker-alt"></i>

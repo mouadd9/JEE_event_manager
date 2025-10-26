@@ -67,23 +67,38 @@ public class AdminEventModerationServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        // Set request encoding BEFORE reading any parameters
+        request.setCharacterEncoding("UTF-8");
+        
         // Check if user is admin
         if (!isAdmin(request)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
         
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        
         String action = request.getParameter("action");
         String eventIdStr = request.getParameter("eventId");
         
+        // Debug logging
+        System.out.println("=== AdminEventModerationServlet POST ===");
+        System.out.println("Action: " + action);
+        System.out.println("EventId: " + eventIdStr);
+        
+        Map<String, Object> result = new HashMap<>();
+        
         if (action == null || eventIdStr == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            result.put("success", false);
+            result.put("message", "Paramètres manquants (action=" + action + ", eventId=" + eventIdStr + ")");
+            System.out.println("ERROR: Missing parameters!");
+            response.getWriter().write(gson.toJson(result));
             return;
         }
         
         try {
             Long eventId = Long.parseLong(eventIdStr);
-            Map<String, Object> result = new HashMap<>();
             
             switch (action) {
                 case "hide":
@@ -110,19 +125,13 @@ public class AdminEventModerationServlet extends HttpServlet {
                     result.put("message", "Action non reconnue");
             }
             
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
             response.getWriter().write(gson.toJson(result));
             
         } catch (Exception e) {
             e.printStackTrace();
-            Map<String, Object> error = new HashMap<>();
-            error.put("success", false);
-            error.put("message", "Erreur: " + e.getMessage());
-            
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(gson.toJson(error));
+            result.put("success", false);
+            result.put("message", "Erreur: " + e.getMessage());
+            response.getWriter().write(gson.toJson(result));
         }
     }
     
