@@ -2,12 +2,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JSP - Hello World</title>
+    <title>Event Manager</title>
+    <meta http-equiv="refresh" content="0;url=catalogue">
 </head>
 <body>
-<h1><%= "Hello World!" %>
-</h1>
-<br/>
-<a href="hello-servlet">Hello Servlet</a>
+<h1>Redirecting to Event Manager...</h1>
+<p>If you are not redirected automatically, <a href="catalogue">click here</a>.</p>
 </body>
 </html>

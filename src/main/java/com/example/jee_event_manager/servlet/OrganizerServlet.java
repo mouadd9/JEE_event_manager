@@ -43,12 +43,20 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
     @Inject
     private FileUploadService fileUploadService;
 
-    // !!!!!!! temporary we will use sessions in the future
     @Inject
     @OrganisateurQualifier
     private OrganisateurRepository organisateurRepository;
-    private static final Long CURRENT_ORGANIZER_ID = 1L;
-    // !!!!!!! temporary we will use sessions in the future
+
+    /**
+     * Get the current logged-in organizer ID from session
+     */
+    private Long getCurrentOrganizerId(HttpServletRequest request) {
+        Long organizerId = (Long) request.getSession().getAttribute("organisateurId");
+        if (organizerId == null) {
+            throw new EntityNotFoundException("Aucun organisateur connecté. Veuillez vous connecter.");
+        }
+        return organizerId;
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -167,24 +175,26 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         }
     }
 
-    // !!!!!!! temporary we will use sessions in the future
+    /**
+     * Add current organizer to request attributes
+     */
     private void addOrganizerToRequest(HttpServletRequest request) {
         try {
-            Organisateur organisateur = organisateurRepository.findOrganisateurById(CURRENT_ORGANIZER_ID)
-                    .orElseThrow(() -> new EntityNotFoundException("Organisateur not found"));
+            Long organizerId = getCurrentOrganizerId(request);
+            Organisateur organisateur = organisateurRepository.findOrganisateurById(organizerId)
+                    .orElseThrow(() -> new EntityNotFoundException("Organisateur avec ID " + organizerId + " introuvable"));
             request.setAttribute("organizer", organisateur);
         } catch (Exception e) {
-            // Handle error, maybe set a default name
             request.setAttribute("organizerName", "Erreur");
+            throw e;
         }
     }
 
     private void showDashboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        //HttpSession session = request.getSession(); // extracts user session from the server using token in the request.
-        //Organisateur organisateur = (Organisateur) session.getAttribute("loggedInUser");
-        List<EvenementDTO> eventList = evenementService.getEventsByOrganizer(CURRENT_ORGANIZER_ID);
-        request.setAttribute("events", eventList); // here we pass data to our request
-        request.getRequestDispatcher("/WEB-INF/views/organizer/dashboard.jsp").forward(request, response); // and then we forward the request to the JSP page.
+        Long organizerId = getCurrentOrganizerId(request);
+        List<EvenementDTO> eventList = evenementService.getEventsByOrganizer(organizerId);
+        request.setAttribute("events", eventList);
+        request.getRequestDispatcher("/WEB-INF/views/organizer/dashboard.jsp").forward(request, response);
     }
 
     private void showCreateEventForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -283,7 +293,8 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
             System.err.println("Error uploading image: " + e.getMessage());
         }
 
-        return evenementService.createEvent(dto, CURRENT_ORGANIZER_ID); // creates a new event
+        Long organizerId = getCurrentOrganizerId(request);
+        return evenementService.createEvent(dto, organizerId);
     }
 
     private EvenementDTO handleUpdate(HttpServletRequest request, Long eventId) throws IOException, ServletException {

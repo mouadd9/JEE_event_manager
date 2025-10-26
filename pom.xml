@@ -96,19 +96,6 @@
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
             <version>4.0.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jakarta.activation</groupId>
-                    <artifactId>jakarta.activation-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        
-        <!-- Activation API -->
-        <dependency>
-            <groupId>com.sun.activation</groupId>
-            <artifactId>jakarta.activation</artifactId>
-            <version>2.0.1</version>
         </dependency>
         
         <!-- PostgreSQL JDBC Driver -->
@@ -200,13 +187,33 @@
             <version>8.0.33</version>
         </dependency>
 
-
-
         <!-- Hibernate JPA API -->
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
             <version>3.1.0</version>
+        </dependency>
+        
+        <!-- JavaMail for Email Sending -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        
+        <!-- Jakarta Activation API -->
+        <dependency>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+            <version>2.1.2</version>
+        </dependency>
+        
+        <!-- Angus Activation (Implementation for Jakarta Activation) -->
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-activation</artifactId>
+            <version>2.0.0</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
@@ -288,7 +295,7 @@
                     </container>
                     <configuration>
                         <properties>
-                            <cargo.servlet.port>8081</cargo.servlet.port>
+                            <cargo.servlet.port>8084</cargo.servlet.port>
                             <cargo.tomcat.context.xml>src/main/webapp/META-INF/context.xml</cargo.tomcat.context.xml>
                         </properties>
                     </configuration>

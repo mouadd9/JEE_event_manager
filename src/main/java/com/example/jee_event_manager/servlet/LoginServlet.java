@@ -102,7 +102,7 @@ public class LoginServlet extends HttpServlet {
             if ("PARTICIPANT".equals(utilisateur.getUserType().toString())) {
                 redirectUrl = request.getContextPath() + "/participant/dashboard";
             } else if ("ORGANISATEUR".equals(utilisateur.getUserType().toString())) {
-                redirectUrl = request.getContextPath() + "/organisateur/dashboard";
+                redirectUrl = request.getContextPath() + "/organizer/dashboard";
             } else if ("ADMIN".equals(utilisateur.getUserType().toString())) {
                 redirectUrl = request.getContextPath() + "/admin/dashboard";
             } else {

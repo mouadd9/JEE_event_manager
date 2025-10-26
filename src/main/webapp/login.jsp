@@ -250,7 +250,7 @@
                 </div>
                 
                 <div class="forgot-password">
-                    <a href="#"><i class="fas fa-key me-1"></i>Mot de passe oublié ?</a>
+                    <a href="${pageContext.request.contextPath}/forgot-password"><i class="fas fa-key me-1"></i>Mot de passe oublié ?</a>
                 </div>
                 
                 <button type="submit" class="btn-primary-custom mt-4">
