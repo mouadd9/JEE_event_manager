@@ -33,6 +33,9 @@ public class InscriptionService {
     @Inject
     private InscriptionNotifier notifier;
     
+    @Inject
+    private BilletService billetService;
+    
     /**
      * Trouver une inscription par son ID
      */
@@ -110,6 +113,15 @@ public class InscriptionService {
         // Forcer le chargement des relations pour éviter LazyInitializationException
         saved.getEvenement().getTitre(); // Force le chargement de l'événement
         saved.getParticipant().getNom(); // Force le chargement du participant
+        
+        // Générer le billet PDF automatiquement
+        try {
+            billetService.genererEtEnvoyerBillet(saved);
+            System.out.println("Billet généré et envoyé pour l'inscription: " + saved.getId());
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la génération du billet: " + e.getMessage());
+            // Ne pas faire échouer l'inscription si le billet ne peut pas être généré
+        }
         
         // Notifier les observateurs
         notifier.notifyInscription(saved);

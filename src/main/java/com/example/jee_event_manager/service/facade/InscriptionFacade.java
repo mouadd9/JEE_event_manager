@@ -8,6 +8,7 @@ import com.example.jee_event_manager.model.Evenement;
 import com.example.jee_event_manager.model.Inscription;
 import com.example.jee_event_manager.model.Participant;
 import com.example.jee_event_manager.model.StatutInscription;
+import com.example.jee_event_manager.service.BilletService;
 
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -32,6 +33,9 @@ public class InscriptionFacade {
     
     @Inject
     private EntityManager em;
+    
+    @Inject
+    private BilletService billetService;
 
     private EntityManager getEm() {
         if (em != null) {
@@ -75,12 +79,22 @@ public class InscriptionFacade {
             Inscription inscription = createInscription(participant, evenement, typeBillet, quantite, statut);
             
             // 9. Persister l'inscription
-            inscriptionRepository.save(inscription);
+            Inscription saved = inscriptionRepository.save(inscription);
             
             // Committer la transaction
             entityManager.getTransaction().commit();
             
-            return inscription;
+            // 10. Générer le billet PDF automatiquement (après commit)
+            try {
+                billetService.genererEtEnvoyerBillet(saved);
+                System.out.println("Billet généré et envoyé pour l'inscription: " + saved.getId());
+            } catch (Exception e) {
+                System.err.println("Erreur lors de la génération du billet: " + e.getMessage());
+                e.printStackTrace();
+                // Ne pas faire échouer l'inscription si le billet ne peut pas être généré
+            }
+            
+            return saved;
             
         } catch (Exception e) {
             // Rollback en cas d'erreur

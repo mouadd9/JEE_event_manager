@@ -19,6 +19,7 @@
         <postgresql.version>42.7.3</postgresql.version>
         <flyway.version>10.8.1</flyway.version>
         <ehcache.version>3.10.8</ehcache.version>
+        <itext.version>8.0.2</itext.version>
     </properties>
 
     <dependencyManagement>
@@ -82,6 +83,32 @@
             <artifactId>lombok</artifactId>
             <version>1.18.42</version>
             <scope>provided</scope>
+        </dependency>
+        
+        <!-- iText PDF Generation -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext-core</artifactId>
+            <version>${itext.version}</version>
+            <type>pom</type>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>kernel</artifactId>
+            <version>${itext.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>io</artifactId>
+            <version>${itext.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>layout</artifactId>
+            <version>${itext.version}</version>
         </dependency>
         
         <!-- Tomcat JDBC Pool (for DataSource) -->
@@ -181,10 +208,10 @@
             <version>5.1.2.Final</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>8.0.33</version>
+         <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.3</version>
         </dependency>
 
         <!-- Hibernate JPA API -->
@@ -237,12 +264,7 @@
                     <skip>true</skip>
                 </configuration>
                 <dependencies>
-                    <dependency>
-                        <groupId>org.postgresql</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <version>42.7.3</version>
-                        <scope>runtime</scope>
-                    </dependency>
+                    
                 </dependencies>
             </plugin>
             
@@ -295,7 +317,7 @@
                     </container>
                     <configuration>
                         <properties>
-                            <cargo.servlet.port>8084</cargo.servlet.port>
+                            <cargo.servlet.port>8081</cargo.servlet.port>
                             <cargo.tomcat.context.xml>src/main/webapp/META-INF/context.xml</cargo.tomcat.context.xml>
                         </properties>
                     </configuration>
@@ -316,7 +338,7 @@
                 <version>4.2.2.Final</version>
                 <configuration>
                     <hostname>localhost</hostname>
-                    <port>8080</port>
+                    <port>8081</port>
                     <username>admin</username>
                     <password>admin</password>
                     <filename>${project.build.finalName}.war</filename>

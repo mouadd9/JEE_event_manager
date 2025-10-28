@@ -440,7 +440,9 @@
                         <c:forEach items="${evenements}" var="evenement">
                             <div class="event-card">
                                 <div style="position: relative;">
-                                    <img src="${not empty evenement.imageUrl ? pageContext.request.contextPath.concat('/').concat(evenement.imageUrl) : 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800'}" 
+                                    <c:set var="imageUrl" value="${evenement.imageUrl}"/>
+                                    <c:set var="finalImageUrl" value="${fn:startsWith(imageUrl, 'http') ? imageUrl : pageContext.request.contextPath.concat('/').concat(imageUrl)}"/>
+                                    <img src="${not empty finalImageUrl ? finalImageUrl : 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800'}" 
                                          alt="${evenement.titre}" 
                                          class="event-image">
                                     <c:if test="${not empty evenement.categories}">
@@ -472,11 +474,11 @@
                                     <div class="event-meta">
                                         <div class="event-meta-item">
                                             <i class="far fa-calendar"></i>
-                                            <span>${evenement.dateDebut}</span>
+                                            <span>${evenement.dateDebutJour}</span>
                                         </div>
                                         <div class="event-meta-item">
                                             <i class="far fa-clock"></i>
-                                            <span>19h30</span>
+                                            <span>${evenement.dateDebutHeure}</span>
                                         </div>
                                         <div class="event-meta-item">
                                             <i class="fas fa-map-marker-alt"></i>

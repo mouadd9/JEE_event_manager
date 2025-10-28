@@ -19,6 +19,8 @@ public class EvenementDetailDTO {
     private LocalDateTime dateFin;
     private String dateDebutFormatee;
     private String dateFinFormatee;
+    private String dateDebutJour;  // Ex: "28 octobre 2025"
+    private String dateDebutHeure; // Ex: "19h30"
     private StatutEvenement statut;
     private String lieu;
     private Integer capacite;
@@ -80,6 +82,8 @@ public class EvenementDetailDTO {
         this.dateDebut = dateDebut;
         if (dateDebut != null) {
             this.dateDebutFormatee = dateDebut.format(DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm"));
+            this.dateDebutJour = dateDebut.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+            this.dateDebutHeure = dateDebut.format(DateTimeFormatter.ofPattern("HH'h'mm"));
         }
     }
     
@@ -96,6 +100,14 @@ public class EvenementDetailDTO {
     
     public String getDateDebutFormatee() {
         return dateDebutFormatee;
+    }
+    
+    public String getDateDebutJour() {
+        return dateDebutJour;
+    }
+    
+    public String getDateDebutHeure() {
+        return dateDebutHeure;
     }
     
     public String getDateFinFormatee() {

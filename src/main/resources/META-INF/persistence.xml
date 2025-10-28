@@ -19,24 +19,27 @@
         <class>com.example.jee_event_manager.model.Evaluation</class>
         <class>com.example.jee_event_manager.model.EvenementReport</class>
         <class>com.example.jee_event_manager.model.VerificationCode</class>
+        <class>com.example.jee_event_manager.model.Billet</class>
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
 
         <properties>
-            <!-- JDBC Connection Properties -->
-            <property name="jakarta.persistence.jdbc.url"
-                      value="jdbc:mysql://localhost:3306/event_manager?createDatabaseIfNotExist=true&amp;useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true"/>
-            <property name="jakarta.persistence.jdbc.user" value="root"/>
-            <property name="jakarta.persistence.jdbc.password" value=""/>
-            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
-
-            <!-- Hibernate Configuration -->
-            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
+            <!-- Configuration de la connexion à la base de données -->
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/event_manager_jee"/>
+            <property name="jakarta.persistence.jdbc.user" value="postgres"/>
+            <property name="jakarta.persistence.jdbc.password" value="1234"/>
+            <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            
+            <!-- Configuration Hibernate -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
+            
+            <!-- Paramètres de logging (à désactiver en production) -->
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
             <property name="hibernate.use_sql_comments" value="true"/>
         </properties>
+
     </persistence-unit>
 
 </persistence>
