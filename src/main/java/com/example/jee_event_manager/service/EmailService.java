@@ -10,12 +10,12 @@ import java.util.Properties;
 @ApplicationScoped
 public class EmailService {
     
-    // Email configuration
+    // Email configuration from environment variables
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
-    private static final String EMAIL_USERNAME = "youssef2003plus@gmail.com";
-    private static final String EMAIL_PASSWORD = "wyanhkxrkdqpacuu"; // Gmail App Password (spaces removed)
-    private static final String FROM_EMAIL = "youssef2003plus@gmail.com";
+    private static final String EMAIL_USERNAME = System.getenv().getOrDefault("EMAIL_USERNAME", "youssef2003plus@gmail.com");
+    private static final String EMAIL_PASSWORD = System.getenv().getOrDefault("EMAIL_PASSWORD", "wyanhkxrkdqpacuu");
+    private static final String FROM_EMAIL = System.getenv().getOrDefault("EMAIL_FROM", "youssef2003plus@gmail.com");
     private static final String FROM_NAME = "Event Manager";
     
     /**
