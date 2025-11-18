@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <%@ include file="/WEB-INF/jspf/theme-head.jspf" %>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/organizer-theme.css">
 
   <style>
@@ -316,9 +317,12 @@
                     <div class="event-image-container">
                         <c:choose>
                             <c:when test="${not empty event.imageUrl}">
-                                <img src="${pageContext.request.contextPath}/${event.imageUrl}" 
+                                <c:set var="imgUrl" value="${event.imageUrl}"/>
+                                <c:set var="finalUrl" value="${fn:startsWith(imgUrl, 'http') ? imgUrl : pageContext.request.contextPath.concat('/').concat(imgUrl)}"/>
+                                <img src="${finalUrl}" 
                                      alt="${event.titre}" 
-                                     class="event-image">
+                                     class="event-image"
+                                     onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800';">
                             </c:when>
                             <c:otherwise>
                                 <div class="event-image-placeholder">
@@ -460,25 +464,28 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script>
+<c:if test="${event.latitude != null && event.longitude != null}">
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
-  <c:if test="${event.latitude != null && event.longitude != null}">
-                try {
-  const lat = ${event.latitude};
-  const lon = ${event.longitude};
-  const map = L.map('map').setView([lat, lon], 15);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
-                    L.marker([lat, lon]).addTo(map).bindPopup('<c:out value="${event.titre}"/>').openPopup();
-                } catch (e) {
-                    console.error("Error initializing Leaflet map:", e);
-                    document.getElementById('map').innerHTML = "<p style='padding: 20px; color: red;'>Erreur lors de l'affichage de la carte.</p>";
-                }
-  </c:if>
-  <c:if test="${event.latitude == null || event.longitude == null}">
-                document.getElementById('map').innerHTML = "<p style='padding: 20px; color: #6c757d; text-align: center;'>Aucune localisation GPS fournie.</p>";
-  </c:if>
+            try {
+                const lat = parseFloat('${event.latitude}');
+                const lon = parseFloat('${event.longitude}');
+                const map = L.map('map').setView([lat, lon], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: 'OpenStreetMap' }).addTo(map);
+                L.marker([lat, lon]).addTo(map).bindPopup('<c:out value="${event.titre}"/>').openPopup();
+            } catch (e) {
+                console.error("Error initializing Leaflet map:", e);
+                document.getElementById('map').innerHTML = "<p style='padding: 20px; color: red;'>Erreur lors de l'affichage de la carte.</p>";
+            }
         });
-</script>
-
+    </script>
+</c:if>
+<c:if test="${event.latitude == null || event.longitude == null}">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('map').innerHTML = "<p style='padding: 20px; color: #6c757d; text-align: center;'>Aucune localisation GPS fournie.</p>";
+        });
+    </script>
+</c:if>
 </body>
 </html>

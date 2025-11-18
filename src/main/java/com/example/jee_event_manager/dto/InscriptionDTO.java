@@ -26,6 +26,7 @@ public class InscriptionDTO {
     
     // Informations calculées
     private Integer capaciteDisponible;
+    private Integer nombreInscrits;
     private String dateInscriptionFormatee;
     private String evenementDateFormatee;
     
@@ -143,6 +144,14 @@ public class InscriptionDTO {
         this.capaciteDisponible = capaciteDisponible;
     }
     
+    public Integer getNombreInscrits() {
+        return nombreInscrits;
+    }
+    
+    public void setNombreInscrits(Integer nombreInscrits) {
+        this.nombreInscrits = nombreInscrits;
+    }
+    
     public String getDateInscriptionFormatee() {
         return dateInscriptionFormatee;
     }
@@ -164,5 +173,37 @@ public class InscriptionDTO {
     public boolean isPeutAnnuler() {
         return statut != StatutInscription.ANNULEE && 
                !isEvenementPasse();
+    }
+    
+    /**
+     * Vérifier si l'événement est dans la fenêtre de 7 jours après sa fin
+     * Permet aux participants de commenter et évaluer après l'événement
+     */
+    public boolean isEvenementDansFenitrePostEvenement() {
+        if (evenementDateFin == null) {
+            return false;
+        }
+        LocalDateTime maintenant = LocalDateTime.now();
+        LocalDateTime limiteSept = evenementDateFin.plusDays(7);
+        
+        return maintenant.isAfter(evenementDateFin) && maintenant.isBefore(limiteSept);
+    }
+    
+    /**
+     * Vérifier si le participant peut évaluer l'événement
+     * (événement passé ou dans la fenêtre de 7 jours)
+     */
+    public boolean isPeutEvaluer() {
+        return statut == StatutInscription.ACCEPTEE && 
+               (isEvenementPasse() || isEvenementDansFenitrePostEvenement());
+    }
+    
+    /**
+     * Vérifier si le participant peut commenter l'événement
+     * (événement passé ou dans la fenêtre de 7 jours)
+     */
+    public boolean isPeutCommenter() {
+        return statut == StatutInscription.ACCEPTEE && 
+               (isEvenementPasse() || isEvenementDansFenitrePostEvenement());
     }
 }

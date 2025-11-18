@@ -11,6 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <%@ include file="/WEB-INF/jspf/theme-head.jspf" %>
     <!-- Theme CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/organizer-theme.css">

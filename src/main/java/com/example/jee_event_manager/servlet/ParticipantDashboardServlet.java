@@ -108,12 +108,33 @@ public class ParticipantDashboardServlet extends HttpServlet {
                 .filter(i -> i.getStatut() == StatutInscription.ACCEPTEE || i.getStatut() == StatutInscription.EN_ATTENTE)
                 .filter(i -> i.getEvenement().getDateDebut().isAfter(LocalDateTime.now()))
                 .map(DTOMapper::toInscriptionDTO)
+                .peek(dto -> {
+                    // Enrichir avec le nombre d'inscrits et la capacité disponible
+                    if (dto.getEvenementId() != null) {
+                        dto.setNombreInscrits(inscriptionService.countInscritsEvenement(dto.getEvenementId()).intValue());
+                        dto.setCapaciteDisponible(inscriptionService.getCapaciteDisponible(dto.getEvenementId()).intValue());
+                    }
+                })
                 .collect(Collectors.toList());
             
+            // Événements passés ou dans la fenêtre de 7 jours post-événement
+            LocalDateTime maintenant = LocalDateTime.now();
             List<InscriptionDTO> inscriptionsPassees = inscriptions.stream()
                 .filter(i -> i.getStatut() == StatutInscription.ACCEPTEE)
-                .filter(i -> i.getEvenement().getDateFin().isBefore(LocalDateTime.now()))
+                .filter(i -> {
+                    LocalDateTime dateFin = i.getEvenement().getDateFin();
+                    LocalDateTime limiteSept = dateFin.plusDays(7);
+                    // Inclure les événements passés et ceux dans la fenêtre de 7 jours
+                    return dateFin.isBefore(maintenant) && maintenant.isBefore(limiteSept);
+                })
                 .map(DTOMapper::toInscriptionDTO)
+                .peek(dto -> {
+                    // Enrichir avec le nombre d'inscrits et la capacité disponible
+                    if (dto.getEvenementId() != null) {
+                        dto.setNombreInscrits(inscriptionService.countInscritsEvenement(dto.getEvenementId()).intValue());
+                        dto.setCapaciteDisponible(inscriptionService.getCapaciteDisponible(dto.getEvenementId()).intValue());
+                    }
+                })
                 .collect(Collectors.toList());
             
             List<InscriptionDTO> inscriptionsAnnulees = inscriptions.stream()
@@ -149,6 +170,12 @@ public class ParticipantDashboardServlet extends HttpServlet {
             // Sérialiser en JSON pour le JavaScript
             request.setAttribute("evenementsJSON", GsonUtil.toJson(evenementsDTO));
             request.setAttribute("statistiquesJSON", GsonUtil.toJson(statistiques));
+            
+            // Sérialiser toutes les inscriptions pour le calendrier
+            List<InscriptionDTO> toutesInscriptions = inscriptions.stream()
+                .map(DTOMapper::toInscriptionDTO)
+                .collect(Collectors.toList());
+            request.setAttribute("inscriptionsJSON", GsonUtil.toJson(toutesInscriptions));
             
             // Forward vers la JSP
             request.getRequestDispatcher("/participant-dashboard.jsp").forward(request, response);

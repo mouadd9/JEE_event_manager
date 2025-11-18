@@ -230,6 +230,13 @@ public class EvenementService {
     }
     
     /**
+     * Récupérer les événements les plus populaires (par nombre de participants)
+     */
+    public List<Evenement> getPopularEvents(int limit) {
+        return evenementRepository.findPopularEvents(limit);
+    }
+    
+    /**
      * Enrichir un EvenementDTO avec les statistiques
      */
     private EvenementDTO enrichirEvenementDTO(Evenement evenement) {

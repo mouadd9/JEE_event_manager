@@ -104,6 +104,36 @@ public class CatalogueServlet extends HttpServlet {
             List<Categorie> categories = categorieService.findAll();
             request.setAttribute("categories", categories);
             
+            // Récupération des événements populaires (entre 3 et 5, basés sur le nombre d'inscriptions)
+            List<Evenement> popularEvents = evenementService.getPopularEvents(5);
+            System.out.println("=== DEBUG Popular Events ===");
+            System.out.println("Nombre d'événements populaires récupérés: " + (popularEvents != null ? popularEvents.size() : "null"));
+            
+            // Trier les DTOs par nombre d'inscriptions décroissant pour garantir l'ordre
+            List<EvenementDetailDTO> popularEventsDTO = popularEvents.stream()
+                .map(evt -> enrichirEvenementDTO(evt, participantId))
+                .sorted((e1, e2) -> {
+                    Long count1 = e1.getNombreInscrits() != null ? e1.getNombreInscrits() : 0L;
+                    Long count2 = e2.getNombreInscrits() != null ? e2.getNombreInscrits() : 0L;
+                    return count2.compareTo(count1); // Descending order
+                })
+                .limit(5) // Maximum 5 événements
+                .collect(java.util.stream.Collectors.toList());
+            
+            System.out.println("Nombre de DTOs populaires créés: " + popularEventsDTO.size());
+            if (!popularEventsDTO.isEmpty()) {
+                System.out.println("Premier événement populaire: " + popularEventsDTO.get(0).getTitre() + 
+                                 " - Inscrits: " + popularEventsDTO.get(0).getNombreInscrits());
+            }
+            
+            // Afficher si on a au moins 1 événement (au lieu de 3)
+            if (popularEventsDTO.size() >= 1) {
+                request.setAttribute("popularEvents", popularEventsDTO);
+            } else {
+                request.setAttribute("popularEvents", null);
+                System.out.println("Aucun événement populaire à afficher (moins de 1 événement)");
+            }
+            
             // Récupération des événements avec les filtres
             List<Evenement> evenements = evenementService.getEvenementsPublies(date, lieu, categorieId, searchQuery);
             System.out.println("=== DEBUG CatalogueServlet ===");

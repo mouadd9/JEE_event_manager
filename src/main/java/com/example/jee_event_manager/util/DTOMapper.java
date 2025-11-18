@@ -98,6 +98,8 @@ public class DTOMapper {
         dto.setDateFin(evenement.getDateFin());
         dto.setStatut(evenement.getStatut());
         dto.setLieu(evenement.getLieu());
+        dto.setLatitude(evenement.getLatitude());
+        dto.setLongitude(evenement.getLongitude());
         dto.setCapacite(evenement.getCapacite());
         dto.setImageUrl(evenement.getImageUrl());
         
@@ -105,6 +107,7 @@ public class DTOMapper {
         if (evenement.getOrganisateur() != null) {
             dto.setOrganisateurId(evenement.getOrganisateur().getId());
             dto.setOrganisateurNom(evenement.getOrganisateur().getNom());
+            dto.setOrganisateurEmail(evenement.getOrganisateur().getEmail());
         }
         
         // Catégories

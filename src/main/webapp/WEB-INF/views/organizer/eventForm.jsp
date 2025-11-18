@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" crossorigin=""/>
+    <%@ include file="/WEB-INF/jspf/theme-head.jspf" %>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/organizer-theme.css">
     

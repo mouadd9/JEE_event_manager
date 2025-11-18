@@ -1,0 +1,239 @@
+/* ========== GLOBAL THEME SYSTEM ========== */
+:root {
+  --primary-color: #a855f7;
+  --primary-hover: #9333ea;
+  --text-dark: #1f2937;
+  --text-light: #6b7280;
+  --bg-light: #f9fafb;
+  --border-color: #e5e7eb;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --navbar-bg: #ffffff;
+  --modal-bg: #ffffff;
+  --modal-text: #1f2937;
+}
+
+/* Dark mode theme */
+:root[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --text-primary: #f0f0f0;
+  --text-secondary: #b0b0b0;
+  --card-bg: #2d2d2d;
+  --card-border: #404040;
+  --border-color: #404040;
+  --navbar-bg: #1a1a1a;
+  --modal-bg: #2d2d2d;
+  --modal-text: #f0f0f0;
+}
+
+/* ========== UNIVERSAL STYLES ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
+/* ========== NAVBAR GLOBAL ========== */
+.navbar {
+  background: var(--navbar-bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--card-border);
+  transition: background-color 0.3s ease;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color) !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-brand i {
+  font-size: 1.8rem;
+}
+
+.nav-link {
+  color: var(--text-primary) !important;
+  font-weight: 500;
+  margin: 0 0.8rem;
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: var(--primary-color) !important;
+}
+
+/* ========== THEME TOGGLE BUTTON ========== */
+.theme-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: transform 0.3s ease, color 0.3s ease;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  color: var(--primary-color);
+}
+
+/* ========== BUTTONS ========== */
+.btn-outline-primary {
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.btn-outline-primary:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+/* ========== FORMS ========== */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+textarea,
+select {
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--card-border);
+  transition: all 0.3s ease;
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+/* ========== MODALS ========== */
+.modal-content {
+  background: var(--modal-bg);
+  color: var(--modal-text);
+  border: 1px solid var(--card-border);
+}
+
+.modal-header {
+  background: var(--modal-bg);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.modal-title {
+  color: var(--text-primary);
+}
+
+.modal-body {
+  background: var(--modal-bg);
+  color: var(--text-primary);
+}
+
+.modal-footer {
+  background: var(--modal-bg);
+  border-top: 1px solid var(--card-border);
+}
+
+.btn-close {
+  filter: invert(var(--text-primary));
+}
+
+:root[data-theme="dark"] .btn-close,
+body.dark-mode .btn-close {
+  filter: invert(1);
+}
+
+/* ========== CARDS ========== */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--text-primary);
+}
+
+/* ========== TEXT COLORS ========== */
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+.text-dark {
+  color: var(--text-primary) !important;
+}
+
+/* ========== FOOTER ========== */
+footer {
+  background: var(--text-dark);
+  color: white;
+}
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
+}

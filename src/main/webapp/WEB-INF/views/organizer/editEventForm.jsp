@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" crossorigin=""/>
+    <%@ include file="/WEB-INF/jspf/theme-head.jspf" %>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/organizer-theme.css">
     
@@ -198,7 +199,9 @@
                             <div class="form-text">Formats acceptés: JPG, PNG, WEBP (max 5MB)</div>
                             <c:if test="${not empty event.imageUrl}">
                                 <div class="mt-2">
-                                    <img src="${pageContext.request.contextPath}/${event.imageUrl}" class="image-preview" alt="Image actuelle">
+                                    <c:set var="imgUrl" value="${event.imageUrl}"/>
+                                    <c:set var="finalUrl" value="${fn:startsWith(imgUrl, 'http') ? imgUrl : pageContext.request.contextPath.concat('/').concat(imgUrl)}"/>
+                                    <img src="${finalUrl}" class="image-preview" alt="Image actuelle" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800';">
                                     <div class="text-muted small">Image actuelle</div>
                                 </div>
                             </c:if>

@@ -30,4 +30,7 @@ public interface EvenementRepository {
     List<Evenement> findByLieu(String lieu);
     List<Evenement> findByDateDebut(LocalDate date);
     List<Evenement> findByCategorieId(Long categorieId);
+    
+    // Popular events query
+    List<Evenement> findPopularEvents(int limit);
 }

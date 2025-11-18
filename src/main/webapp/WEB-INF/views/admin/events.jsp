@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="jakarta.tags.core" prefix="c"%>
 <%@ taglib uri="jakarta.tags.fmt" prefix="fmt"%>
+<%@ taglib uri="jakarta.tags.functions" prefix="fn"%>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%
     // Define date formatter for LocalDateTime
@@ -20,6 +21,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Neue+Plak:wght@400;600;700&display=swap" rel="stylesheet">
+    <%@ include file="/WEB-INF/jspf/theme-head.jspf" %>
     <!-- Theme CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
     
@@ -171,7 +173,9 @@
                             <div class="col-md-4">
                                 <c:choose>
                                     <c:when test="${not empty event.imageUrl}">
-                                        <img src="${event.imageUrl}" alt="${event.titre}" class="event-image">
+                                        <c:set var="imgUrl" value="${event.imageUrl}"/>
+                                        <c:set var="finalUrl" value="${fn:startsWith(imgUrl, 'http') ? imgUrl : pageContext.request.contextPath.concat('/').concat(imgUrl)}"/>
+                                        <img src="${finalUrl}" alt="${event.titre}" class="event-image" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800';">
                                     </c:when>
                                     <c:otherwise>
                                         <div class="event-image bg-secondary d-flex align-items-center justify-content-center">
@@ -203,16 +207,16 @@
                         <div class="mt-3 pt-3 border-top">
                             <div class="d-flex flex-wrap gap-1">
                                 <c:if test="${event.statut == 'PUBLIE'}">
-                                    <button class="btn btn-warning btn-action" onclick="hideEvent(${event.id})">
+                                    <button class="btn btn-warning btn-action" onclick="hideEvent('${event.id}')">
                                         <i class="fas fa-eye-slash me-1"></i>Masquer
                                     </button>
                                 </c:if>
                                 <c:if test="${event.statut == 'CACHE' || event.statut == 'BROUILLON'}">
-                                    <button class="btn btn-success btn-action" onclick="publishEvent(${event.id})">
+                                    <button class="btn btn-success btn-action" onclick="publishEvent('${event.id}')">
                                         <i class="fas fa-check me-1"></i>Publier
                                     </button>
                                 </c:if>
-                                <button class="btn btn-danger btn-action" onclick="deleteEvent(${event.id})">
+                                <button class="btn btn-danger btn-action" onclick="deleteEvent('${event.id}')">
                                     <i class="fas fa-trash me-1"></i>Supprimer
                                 </button>
                                 <a href="${pageContext.request.contextPath}/events/${event.id}" 

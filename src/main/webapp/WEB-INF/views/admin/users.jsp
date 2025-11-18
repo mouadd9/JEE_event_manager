@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Neue+Plak:wght@400;600;700&display=swap" rel="stylesheet">
+    <%@ include file="/WEB-INF/jspf/theme-head.jspf" %>
     <!-- Theme CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
     

@@ -23,12 +23,15 @@ public class EvenementDetailDTO {
     private String dateDebutHeure; // Ex: "19h30"
     private StatutEvenement statut;
     private String lieu;
+    private Double latitude;
+    private Double longitude;
     private Integer capacite;
     private String imageUrl;
     
     // Informations organisateur
     private Long organisateurId;
     private String organisateurNom;
+    private String organisateurEmail;
     
     // Catégories
     private List<String> categories = new ArrayList<>();
@@ -130,6 +133,22 @@ public class EvenementDetailDTO {
         this.lieu = lieu;
     }
     
+    public Double getLatitude() {
+        return latitude;
+    }
+    
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+    
+    public Double getLongitude() {
+        return longitude;
+    }
+    
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+    
     public Integer getCapacite() {
         return capacite;
     }
@@ -160,6 +179,14 @@ public class EvenementDetailDTO {
     
     public void setOrganisateurNom(String organisateurNom) {
         this.organisateurNom = organisateurNom;
+    }
+    
+    public String getOrganisateurEmail() {
+        return organisateurEmail;
+    }
+    
+    public void setOrganisateurEmail(String organisateurEmail) {
+        this.organisateurEmail = organisateurEmail;
     }
     
     public List<String> getCategories() {

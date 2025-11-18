@@ -12,6 +12,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+    <%@ include file="/WEB-INF/jspf/theme-head.jspf" %>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
@@ -33,6 +36,11 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="#evenements" data-section="evenements">
                             <i class="bi bi-grid me-1"></i>Événements
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#calendrier" data-section="calendrier">
+                            <i class="bi bi-calendar3 me-1"></i>Calendrier
                         </a>
                     </li>
                     <li class="nav-item">
@@ -74,7 +82,7 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="welcome-banner bg-gradient-primary text-white rounded-3 p-4 shadow-sm">
-                    <h1 class="h3 mb-2">Bienvenue, <span id="welcomeName">Participant</span>! 👋</h1>
+                    <h1 class="h3 mb-2">Bienvenue, <span id="welcomeName">Participant</span>!</h1>
                     <p class="mb-0 opacity-90">Découvrez les événements à venir et gérez vos inscriptions</p>
                 </div>
             </div>
@@ -135,6 +143,47 @@
                 </div>
             </div>
         </div>
+
+        <!-- Section: Calendrier -->
+        <section id="section-calendrier" class="content-section d-none">
+            <div class="section-header d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4 mb-0">
+                    <i class="bi bi-calendar3 text-primary me-2"></i>Mon Calendrier
+                </h2>
+                <button class="btn btn-outline-primary btn-sm" id="btnRefreshCalendar">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Actualiser
+                </button>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div id="calendarContainer">
+                        <div id="calendar" style="min-height: 600px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Légende -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="mb-3"><i class="bi bi-info-circle me-2"></i>Légende</h6>
+                    <div class="d-flex flex-wrap gap-3">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-success me-2" style="width: 20px; height: 20px;"></span>
+                            <small>Événement accepté</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-warning me-2" style="width: 20px; height: 20px;"></span>
+                            <small>En attente</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-secondary me-2" style="width: 20px; height: 20px;"></span>
+                            <small>Annulé</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- Section: Événements Disponibles -->
         <section id="section-evenements" class="content-section">
@@ -561,11 +610,14 @@
          data-participant-nom="${participant.nom}"
          data-participant-email="${participant.email}"
          data-evenements='<c:out value="${evenementsJSON}" escapeXml="false"/>'
-         data-statistiques='<c:out value="${statistiquesJSON}" escapeXml="false"/>'>
+         data-statistiques='<c:out value="${statistiquesJSON}" escapeXml="false"/>'
+         data-inscriptions='<c:out value="${inscriptionsJSON}" escapeXml="false"/>'>
     </div>
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     
     <!-- Chargement des données depuis les attributs data -->
     <script>
@@ -580,7 +632,8 @@
                             email: dataElement.getAttribute('data-participant-email') || ''
                         },
                         evenementsDisponibles: JSON.parse(dataElement.getAttribute('data-evenements') || '[]'),
-                        statistiques: JSON.parse(dataElement.getAttribute('data-statistiques') || '{}')
+                        statistiques: JSON.parse(dataElement.getAttribute('data-statistiques') || '{}'),
+                        inscriptions: JSON.parse(dataElement.getAttribute('data-inscriptions') || '[]')
                     };
                     console.log('ServerData chargé:', window.serverData);
                 } catch (e) {
@@ -599,6 +652,7 @@
     <script src="${pageContext.request.contextPath}/js/config.js"></script>
     <!-- Custom JavaScript -->
     <script src="${pageContext.request.contextPath}/js/dashboard.js"></script>
+    <script src="${pageContext.request.contextPath}/js/calendar.js"></script>
     <script src="${pageContext.request.contextPath}/js/inscription.js"></script>
     <script src="${pageContext.request.contextPath}/js/profil.js"></script>
     <script src="${pageContext.request.contextPath}/js/commentaires.js"></script>

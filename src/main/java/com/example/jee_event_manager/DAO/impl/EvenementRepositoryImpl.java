@@ -9,6 +9,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -210,5 +211,50 @@ public class EvenementRepositoryImpl implements EvenementRepository {
         );
         query.setParameter("categorieId", categorieId);
         return query.getResultList();
+    }
+    
+    @Override
+    public List<Evenement> findPopularEvents(int limit) {
+        // Query to get popular events ordered by number of recent inscriptions (last 48 hours)
+        // This allows to showcase trending events based on recent activity
+        LocalDateTime dateLimite = LocalDateTime.now().minusHours(48);
+        
+        String jpql = "SELECT e FROM Evenement e " +
+                     "WHERE e.statut = 'PUBLIE' " +
+                     "ORDER BY (SELECT COUNT(i.id) FROM Inscription i " +
+                     "          WHERE i.evenement.id = e.id " +
+                     "          AND i.dateInscription >= :dateLimite) DESC, " +
+                     "         e.dateDebut ASC";
+        
+        TypedQuery<Evenement> query = em.createQuery(jpql, Evenement.class);
+        query.setParameter("dateLimite", dateLimite);
+        
+        // Limit between 1 and 5 (adjusted to allow display even with few events)
+        int actualLimit = Math.max(1, Math.min(5, limit));
+        query.setMaxResults(actualLimit);
+        
+        List<Evenement> result = query.getResultList();
+        
+        System.out.println("=== DEBUG findPopularEvents (Inscriptions récentes - 48h) ===");
+        System.out.println("Date limite (48h): " + dateLimite);
+        System.out.println("JPQL Query: " + jpql);
+        System.out.println("Limit demandé: " + limit + ", Limit appliqué: " + actualLimit);
+        System.out.println("Nombre d'événements retournés: " + result.size());
+        
+        if (!result.isEmpty()) {
+            System.out.println("Premier événement tendance: " + result.get(0).getTitre() + " (ID: " + result.get(0).getId() + ")");
+        } else {
+            System.out.println("AUCUN événement publié trouvé dans la base de données !");
+        }
+        
+        // Eagerly load categories and organisateur for each event
+        for (Evenement e : result) {
+            e.getCategories().size(); // Force load
+            if (e.getOrganisateur() != null) {
+                e.getOrganisateur().getId(); // Force load
+            }
+        }
+        
+        return result;
     }
 }
