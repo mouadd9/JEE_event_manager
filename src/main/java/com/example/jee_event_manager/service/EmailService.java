@@ -1,23 +1,19 @@
 package com.example.jee_event_manager.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.mail.*;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
-
-import java.util.Properties;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 @ApplicationScoped
 public class EmailService {
-    
-    // Email configuration
-    private static final String SMTP_HOST = "smtp.gmail.com";
-    private static final String SMTP_PORT = "587";
-    private static final String EMAIL_USERNAME = "youssef2003plus@gmail.com";
-    private static final String EMAIL_PASSWORD = "wyanhkxrkdqpacuu"; // Gmail App Password (spaces removed)
-    private static final String FROM_EMAIL = "youssef2003plus@gmail.com";
+
+    // Resend configuration
+    private static final String RESEND_API_KEY = System.getenv("RESEND_API_KEY");
+    private static final String FROM_EMAIL = "noreply@ufess.codes"; // Your verified domain
     private static final String FROM_NAME = "Event Manager";
-    
+
     /**
      * Send verification code email
      */
@@ -26,7 +22,7 @@ public class EmailService {
         String body = buildVerificationEmailBody(code);
         sendEmail(toEmail, subject, body);
     }
-    
+
     /**
      * Send password reset email with temporary password
      */
@@ -35,42 +31,94 @@ public class EmailService {
         String body = buildPasswordResetEmailBody(temporaryPassword);
         sendEmail(toEmail, subject, body);
     }
-    
+
     /**
-     * Core email sending method
+     * Send contact form email to contact@ufess.codes
      */
-    private void sendEmail(String toEmail, String subject, String body) {
-        Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", SMTP_HOST);
-        props.put("mail.smtp.port", SMTP_PORT);
-        props.put("mail.smtp.ssl.trust", SMTP_HOST);
-        
-        Session session = Session.getInstance(props, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(EMAIL_USERNAME, EMAIL_PASSWORD);
-            }
-        });
-        
+    public void sendContactEmail(String senderName, String senderEmail, String subject, String message) {
+        String toEmail = "contact@ufess.codes";
+        String emailSubject = "Contact Form: " + subject;
+        String body = buildContactEmailBody(senderName, senderEmail, message);
+        sendEmail(toEmail, emailSubject, body);
+    }
+
+    /**
+     * Core email sending method using Resend API
+     */
+    private void sendEmail(String toEmail, String subject, String htmlBody) {
+        HttpURLConnection connection = null;
         try {
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(FROM_EMAIL, FROM_NAME));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
-            message.setSubject(subject);
-            message.setContent(body, "text/html; charset=utf-8");
-            
-            Transport.send(message);
-            System.out.println("Email sent successfully to: " + toEmail);
-            
+            System.out.println("=== EmailService.sendEmail called ===");
+            System.out.println("To: " + toEmail);
+            System.out.println("Subject: " + subject);
+
+            // Get API key from environment variable
+            String apiKey = RESEND_API_KEY;
+            if (apiKey == null || apiKey.isEmpty()) {
+                System.err.println("ERROR: RESEND_API_KEY environment variable is not set!");
+                throw new RuntimeException("RESEND_API_KEY environment variable is not set");
+            }
+
+            System.out.println("API Key found: " + apiKey.substring(0, Math.min(10, apiKey.length())) + "...");
+
+            // Create connection to Resend API
+            URL url = new URL("https://api.resend.com/emails");
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Authorization", "Bearer " + apiKey);
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(10000);
+
+            // Build JSON payload - escape special characters
+            String escapedHtmlBody = htmlBody
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
+
+            String jsonPayload = String.format(
+                "{\"from\": \"%s <%s>\", \"to\": [\"%s\"], \"subject\": \"%s\", \"html\": \"%s\"}",
+                FROM_NAME, FROM_EMAIL, toEmail, subject, escapedHtmlBody
+            );
+
+            // Send request
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = jsonPayload.getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+
+            // Check response
+            int responseCode = connection.getResponseCode();
+            if (responseCode >= 200 && responseCode < 300) {
+                System.out.println("Email sent successfully to: " + toEmail);
+                System.out.println("Resend Response Code: " + responseCode);
+            } else {
+                // Read error response
+                String errorResponse = "";
+                try (java.io.InputStream errorStream = connection.getErrorStream()) {
+                    if (errorStream != null) {
+                        errorResponse = new String(errorStream.readAllBytes(), StandardCharsets.UTF_8);
+                    }
+                }
+                System.err.println("Resend returned error code: " + responseCode);
+                System.err.println("Response body: " + errorResponse);
+                throw new RuntimeException("Failed to send email. Status: " + responseCode + ", Error: " + errorResponse);
+            }
+
         } catch (Exception e) {
             System.err.println("Failed to send email to: " + toEmail);
             e.printStackTrace();
             throw new RuntimeException("Failed to send email: " + e.getMessage(), e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
-    
+
     /**
      * Build verification email HTML body
      */
@@ -109,7 +157,7 @@ public class EmailService {
             </html>
             """, code);
     }
-    
+
     /**
      * Build password reset email HTML body
      */
@@ -150,5 +198,55 @@ public class EmailService {
             </body>
             </html>
             """, temporaryPassword);
+    }
+
+    /**
+     * Build contact form email HTML body
+     */
+    private String buildContactEmailBody(String senderName, String senderEmail, String message) {
+        return String.format("""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background: linear-gradient(135deg, #6366f1 0%%, #14b8a6 100%%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                    .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+                    .info-box { background: white; border-left: 4px solid #6366f1; padding: 15px; margin: 20px 0; }
+                    .message-box { background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 5px; margin: 20px 0; }
+                    .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #999; }
+                    .label { font-weight: 600; color: #6366f1; margin-bottom: 5px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>Nouveau Message de Contact</h1>
+                    </div>
+                    <div class="content">
+                        <p>Vous avez reçu un nouveau message via le formulaire de contact EventHub.</p>
+
+                        <div class="info-box">
+                            <div class="label">De:</div>
+                            <p>%s (%s)</p>
+                        </div>
+
+                        <div class="message-box">
+                            <div class="label">Message:</div>
+                            <p>%s</p>
+                        </div>
+
+                        <p style="margin-top: 30px; font-size: 14px; color: #666;">
+                            Pour répondre à ce message, veuillez envoyer un email directement à <strong>%s</strong>
+                        </p>
+                    </div>
+                    <div class="footer">
+                        <p>EventHub - Système de messagerie automatique</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """, senderName, senderEmail, message.replace("\n", "<br>"), senderEmail);
     }
 }

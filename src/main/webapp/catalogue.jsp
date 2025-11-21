@@ -329,19 +329,166 @@
             background: var(--primary-hover);
             transform: scale(1.05);
         }
-        
+
+        /* ========== ABOUT SECTION ========== */
+        .about-section {
+            padding: 5rem 0;
+            background: var(--bg-light);
+        }
+
+        .about-section h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .about-section .highlight {
+            color: var(--primary-color);
+        }
+
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            line-height: 1.8;
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .about-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h4 {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.8rem;
+        }
+
+        .feature-card p {
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        /* ========== CONTACT SECTION ========== */
+        .contact-section {
+            padding: 5rem 0;
+            background: white;
+        }
+
+        .contact-section h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .contact-section .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 3rem;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--bg-light);
+            padding: 2.5rem;
+            border-radius: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
         /* ========== FOOTER ========== */
         .footer {
             background: var(--text-dark);
             color: white;
             padding: 2rem 0;
             text-align: center;
-            margin-top: 4rem;
+            margin-top: 0;
         }
-        
+
         .footer p {
             margin: 0;
             opacity: 0.8;
+        }
+
+        /* ========== SMOOTH SCROLL ========== */
+        html {
+            scroll-behavior: smooth;
         }
     </style>
 </head>
@@ -364,16 +511,13 @@
                         <a class="nav-link" href="${pageContext.request.contextPath}/catalogue">Événements</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Catégories</a>
+                        <a class="nav-link" href="#apropos">À propos</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">À propos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Contact</a>
+                        <a class="nav-link" href="#contact">Contact</a>
                     </li>
                 </ul>
-                
+
                 <div class="d-flex gap-2">
                     <a href="${pageContext.request.contextPath}/login.jsp" class="btn btn-outline-primary">
                         Se connecter
@@ -569,6 +713,75 @@
             </div>
         </div>
     </div>
+
+    <!-- À PROPOS SECTION -->
+    <section id="apropos" class="about-section">
+        <div class="container">
+            <h2>À propos <span class="highlight">EventHub</span></h2>
+
+            <div class="about-content">
+                <p>
+                    EventHub est votre plateforme de gestion d'événements qui simplifie la découverte,
+                    l'organisation et la participation à des événements. Notre mission est de connecter
+                    les organisateurs avec les participants et de créer des expériences mémorables.
+                </p>
+            </div>
+
+            <div class="about-features">
+                <div class="feature-card">
+                    <i class="fas fa-search"></i>
+                    <h4>Découverte facile</h4>
+                    <p>Trouvez rapidement les événements qui vous intéressent grâce à nos filtres de recherche intuitifs</p>
+                </div>
+
+                <div class="feature-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <h4>Inscription simplifiée</h4>
+                    <p>Réservez votre place en quelques clics et gérez toutes vos inscriptions au même endroit</p>
+                </div>
+
+                <div class="feature-card">
+                    <i class="fas fa-users"></i>
+                    <h4>Communauté active</h4>
+                    <p>Partagez vos avis et commentaires pour enrichir l'expérience de tous les participants</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2>Contactez-nous</h2>
+            <p class="subtitle">Une question ? Une suggestion ? N'hésitez pas à nous contacter</p>
+
+            <form class="contact-form" method="POST" action="${pageContext.request.contextPath}/contact">
+                <div class="form-group">
+                    <label for="contactName">Nom complet</label>
+                    <input type="text" id="contactName" name="nom" required placeholder="Votre nom">
+                </div>
+
+                <div class="form-group">
+                    <label for="contactEmail">Email</label>
+                    <input type="email" id="contactEmail" name="email" required placeholder="votre.email@exemple.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="contactSubject">Sujet</label>
+                    <input type="text" id="contactSubject" name="sujet" required placeholder="Objet de votre message">
+                </div>
+
+                <div class="form-group">
+                    <label for="contactMessage">Message</label>
+                    <textarea id="contactMessage" name="message" required placeholder="Votre message..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-paper-plane me-2"></i>Envoyer le message
+                </button>
+            </form>
+        </div>
+    </section>
 
     <!-- FOOTER -->
     <footer class="footer">

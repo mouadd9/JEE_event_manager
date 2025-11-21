@@ -194,20 +194,20 @@
             <version>3.1.0</version>
         </dependency>
         
-        <!-- JavaMail for Email Sending -->
+        <!-- JavaMail for Email Sending (kept for backward compatibility) -->
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
             <version>2.0.1</version>
         </dependency>
-        
+
         <!-- Jakarta Activation API -->
         <dependency>
             <groupId>jakarta.activation</groupId>
             <artifactId>jakarta.activation-api</artifactId>
             <version>2.1.2</version>
         </dependency>
-        
+
         <!-- Angus Activation (Implementation for Jakarta Activation) -->
         <dependency>
             <groupId>org.eclipse.angus</groupId>
@@ -215,6 +215,8 @@
             <version>2.0.0</version>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- Resend Email Service - using native Java HTTP client, no additional dependency needed -->
     </dependencies>
 
     <build>

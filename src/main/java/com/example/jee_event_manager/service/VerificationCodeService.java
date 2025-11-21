@@ -30,7 +30,20 @@ public class VerificationCodeService {
     public String generateEmailVerificationCode(String email) {
         String code = generateCode();
         saveVerificationCode(email, code, VerificationType.EMAIL_VERIFICATION);
-        emailService.sendVerificationEmail(email, code);
+
+        try {
+            System.out.println("=== ATTEMPTING TO SEND VERIFICATION EMAIL ===");
+            System.out.println("To: " + email);
+            System.out.println("Code: " + code);
+            emailService.sendVerificationEmail(email, code);
+            System.out.println("=== EMAIL SENT SUCCESSFULLY ===");
+        } catch (Exception e) {
+            System.err.println("=== FAILED TO SEND EMAIL ===");
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to send verification email: " + e.getMessage(), e);
+        }
+
         return code;
     }
     

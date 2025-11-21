@@ -5,94 +5,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - EventManager</title>
-    
+    <title>Connexion - EventHub</title>
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Neue+Plak:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Theme CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
-    
+
     <style>
         :root {
-            --primary-color: #8c65a7;      
-            --secondary-color: #c191e1;  
+            --primary-color: #8c65a7;
+            --secondary-color: #c191e1;
             --accent-color: #8338b5;
             --text-dark: #212529;
-            --text-light: #171818;
+            --text-light: #6c757d;
             --bg-light: #f8f9fa;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Neue Plak', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .split-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* LEFT SIDE - BRANDING */
+        .left-side {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-side::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 20s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .branding {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .branding-icon {
+            font-size: 5rem;
+            margin-bottom: 2rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .branding h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .branding p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            line-height: 1.6;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .features-list {
+            margin-top: 3rem;
+            text-align: left;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .feature-item i {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.8rem;
+            border-radius: 10px;
+        }
+
+        /* RIGHT SIDE - FORM */
+        .right-side {
+            flex: 1;
+            background: white;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 2rem;
         }
-        
-        .login-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 500px;
+
+        .login-form-container {
+            max-width: 450px;
             width: 100%;
-            overflow: hidden;
         }
-        
+
         .login-header {
-            background: linear-gradient(135deg, #7d24bd 0%, #8529c2 100%);
-            color: white;
-            padding: 3rem 2rem;
             text-align: center;
+            margin-bottom: 3rem;
         }
-        
-        .login-header h1 {
-            font-size: 2.5rem;
+
+        .login-header h2 {
+            font-size: 2rem;
             font-weight: 700;
+            color: var(--text-dark);
             margin-bottom: 0.5rem;
         }
-        
+
         .login-header p {
-            font-size: 1.1rem;
-            opacity: 0.95;
+            color: var(--text-light);
+            font-size: 1rem;
         }
-        
-        .login-body {
-            padding: 3rem 2rem;
-        }
-        
+
         .form-label {
             font-weight: 600;
             color: var(--text-dark);
             margin-bottom: 0.5rem;
+            display: block;
         }
-        
+
         .form-control {
-            border: 2px solid var(--bg-light);
+            border: 2px solid #e0e0e0;
             border-radius: 10px;
-            padding: 0.8rem 1rem;
+            padding: 0.9rem 1.2rem;
             font-size: 1rem;
             transition: all 0.3s;
+            width: 100%;
         }
-        
+
         .form-control:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(209, 65, 12, 0.1);
+            box-shadow: 0 0 0 4px rgba(140, 101, 167, 0.1);
+            outline: none;
         }
-        
-        .btn-primary-custom {
+
+        .btn-login {
             background: var(--primary-color);
             color: white;
             border: none;
@@ -102,188 +186,209 @@
             font-size: 1.1rem;
             transition: all 0.3s;
             width: 100%;
+            cursor: pointer;
         }
-        
-        .btn-primary-custom:hover {
+
+        .btn-login:hover {
             background: var(--accent-color);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(209, 65, 12, 0.3);
+            box-shadow: 0 5px 20px rgba(140, 101, 167, 0.3);
         }
-        
+
         .alert {
             border-radius: 10px;
             border: none;
             padding: 1rem;
+            margin-bottom: 1.5rem;
         }
-        
-        .register-link {
+
+        .alert-danger {
+            background: #fee;
+            color: #c00;
+        }
+
+        .alert-success {
+            background: #efe;
+            color: #0a0;
+        }
+
+        .form-footer {
+            margin-top: 1.5rem;
             text-align: center;
+        }
+
+        .form-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .register-prompt {
             margin-top: 2rem;
-            color: var(--text-light);
-        }
-        
-        .register-link a {
-            color: var(--primary-color);
-            font-weight: 600;
-            text-decoration: none;
-        }
-        
-        .register-link a:hover {
-            text-decoration: underline;
-        }
-        
-        .divider {
-            display: flex;
-            align-items: center;
+            padding-top: 2rem;
+            border-top: 1px solid #e0e0e0;
             text-align: center;
-            margin: 2rem 0;
             color: var(--text-light);
         }
-        
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid var(--bg-light);
-        }
-        
-        .divider span {
-            padding: 0 1rem;
-            font-weight: 600;
-        }
-        
-        .social-login {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .btn-social {
-            padding: 0.8rem;
-            border: 2px solid var(--bg-light);
-            border-radius: 10px;
-            background: white;
-            color: var(--text-dark);
-            font-weight: 600;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        
-        .btn-social:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-        }
-        
-        .btn-social i {
-            margin-right: 0.5rem;
-        }
-        
-        .forgot-password {
-            text-align: right;
-            margin-top: 0.5rem;
-        }
-        
-        .forgot-password a {
+
+        .register-prompt a {
             color: var(--primary-color);
+            font-weight: 600;
             text-decoration: none;
-            font-size: 0.9rem;
         }
-        
-        .forgot-password a:hover {
+
+        .register-prompt a:hover {
             text-decoration: underline;
         }
-        
+
         .back-home {
             text-align: center;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
-        
+
         .back-home a {
             color: var(--text-light);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
-        
+
         .back-home a:hover {
             color: var(--primary-color);
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+
+        .mt-4 {
+            margin-top: 1.5rem;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .split-container {
+                flex-direction: column;
+            }
+
+            .left-side {
+                padding: 2rem;
+                min-height: 40vh;
+            }
+
+            .branding h1 {
+                font-size: 2rem;
+            }
+
+            .branding p {
+                font-size: 1rem;
+            }
+
+            .features-list {
+                display: none;
+            }
+
+            .right-side {
+                min-height: 60vh;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1><i class="fas fa-calendar-star"></i> EventManager</h1>
-            <p>Connectez-vous à votre compte</p>
+    <div class="split-container">
+        <!-- LEFT SIDE - BRANDING -->
+        <div class="left-side">
+            <div class="branding">
+                <div class="branding-icon">
+                    <i class="fas fa-calendar-star"></i>
+                </div>
+                <h1>EventHub</h1>
+                <p>Découvrez, participez et créez des événements inoubliables</p>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <i class="fas fa-search"></i>
+                        <span>Recherche d'événements facile</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span>Réservation en un clic</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-users"></i>
+                        <span>Communauté active</span>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <div class="login-body">
-            <!-- Error/Success Messages -->
-            <c:if test="${not empty error}">
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle me-2"></i>${error}
+
+        <!-- RIGHT SIDE - LOGIN FORM -->
+        <div class="right-side">
+            <div class="login-form-container">
+                <div class="login-header">
+                    <h2>Connexion</h2>
+                    <p>Accédez à votre compte EventHub</p>
                 </div>
-            </c:if>
-            
-            <c:if test="${not empty success}">
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle me-2"></i>${success}
+
+                <!-- Error/Success Messages -->
+                <c:if test="${not empty error}">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>${error}
+                    </div>
+                </c:if>
+
+                <c:if test="${not empty success}">
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>${success}
+                    </div>
+                </c:if>
+
+                <!-- Login Form -->
+                <form action="${pageContext.request.contextPath}/login" method="POST" autocomplete="on">
+                    <div class="mb-4">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope me-2"></i>Adresse email
+                        </label>
+                        <input type="email" class="form-control" id="email" name="email"
+                               placeholder="votre@email.com" autocomplete="username" required autofocus>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock me-2"></i>Mot de passe
+                        </label>
+                        <input type="password" class="form-control" id="password" name="password"
+                               placeholder="Entrez votre mot de passe" autocomplete="current-password" required>
+                    </div>
+
+                    <div class="form-footer">
+                        <a href="${pageContext.request.contextPath}/forgot-password">
+                            <i class="fas fa-key me-1"></i>Mot de passe oublié ?
+                        </a>
+                    </div>
+
+                    <button type="submit" class="btn-login mt-4">
+                        <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                    </button>
+                </form>
+
+                <div class="register-prompt">
+                    Vous n'avez pas de compte ?
+                    <a href="${pageContext.request.contextPath}/register">Créer un compte</a>
                 </div>
-            </c:if>
-            
-            <!-- Login Form -->
-            <form action="${pageContext.request.contextPath}/login" method="POST" autocomplete="on">
-                <div class="mb-4">
-                    <label for="email" class="form-label">
-                        <i class="fas fa-envelope me-2"></i>Adresse email
-                    </label>
-                    <input type="email" class="form-control" id="email" name="email" 
-                           placeholder="votre@email.com" autocomplete="username" required autofocus>
+
+                <div class="back-home">
+                    <a href="${pageContext.request.contextPath}/catalogue">
+                        <i class="fas fa-arrow-left me-1"></i>Retour à l'accueil
+                    </a>
                 </div>
-                
-                <div class="mb-3">
-                    <label for="password" class="form-label">
-                        <i class="fas fa-lock me-2"></i>Mot de passe
-                    </label>
-                    <input type="password" class="form-control" id="password" name="password" 
-                           placeholder="Entrez votre mot de passe" autocomplete="current-password" required>
-                </div>
-                
-                <div class="forgot-password">
-                    <a href="${pageContext.request.contextPath}/forgot-password"><i class="fas fa-key me-1"></i>Mot de passe oublié ?</a>
-                </div>
-                
-                <button type="submit" class="btn-primary-custom mt-4">
-                    <i class="fas fa-sign-in-alt me-2"></i>Se connecter
-                </button>
-            </form>
-            
-            <div class="divider">
-                <span>OU</span>
-            </div>
-            
-            <div class="social-login">
-                <button class="btn-social" onclick="alert('Fonctionnalité à venir')">
-                    <i class="fab fa-google"></i>Google
-                </button>
-                <button class="btn-social" onclick="alert('Fonctionnalité à venir')">
-                    <i class="fab fa-facebook-f"></i>Facebook
-                </button>
-            </div>
-            
-            <div class="register-link">
-                Vous n'avez pas de compte ? 
-                <a href="${pageContext.request.contextPath}/register">Créer un compte</a>
-            </div>
-            
-            <div class="back-home">
-                <a href="${pageContext.request.contextPath}/catalogue">
-                    <i class="fas fa-arrow-left me-1"></i>Retour à l'accueil
-                </a>
             </div>
         </div>
     </div>
-    
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
