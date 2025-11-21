@@ -12,9 +12,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <%@ include file="/WEB-INF/jspf/theme-head.jspf" %>
     <style>
+        :root {
+            --primary-color: #8c65a7;
+            --accent-color: #8338b5;
+        }
+        
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -32,7 +37,7 @@
             overflow: hidden;
         }
         .card-header {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #c28fe4 0%, #764ba2 100%);
             color: white;
             padding: 40px 30px;
             text-align: center;
@@ -51,11 +56,11 @@
             transition: all 0.3s;
         }
         .form-control:focus {
-            border-color: #f5576c;
-            box-shadow: 0 0 0 3px rgba(245, 87, 108, 0.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(140, 101, 167, 0.1);
         }
         .btn-reset {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #c28fe4 0%, #764ba2 100%);
             border: none;
             color: white;
             padding: 12px;
@@ -66,10 +71,10 @@
         }
         .btn-reset:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
+            box-shadow: 0 5px 20px rgba(140, 101, 167, 0.4);
         }
         .back-link {
-            color: #f5576c;
+            color: var(--primary-color);
             text-decoration: none;
             font-weight: 500;
         }

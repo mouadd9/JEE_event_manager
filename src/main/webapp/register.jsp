@@ -46,13 +46,8 @@ pageEncoding="UTF-8"%> <%@ taglib uri="jakarta.tags.core" prefix="c"%>
       }
 
       body {
-        font-family: "Neue Plak", -apple-system, BlinkMacSystemFont, "Segoe UI",
-          Roboto, sans-serif;
-        background: linear-gradient(
-          135deg,
-          var(--primary-color) 0%,
-          var(--accent-color) 100%
-        );
+        font-family: 'Neue Plak', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
         min-height: 100vh;
         display: flex;
         align-items: center;
@@ -194,18 +189,19 @@ pageEncoding="UTF-8"%> <%@ taglib uri="jakarta.tags.core" prefix="c"%>
         padding: 0.8rem 1rem;
         font-size: 1rem;
         transition: all 0.3s;
-        color: var(--text-dark);
-        background-color: #fff;
+        color: var(--text-dark) !important;
+        background-color: #fff !important;
       }
 
       .form-control::placeholder {
-        color: #a0a0a0;
-        opacity: 1;
+        color: #6c757d !important;
+        opacity: 0.7;
       }
 
       .form-control:focus {
         border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(203, 133, 237, 0.1);
+        color: var(--text-dark) !important;
       }
 
       .role-card {
@@ -352,22 +348,6 @@ pageEncoding="UTF-8"%> <%@ taglib uri="jakarta.tags.core" prefix="c"%>
 
       .password-requirements li.valid i {
         color: #a65ee1;
-      }
-
-      /* Force form fields to always have white background and dark text */
-      .form-control {
-        background-color: #ffffff !important;
-        color: #212529 !important;
-        border-color: #e0e0e0 !important;
-      }
-
-      .form-control::placeholder {
-        color: #a0a0a0 !important;
-      }
-
-      .form-control:focus {
-        background-color: #ffffff !important;
-        color: #212529 !important;
       }
     </style>
   </head>
