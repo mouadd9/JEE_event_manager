@@ -39,6 +39,11 @@
             transition: transform 0.3s;
         }
         
+        .user-card h5,
+        .user-card p {
+            color: #2d1038 !important;
+        }
+        
         .user-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.15);
@@ -80,6 +85,10 @@
         .nav-pills .nav-link.active {
             background: #8c65a7;
         }
+        
+        h4, h5, .form-label {
+            color: #2d1038 !important;
+        }
     </style>
 </head>
 <body>
@@ -93,6 +102,9 @@
                 </div>
                 <div>
                     <span class="me-3"><i class="fas fa-user me-2"></i>${sessionScope.userName}</span>
+                    <a href="${pageContext.request.contextPath}/admin/profil" class="btn btn-outline-light me-2">
+                        <i class="fas fa-user-circle me-2"></i>Profil
+                    </a>
                     <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline-light">
                         <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
                     </a>
@@ -126,7 +138,7 @@
             <form method="GET" action="${pageContext.request.contextPath}/admin/users">
                 <div class="row g-3 align-items-end">
                     <div class="col-md-3">
-                        <label class="form-label"><i class="fas fa-user-tag me-1"></i>Type d'utilisateur</label>
+                        <label class="form-label text-dark"><i class="fas fa-user-tag me-1"></i>Type d'utilisateur</label>
                         <select name="userType" class="form-select">
                             <option value="">Tous</option>
                             <option value="PARTICIPANT" ${selectedUserType == 'PARTICIPANT' ? 'selected' : ''}>Participants</option>
@@ -135,7 +147,7 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label"><i class="fas fa-check-circle me-1"></i>Vérification</label>
+                        <label class="form-label text-dark"><i class="fas fa-check-circle me-1"></i>Vérification</label>
                         <select name="verified" class="form-select">
                             <option value="">Tous</option>
                             <option value="true" ${selectedVerified == 'true' ? 'selected' : ''}>Vérifiés</option>
@@ -143,7 +155,7 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label"><i class="fas fa-ban me-1"></i>Suspension</label>
+                        <label class="form-label text-dark"><i class="fas fa-ban me-1"></i>Suspension</label>
                         <select name="suspended" class="form-select">
                             <option value="">Tous</option>
                             <option value="false" ${selectedSuspended == 'false' ? 'selected' : ''}>Actifs</option>
@@ -162,7 +174,7 @@
         <!-- Pending Organisateurs Section -->
         <c:if test="${not empty pendingOrganisateurs && pendingOrganisateurs.size() > 0}">
             <div class="alert alert-warning mb-4">
-                <h5><i class="fas fa-exclamation-triangle me-2"></i>Organisateurs en attente d'approbation (${pendingOrganisateurs.size()})</h5>
+                <h5 class="text-dark"><i class="fas fa-exclamation-triangle me-2"></i>Organisateurs en attente d'approbation (${pendingOrganisateurs.size()})</h5>
                 <p class="mb-0">Ces organisateurs ont vérifié leur email et attendent votre approbation pour accéder à leur compte.</p>
             </div>
             <div class="row mb-4">
@@ -171,8 +183,8 @@
                         <div class="user-card border-warning border-start border-4">
                             <div class="row align-items-center">
                                 <div class="col-md-6">
-                                    <h5><i class="fas fa-user-tie me-2"></i>${user.nom}</h5>
-                                    <p class="text-muted mb-1">
+                                    <h5 class="text-dark"><i class="fas fa-user-tie me-2"></i>${user.nom}</h5>
+                                    <p class="text-dark mb-1">
                                         <i class="fas fa-envelope me-2"></i>${user.email}
                                     </p>
                                     <span class="badge badge-pending">
@@ -200,7 +212,7 @@
         </c:if>
         
         <!-- Users List -->
-        <h4 class="mb-3">Liste des utilisateurs (${users.size()})</h4>
+        <h4 class="mb-3" style="color: #2d1038 !important;">Liste des utilisateurs (${users.size()})</h4>
         <div class="row">
             <c:forEach var="user" items="${users}">
                 <div class="col-12">
@@ -210,8 +222,8 @@
                                 <i class="fas fa-${user.userType == 'PARTICIPANT' ? 'user' : user.userType == 'ORGANISATEUR' ? 'user-tie' : 'user-shield'} fa-3x text-primary"></i>
                             </div>
                             <div class="col-md-5">
-                                <h5>${user.nom}</h5>
-                                <p class="text-muted mb-1">
+                                <h5 class="text-dark">${user.nom}</h5>
+                                <p class="text-dark mb-1">
                                     <i class="fas fa-envelope me-2"></i>${user.email}
                                 </p>
                                 <span class="badge bg-secondary me-1">${user.userType}</span>
@@ -261,7 +273,7 @@
                         </div>
                         <c:if test="${user.isSuspended && not empty user.suspensionReason}">
                             <div class="mt-2 p-2 bg-light rounded">
-                                <small><strong>Raison de suspension:</strong> ${user.suspensionReason}</small>
+                                <small class="text-dark"><strong>Raison de suspension:</strong> ${user.suspensionReason}</small>
                             </div>
                         </c:if>
                     </div>

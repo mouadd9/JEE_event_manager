@@ -47,6 +47,11 @@
             transition: transform 0.3s;
         }
         
+        .event-card h5,
+        .event-card p {
+            color: #2d1038 !important;
+        }
+        
         .event-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.15);
@@ -99,6 +104,10 @@
         .nav-pills .nav-link.active {
             background: #8c65a7;
         }
+        
+        h4, h5, .form-label {
+            color: #2d1038 !important;
+        }
     </style>
 </head>
 <body>
@@ -112,6 +121,9 @@
                 </div>
                 <div>
                     <span class="me-3"><i class="fas fa-user me-2"></i>${sessionScope.userName}</span>
+                    <a href="${pageContext.request.contextPath}/admin/profil" class="btn btn-outline-light me-2">
+                        <i class="fas fa-user-circle me-2"></i>Profil
+                    </a>
                     <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline-light">
                         <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
                     </a>
@@ -145,7 +157,7 @@
             <form method="GET" action="${pageContext.request.contextPath}/admin/events">
                 <div class="row g-3 align-items-end">
                     <div class="col-md-6">
-                        <label class="form-label"><i class="fas fa-filter me-1"></i>Statut de l'événement</label>
+                        <label class="form-label text-dark"><i class="fas fa-filter me-1"></i>Statut de l'événement</label>
                         <select name="statut" class="form-select">
                             <option value="">Tous les statuts</option>
                             <option value="PUBLIE" ${selectedStatut == 'PUBLIE' ? 'selected' : ''}>Publiés</option>
@@ -164,7 +176,7 @@
         </div>
         
         <!-- Events List -->
-        <h4 class="mb-3">Liste des événements (${events.size()})</h4>
+        <h4 class="mb-3" style="color: #2d1038 !important;">Liste des événements (${events.size()})</h4>
         <div class="row">
             <c:forEach var="event" items="${events}">
                 <div class="col-md-6">
@@ -185,17 +197,17 @@
                                 </c:choose>
                             </div>
                             <div class="col-md-8">
-                                <h5>${event.titre}</h5>
-                                <p class="text-muted mb-1">
+                                <h5 class="text-dark">${event.titre}</h5>
+                                <p class="text-dark mb-1">
                                     <i class="fas fa-user-tie me-1"></i>
                                     <c:if test="${not empty event.organisateur}">
                                         ${event.organisateur.nom}
                                     </c:if>
                                 </p>
-                                <p class="text-muted mb-1">
+                                <p class="text-dark mb-1">
                                     <i class="fas fa-map-marker-alt me-1"></i>${event.lieu}
                                 </p>
-                                <p class="text-muted mb-2">
+                                <p class="text-dark mb-2">
                                     <i class="fas fa-calendar me-1"></i>
                                     ${event.dateDebut.format(dateFormatter)}
                                 </p>
@@ -227,7 +239,7 @@
                         </div>
                         <c:if test="${not empty event.description}">
                             <div class="mt-2">
-                                <small class="text-muted">
+                                <small class="text-dark">
                                     ${event.description.length() > 100 ? event.description.substring(0, 100).concat('...') : event.description}
                                 </small>
                             </div>

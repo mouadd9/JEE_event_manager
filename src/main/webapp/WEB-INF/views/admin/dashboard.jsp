@@ -53,10 +53,11 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin: 0.5rem 0;
+            color: #2d1038;
         }
         
         .stat-label {
-            color: #6c757d;
+            color: #2d1038;
             font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -122,6 +123,9 @@
                 </div>
                 <div>
                     <span class="me-3"><i class="fas fa-user me-2"></i>${sessionScope.userName}</span>
+                    <a href="${pageContext.request.contextPath}/admin/profil" class="btn btn-outline-light me-2">
+                        <i class="fas fa-user-circle me-2"></i>Profil
+                    </a>
                     <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline-light">
                         <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
                     </a>

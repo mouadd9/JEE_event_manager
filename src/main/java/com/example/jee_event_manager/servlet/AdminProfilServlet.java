@@ -31,11 +31,33 @@ public class AdminProfilServlet extends HttpServlet {
     private final Gson gson = GsonUtil.getGson();
     
     /**
-     * GET /admin/profil - Récupérer les informations du profil
+     * GET /admin/profil - Afficher la page profil ou récupérer les informations (API)
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        // Check if user is admin
+        if (!isAdmin(request)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        
+        // Si c'est une requête API (Accept: application/json), retourner JSON
+        String accept = request.getHeader("Accept");
+        if (accept != null && accept.contains("application/json")) {
+            handleApiGet(request, response);
+        } else {
+            // Sinon, afficher la page JSP
+            request.getRequestDispatcher("/WEB-INF/views/admin/profil.jsp").forward(request, response);
+        }
+    }
+    
+    /**
+     * Gérer les requêtes API GET
+     */
+    private void handleApiGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
@@ -78,6 +100,17 @@ public class AdminProfilServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(gson.toJson(JsonResponse.error("Erreur serveur: " + e.getMessage())));
         }
+    }
+    
+    /**
+     * Vérifier si l'utilisateur est admin
+     */
+    private boolean isAdmin(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) return false;
+        
+        String userType = (String) session.getAttribute("userType");
+        return "ADMIN".equals(userType);
     }
     
     /**
