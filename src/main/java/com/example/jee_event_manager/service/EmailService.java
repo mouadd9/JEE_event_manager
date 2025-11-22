@@ -22,7 +22,7 @@ public class EmailService {
     private static final String SMTP_PORT = System.getenv().getOrDefault("SMTP_PORT", "587");
     private static final String EMAIL_USERNAME = System.getenv().getOrDefault("EMAIL_USERNAME", "youssef2003plus@gmail.com");
     private static final String EMAIL_PASSWORD = System.getenv().getOrDefault("EMAIL_PASSWORD", "wyanhkxrkdqpacuu");
-    private static final String FROM_EMAIL = System.getenv().getOrDefault("FROM_EMAIL", "onboarding@resend.dev");
+    private static final String FROM_EMAIL = System.getenv().getOrDefault("FROM_EMAIL", "noreply@ufess.codes");
     private static final String FROM_NAME = "Event Manager";
 
     // Use Resend API if key is available (production), otherwise use SMTP (local development)
