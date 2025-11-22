@@ -6,19 +6,27 @@ import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 @ApplicationScoped
 public class EmailService {
-    
-    // Email configuration
-    private static final String SMTP_HOST = "smtp.gmail.com";
-    private static final String SMTP_PORT = "587";
-    private static final String EMAIL_USERNAME = "youssef2003plus@gmail.com";
-    private static final String EMAIL_PASSWORD = "wyanhkxrkdqpacuu"; // Gmail App Password (spaces removed)
-    private static final String FROM_EMAIL = "youssef2003plus@gmail.com";
+
+    // Email configuration - use environment variables for production
+    private static final String RESEND_API_KEY = System.getenv("RESEND_API_KEY");
+    private static final String SMTP_HOST = System.getenv().getOrDefault("SMTP_HOST", "smtp.gmail.com");
+    private static final String SMTP_PORT = System.getenv().getOrDefault("SMTP_PORT", "587");
+    private static final String EMAIL_USERNAME = System.getenv().getOrDefault("EMAIL_USERNAME", "youssef2003plus@gmail.com");
+    private static final String EMAIL_PASSWORD = System.getenv().getOrDefault("EMAIL_PASSWORD", "wyanhkxrkdqpacuu");
+    private static final String FROM_EMAIL = System.getenv().getOrDefault("FROM_EMAIL", "onboarding@resend.dev");
     private static final String FROM_NAME = "Event Manager";
+
+    // Use Resend API if key is available (production), otherwise use SMTP (local development)
+    private final boolean useResend = RESEND_API_KEY != null && !RESEND_API_KEY.isEmpty();
     
     /**
      * Send verification code email
@@ -57,38 +65,100 @@ public class EmailService {
     }
     
     /**
-     * Core email sending method
+     * Core email sending method - uses Resend API in production, SMTP for local dev
      */
     private void sendEmail(String toEmail, String subject, String body) {
+        if (useResend) {
+            sendEmailViaResend(toEmail, subject, body);
+        } else {
+            sendEmailViaSMTP(toEmail, subject, body);
+        }
+    }
+
+    /**
+     * Send email via Resend API (production)
+     */
+    private void sendEmailViaResend(String toEmail, String subject, String body) {
+        try {
+            URL url = new URL("https://api.resend.com/emails");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", "Bearer " + RESEND_API_KEY);
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
+
+            String jsonPayload = String.format(
+                "{\"from\":\"%s <%s>\",\"to\":[\"%s\"],\"subject\":\"%s\",\"html\":%s}",
+                FROM_NAME,
+                FROM_EMAIL,
+                toEmail,
+                escapeJson(subject),
+                escapeJson(body)
+            );
+
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = jsonPayload.getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode >= 200 && responseCode < 300) {
+                System.out.println("Email sent successfully via Resend to: " + toEmail);
+            } else {
+                throw new RuntimeException("Resend API returned status code: " + responseCode);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Failed to send email via Resend to: " + toEmail);
+            e.printStackTrace();
+            throw new RuntimeException("Failed to send email via Resend: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Send email via SMTP (local development)
+     */
+    private void sendEmailViaSMTP(String toEmail, String subject, String body) {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", SMTP_HOST);
         props.put("mail.smtp.port", SMTP_PORT);
         props.put("mail.smtp.ssl.trust", SMTP_HOST);
-        
+
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(EMAIL_USERNAME, EMAIL_PASSWORD);
             }
         });
-        
+
         try {
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(FROM_EMAIL, FROM_NAME));
+            message.setFrom(new InternetAddress(EMAIL_USERNAME, FROM_NAME));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
             message.setSubject(subject);
             message.setContent(body, "text/html; charset=utf-8");
-            
+
             Transport.send(message);
-            System.out.println("Email sent successfully to: " + toEmail);
-            
+            System.out.println("Email sent successfully via SMTP to: " + toEmail);
+
         } catch (Exception e) {
-            System.err.println("Failed to send email to: " + toEmail);
+            System.err.println("Failed to send email via SMTP to: " + toEmail);
             e.printStackTrace();
-            throw new RuntimeException("Failed to send email: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to send email via SMTP: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Escape special characters for JSON
+     */
+    private String escapeJson(String str) {
+        return "\"" + str.replace("\\", "\\\\")
+                        .replace("\"", "\\\"")
+                        .replace("\n", "\\n")
+                        .replace("\r", "\\r")
+                        .replace("\t", "\\t") + "\"";
     }
     
     /**
