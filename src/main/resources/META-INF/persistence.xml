@@ -25,9 +25,9 @@
 
         <properties>
             <!-- Configuration de la connexion à la base de données -->
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/event_manager?createDatabaseIfNotExist=true&amp;useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true"/>
-            <property name="jakarta.persistence.jdbc.user" value="eventuser"/>
-            <property name="jakarta.persistence.jdbc.password" value="eventpass"/>
+            <property name="jakarta.persistence.jdbc.url" value="PLACEHOLDER_JDBC_URL"/>
+            <property name="jakarta.persistence.jdbc.user" value="PLACEHOLDER_DB_USER"/>
+            <property name="jakarta.persistence.jdbc.password" value="PLACEHOLDER_DB_PASS"/>
             <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
             
             <!-- Configuration Hibernate -->

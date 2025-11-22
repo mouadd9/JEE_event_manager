@@ -7,10 +7,10 @@
               maxTotal="20"
               maxIdle="10"
               maxWaitMillis="10000"
-              username="root"
-              password=""
+              username="PLACEHOLDER_DB_USER"
+              password="PLACEHOLDER_DB_PASS"
               driverClassName="com.mysql.cj.jdbc.Driver"
-              url="jdbc:mysql://localhost:3306/event_manager?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true"
+              url="PLACEHOLDER_JDBC_URL"
               factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"/>
     
     <!-- Configuration du gestionnaire de transactions -->
