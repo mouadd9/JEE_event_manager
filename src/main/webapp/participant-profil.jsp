@@ -182,5 +182,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JavaScript -->
     <script src="${pageContext.request.contextPath}/js/profil.js"></script>
+    <script>
+        // Initialize the profile module when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof initProfilModule === 'function') {
+                initProfilModule();
+            }
+        });
+    </script>
 </body>
 </html>
