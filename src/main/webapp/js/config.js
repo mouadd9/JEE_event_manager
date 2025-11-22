@@ -1,6 +1,9 @@
 
 if (typeof API_BASE === 'undefined') {
-    var API_BASE = window.location.origin + '/jee-event-manager';
+    // Auto-detect context path - use current path or default to /jee-event-manager for local dev
+    var contextPath = window.location.pathname.split('/')[1];
+    // If we're at root or common pages, use root context, otherwise use /jee-event-manager
+    var API_BASE = window.location.origin + (contextPath && !['participant', 'organisateur', 'admin', 'login.jsp', 'register.jsp', 'catalogue.jsp'].includes(contextPath) ? '/' + contextPath : '');
 }
 
 // Endpoints API
