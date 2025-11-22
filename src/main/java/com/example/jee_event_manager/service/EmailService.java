@@ -87,14 +87,10 @@ public class EmailService {
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);
 
-            String jsonPayload = String.format(
-                "{\"from\":\"%s <%s>\",\"to\":[\"%s\"],\"subject\":\"%s\",\"html\":%s}",
-                FROM_NAME,
-                FROM_EMAIL,
-                toEmail,
-                escapeJson(subject),
-                escapeJson(body)
-            );
+            // Build JSON payload with proper escaping
+            String jsonPayload = buildJsonPayload(toEmail, subject, body);
+
+            System.out.println("Sending email via Resend to: " + toEmail);
 
             try (OutputStream os = conn.getOutputStream()) {
                 byte[] input = jsonPayload.getBytes(StandardCharsets.UTF_8);
@@ -102,10 +98,18 @@ public class EmailService {
             }
 
             int responseCode = conn.getResponseCode();
+
+            // Read response for debugging
+            java.io.InputStream responseStream = (responseCode >= 200 && responseCode < 300)
+                ? conn.getInputStream()
+                : conn.getErrorStream();
+            String responseBody = new String(responseStream.readAllBytes(), StandardCharsets.UTF_8);
+
             if (responseCode >= 200 && responseCode < 300) {
                 System.out.println("Email sent successfully via Resend to: " + toEmail);
             } else {
-                throw new RuntimeException("Resend API returned status code: " + responseCode);
+                System.err.println("Resend API error response: " + responseBody);
+                throw new RuntimeException("Resend API returned status code: " + responseCode + ", response: " + responseBody);
             }
 
         } catch (Exception e) {
@@ -113,6 +117,41 @@ public class EmailService {
             e.printStackTrace();
             throw new RuntimeException("Failed to send email via Resend: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Build JSON payload for Resend API
+     */
+    private String buildJsonPayload(String toEmail, String subject, String body) {
+        // Escape strings for JSON
+        String escapedSubject = escapeJsonString(subject);
+        String escapedBody = escapeJsonString(body);
+        String escapedToEmail = escapeJsonString(toEmail);
+
+        return String.format(
+            "{\"from\":\"%s <%s>\",\"to\":[\"%s\"],\"subject\":\"%s\",\"html\":\"%s\"}",
+            FROM_NAME,
+            FROM_EMAIL,
+            escapedToEmail,
+            escapedSubject,
+            escapedBody
+        );
+    }
+
+    /**
+     * Escape string for JSON (without adding quotes)
+     */
+    private String escapeJsonString(String str) {
+        if (str == null) {
+            return "";
+        }
+        return str.replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
+                  .replace("\n", "\\n")
+                  .replace("\r", "\\r")
+                  .replace("\t", "\\t")
+                  .replace("\b", "\\b")
+                  .replace("\f", "\\f");
     }
 
     /**
@@ -150,17 +189,6 @@ public class EmailService {
         }
     }
 
-    /**
-     * Escape special characters for JSON
-     */
-    private String escapeJson(String str) {
-        return "\"" + str.replace("\\", "\\\\")
-                        .replace("\"", "\\\"")
-                        .replace("\n", "\\n")
-                        .replace("\r", "\\r")
-                        .replace("\t", "\\t") + "\"";
-    }
-    
     /**
      * Build verification email HTML body
      */
