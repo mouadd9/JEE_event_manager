@@ -177,9 +177,25 @@ public class RegisterServlet extends HttpServlet {
                 return;
             }
 
-            // Code is valid - create the user account
+            // Code is valid - check if user already exists
             UserType userType = UserType.valueOf(userTypeStr);
-            Utilisateur utilisateur = utilisateurService.createUser(nom, email, password, userType);
+            
+            // Check if user already exists
+            if (utilisateurService.findByEmail(email).isPresent()) {
+                // User already exists, just verify them
+                Utilisateur existingUser = utilisateurService.findByEmail(email).get();
+                existingUser.setIsVerified(true);
+                
+                // If it's a participant, activate immediately
+                if (existingUser.getUserType() == UserType.PARTICIPANT) {
+                    existingUser.setIsActive(true);
+                }
+                
+                utilisateurService.update(existingUser);
+            } else {
+                // Create new user account
+                Utilisateur utilisateur = utilisateurService.createUser(nom, email, password, userType);
+            }
 
             // Clean up registration session data
             session.removeAttribute("reg_nom");
