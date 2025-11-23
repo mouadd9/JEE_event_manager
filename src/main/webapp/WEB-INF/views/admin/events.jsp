@@ -231,10 +231,6 @@
                                 <button class="btn btn-danger btn-action" onclick="deleteEvent('${event.id}')">
                                     <i class="fas fa-trash me-1"></i>Supprimer
                                 </button>
-                                <a href="${pageContext.request.contextPath}/events/${event.id}" 
-                                   class="btn btn-info btn-action" target="_blank">
-                                    <i class="fas fa-eye me-1"></i>Voir
-                                </a>
                             </div>
                         </div>
                         <c:if test="${not empty event.description}">
