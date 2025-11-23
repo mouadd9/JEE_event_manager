@@ -3,6 +3,9 @@ package com.example.jee_event_manager.DAO.impl;
 import com.example.jee_event_manager.DAO.UtilisateurRepository;
 import com.example.jee_event_manager.config.qualifiers.UtilisateurQualifier;
 import com.example.jee_event_manager.model.Utilisateur;
+import com.example.jee_event_manager.model.Admin;
+import com.example.jee_event_manager.model.Organisateur;
+import com.example.jee_event_manager.model.Participant;
 import com.example.jee_event_manager.model.UserType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -10,6 +13,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -21,8 +25,21 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     
     @Override
     public List<Utilisateur> findAll() {
-        TypedQuery<Utilisateur> query = em.createQuery("SELECT u FROM Utilisateur u", Utilisateur.class);
-        return query.getResultList();
+        List<Utilisateur> allUsers = new ArrayList<>();
+        
+        // Get all Admins
+        TypedQuery<Admin> adminQuery = em.createQuery("SELECT a FROM Admin a", Admin.class);
+        allUsers.addAll(adminQuery.getResultList());
+        
+        // Get all Organisateurs
+        TypedQuery<Organisateur> orgQuery = em.createQuery("SELECT o FROM Organisateur o", Organisateur.class);
+        allUsers.addAll(orgQuery.getResultList());
+        
+        // Get all Participants
+        TypedQuery<Participant> partQuery = em.createQuery("SELECT p FROM Participant p", Participant.class);
+        allUsers.addAll(partQuery.getResultList());
+        
+        return allUsers;
     }
     
     @Override
@@ -107,12 +124,24 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     
     @Override
     public List<Utilisateur> findByUserType(UserType userType) {
-        TypedQuery<Utilisateur> query = em.createQuery(
-            "SELECT u FROM Utilisateur u WHERE u.userType = :userType", 
-            Utilisateur.class
-        );
-        query.setParameter("userType", userType);
-        return query.getResultList();
+        List<Utilisateur> users = new ArrayList<>();
+        
+        switch (userType) {
+            case ADMIN:
+                TypedQuery<Admin> adminQuery = em.createQuery("SELECT a FROM Admin a", Admin.class);
+                users.addAll(adminQuery.getResultList());
+                break;
+            case ORGANISATEUR:
+                TypedQuery<Organisateur> orgQuery = em.createQuery("SELECT o FROM Organisateur o", Organisateur.class);
+                users.addAll(orgQuery.getResultList());
+                break;
+            case PARTICIPANT:
+                TypedQuery<Participant> partQuery = em.createQuery("SELECT p FROM Participant p", Participant.class);
+                users.addAll(partQuery.getResultList());
+                break;
+        }
+        
+        return users;
     }
     
     @Override
