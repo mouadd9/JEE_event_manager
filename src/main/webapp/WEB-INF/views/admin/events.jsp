@@ -108,6 +108,12 @@
         h4, h5, .form-label {
             color: #2d1038 !important;
         }
+        
+        .form-select,
+        .form-select option {
+            color: #2d1038 !important;
+            background-color: #fff !important;
+        }
     </style>
 </head>
 <body>
@@ -158,7 +164,7 @@
                 <div class="row g-3 align-items-end">
                     <div class="col-md-6">
                         <label class="form-label text-dark"><i class="fas fa-filter me-1"></i>Statut de l'événement</label>
-                        <select name="statut" class="form-select">
+                        <select name="statut" class="form-select"  style="color: #2d1038 !important;">
                             <option value="">Tous les statuts</option>
                             <option value="PUBLIE" ${selectedStatut == 'PUBLIE' ? 'selected' : ''}>Publiés</option>
                             <option value="BROUILLON" ${selectedStatut == 'BROUILLON' ? 'selected' : ''}>Brouillons</option>
@@ -243,7 +249,6 @@
                     </div>
                 </div>
             </c:forEach>
-            
             <c:if test="${empty events}">
                 <div class="col-12">
                     <div class="alert alert-info text-center">

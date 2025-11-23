@@ -89,6 +89,12 @@
         h4, h5, .form-label {
             color: #2d1038 !important;
         }
+        
+        .form-select,
+        .form-select option {
+            color: #2d1038 !important;
+            background-color: #fff !important;
+        }
     </style>
 </head>
 <body>
@@ -139,7 +145,7 @@
                 <div class="row g-3 align-items-end">
                     <div class="col-md-3">
                         <label class="form-label text-dark"><i class="fas fa-user-tag me-1"></i>Type d'utilisateur</label>
-                        <select name="userType" class="form-select">
+                        <select name="userType" class="form-select" style="color: #2d1038 !important;">
                             <option value="">Tous</option>
                             <option value="PARTICIPANT" ${selectedUserType == 'PARTICIPANT' ? 'selected' : ''}>Participants</option>
                             <option value="ORGANISATEUR" ${selectedUserType == 'ORGANISATEUR' ? 'selected' : ''}>Organisateurs</option>
@@ -148,7 +154,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label text-dark"><i class="fas fa-check-circle me-1"></i>Vérification</label>
-                        <select name="verified" class="form-select">
+                        <select name="verified" class="form-select" style="color: #2d1038 !important;">
                             <option value="">Tous</option>
                             <option value="true" ${selectedVerified == 'true' ? 'selected' : ''}>Vérifiés</option>
                             <option value="false" ${selectedVerified == 'false' ? 'selected' : ''}>Non vérifiés</option>
@@ -156,7 +162,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label text-dark"><i class="fas fa-ban me-1"></i>Suspension</label>
-                        <select name="suspended" class="form-select">
+                        <select name="suspended" class="form-select" style="color: #2d1038 !important;">
                             <option value="">Tous</option>
                             <option value="false" ${selectedSuspended == 'false' ? 'selected' : ''}>Actifs</option>
                             <option value="true" ${selectedSuspended == 'true' ? 'selected' : ''}>Suspendus</option>
