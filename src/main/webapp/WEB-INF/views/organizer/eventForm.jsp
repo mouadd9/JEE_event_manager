@@ -251,11 +251,15 @@
                     }
 
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = function(event) {
+                        const imageUrl = event.target.result;
                         imagePreview.innerHTML = `
-                    <img src="${e.target.result}" class="image-preview" alt="Aperçu">
-                    <div class="text-muted small mt-1">Aperçu de l'image</div>
-                `;
+                            <img src="${imageUrl}" class="image-preview" alt="Aperçu" style="display: block;">
+                            <div class="text-muted small mt-1">Aperçu de l'image</div>
+                        `;
+                    };
+                    reader.onerror = function() {
+                        imagePreview.innerHTML = '<div class="text-danger small">Erreur lors du chargement de l\'image</div>';
                     };
                     reader.readAsDataURL(file);
                 } else {

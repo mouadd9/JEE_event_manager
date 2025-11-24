@@ -108,7 +108,7 @@
                             <i class="bi bi-check-circle"></i>
                         </div>
                         <div>
-                            <div class="fs-3 fw-bold" id="statPublishedEvents">0</div>
+                            <div class="fs-3 fw-bold"><c:out value="${publishedEventsCount}"/></div>
                             <div class="text-muted small">Événements publiés</div>
                         </div>
                     </div>
@@ -121,7 +121,7 @@
                             <i class="bi bi-people"></i>
                         </div>
                         <div>
-                            <div class="fs-3 fw-bold" id="statTotalParticipants">0</div>
+                            <div class="fs-3 fw-bold"><c:out value="${totalParticipants}"/></div>
                             <div class="text-muted small">Participants total</div>
                         </div>
                     </div>
@@ -134,7 +134,7 @@
                             <i class="bi bi-star"></i>
                         </div>
                         <div>
-                            <div class="fs-3 fw-bold" id="statAvgRating">0.0</div>
+                            <div class="fs-3 fw-bold"><fmt:formatNumber value="${avgRating}" pattern="#0.0"/></div>
                             <div class="text-muted small">Note moyenne</div>
                         </div>
                     </div>

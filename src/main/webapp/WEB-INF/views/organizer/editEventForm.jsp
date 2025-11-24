@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -256,11 +257,15 @@
 
                     // Show preview
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = function(event) {
+                        const imageUrl = event.target.result;
                         imagePreview.innerHTML = `
-                            <img src="${e.target.result}" class="image-preview" alt="Nouvel aperçu">
+                            <img src="${imageUrl}" class="image-preview" alt="Nouvel aperçu" style="display: block;">
                             <div class="text-muted small mt-1">Nouvel aperçu</div>
                         `;
+                    };
+                    reader.onerror = function() {
+                        imagePreview.innerHTML = '<div class="text-danger small">Erreur lors du chargement de l\'image</div>';
                     };
                     reader.readAsDataURL(file);
                 } else {

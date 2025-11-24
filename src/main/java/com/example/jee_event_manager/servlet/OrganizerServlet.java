@@ -1,6 +1,8 @@
 package com.example.jee_event_manager.servlet;
 
 import com.example.jee_event_manager.DAO.OrganisateurRepository;
+import com.example.jee_event_manager.DAO.InscriptionRepository;
+import com.example.jee_event_manager.DAO.EvaluationRepository;
 import com.example.jee_event_manager.config.qualifiers.OrganisateurQualifier;
 import com.example.jee_event_manager.dto.EvenementDTO;
 import com.example.jee_event_manager.model.StatutEvenement;
@@ -46,6 +48,12 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
     @Inject
     @OrganisateurQualifier
     private OrganisateurRepository organisateurRepository;
+    
+    @Inject
+    private InscriptionRepository inscriptionRepository;
+    
+    @Inject
+    private EvaluationRepository evaluationRepository;
 
     /**
      * Get the current logged-in organizer ID from session
@@ -194,6 +202,38 @@ public class OrganizerServlet extends HttpServlet { // the HttpServlet abstract 
         Long organizerId = getCurrentOrganizerId(request);
         List<EvenementDTO> eventList = evenementService.getEventsByOrganizer(organizerId);
         request.setAttribute("events", eventList);
+        
+        // Calculate statistics
+        // 1. Count published events
+        long publishedEventsCount = eventList.stream()
+                .filter(e -> e.getStatut() == StatutEvenement.PUBLIE)
+                .count();
+        request.setAttribute("publishedEventsCount", publishedEventsCount);
+        
+        // 2. Count total participants across all events
+        long totalParticipants = 0;
+        for (EvenementDTO event : eventList) {
+            Long count = inscriptionRepository.countByEvenement(event.getId());
+            if (count != null) {
+                totalParticipants += count;
+            }
+        }
+        request.setAttribute("totalParticipants", totalParticipants);
+        
+        // 3. Calculate average rating across all events
+        double totalRating = 0.0;
+        int ratingCount = 0;
+        for (EvenementDTO event : eventList) {
+            List<com.example.jee_event_manager.model.Evaluation> evaluations = 
+                    evaluationRepository.findByEvenement(event.getId());
+            for (com.example.jee_event_manager.model.Evaluation eval : evaluations) {
+                totalRating += eval.getNote();
+                ratingCount++;
+            }
+        }
+        double avgRating = ratingCount > 0 ? totalRating / ratingCount : 0.0;
+        request.setAttribute("avgRating", avgRating);
+        
         request.getRequestDispatcher("/WEB-INF/views/organizer/dashboard.jsp").forward(request, response);
     }
 
